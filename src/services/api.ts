@@ -4,11 +4,11 @@ import CryptoJS from "crypto-js";
 import curatedTracks from "./curatedTracks.json";
 
 /**
- * SMC Singhs Music Co - YouTube Music Production Engine
- * Resilient Multi-Mirrors, DES Decrypter, and Rich Categorized Feeds.
+ * SMC Singhs Music Co - YouTube Music Premium Streaming API Service
+ * 3500ms Fast Failover • 320kbps Audio Pipeline • Parallel allSettled Feeds
  */
 
-// High-resolution clean vinyl fallback (NEVER creator photo)
+// High-resolution clean vinyl fallback (NEVER creator image for song artwork)
 const HIGH_RES_VINYL_COVER =
   "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
 
@@ -64,16 +64,15 @@ export const decryptMediaUrl = (encryptedMediaUrl: string): string => {
       return decryptedUrl.replace("http://", "https://");
     }
   } catch {
-    // Silent fail if invalid cipher
+    // Ignore invalid cipher
   }
   return "";
 };
 
 /**
- * Flexible downloadUrl parser:
- * Inspects item.downloadUrl, item.media_url, item.url, item.download_url, and item.encrypted_media_url.
- * Extracts 320kbps -> fallback 160kbps -> media_url -> url.
- * Replaces 'http://' with 'https://' to avoid Android mixed-content blocks.
+ * Robust stream parser:
+ * Extracts 320kbps audio (from downloadUrl array or media_url or url or DES decrypter).
+ * Forces 'https://' across all stream URLs to avoid Android mixed-content blocks.
  */
 const resolveAudioUrl = (item: any): string => {
   if (!item) return "";
@@ -82,7 +81,6 @@ const resolveAudioUrl = (item: any): string => {
   if (item.encrypted_media_url) {
     const directUrl = decryptMediaUrl(item.encrypted_media_url);
     if (directUrl) {
-      // Prioritize 320kbps, then 160kbps
       return directUrl.replace(/_96\.mp4|_48\.mp4|_12\.mp4|_160\.mp4/g, "_320.mp4");
     }
   }
@@ -146,8 +144,8 @@ const resolveAudioUrl = (item: any): string => {
 };
 
 /**
- * Resolves the highest resolution album/track artwork (fallback to clean vinyl).
- * Never uses creator photo for song artwork.
+ * Resolves highest-resolution 500x500 cover art.
+ * Fallback to high-res vinyl artwork (NEVER creator photo for song artwork).
  */
 const resolveCoverImage = (item: any): string => {
   if (!item) return HIGH_RES_VINYL_COVER;
@@ -171,7 +169,7 @@ const resolveCoverImage = (item: any): string => {
         return url500.replace("http://", "https://");
       }
 
-      // Pick the last index (highest resolution in Saavn API)
+      // Last element is highest quality in Saavn APIs
       const highestImg = src[src.length - 1];
       const candidate = highestImg?.url || highestImg?.link;
       if (candidate && typeof candidate === "string" && candidate.startsWith("http")) {
@@ -189,9 +187,7 @@ const resolveCoverImage = (item: any): string => {
 };
 
 /**
- * Robust JSON Unpacker:
- * Checks across data structures:
- * res.data.results, res.data.songs?.results, res.data.songs, res.data, res.results, res.songs
+ * Unpacks response arrays across various mirror schemas.
  */
 const unpackResults = (json: any): any[] => {
   if (!json) return [];
@@ -209,8 +205,8 @@ const unpackResults = (json: any): any[] => {
 };
 
 /**
- * Parses raw API items into validated Song objects.
- * Drops any song where audioUrl is missing or invalid.
+ * Normalizes raw API items into validated Song models.
+ * Filters out any track lacking a valid audio URL.
  */
 export const parseSongs = (items: any[]): Song[] => {
   if (!Array.isArray(items)) return [];
@@ -221,7 +217,7 @@ export const parseSongs = (items: any[]): Song[] => {
 
     const audioUrl = resolveAudioUrl(item);
 
-    // Drop any song where audioUrl is missing or invalid
+    // Filter out any track lacking a valid audio URL
     if (!audioUrl || typeof audioUrl !== "string" || !audioUrl.startsWith("http")) {
       continue;
     }
@@ -262,6 +258,7 @@ export const parseSongs = (items: any[]): Song[] => {
       duration: item.duration || 0,
       hasLyrics: !!item.hasLyrics || !!item.lyrics,
       lyrics: item.lyrics || undefined,
+      year: item.year || undefined,
       image: item.image || imageUrl,
       downloadUrl: item.downloadUrl || [
         { quality: "320kbps", url: audioUrl },
@@ -274,23 +271,22 @@ export const parseSongs = (items: any[]): Song[] => {
 };
 
 /**
- * Active Resilient Endpoints:
- * - https://saavn.dev/api/search/songs?query=${cleanQuery}
- * - https://saavn.dev/api/search?query=${cleanQuery}
- * - https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${cleanQuery}
- * - https://saavn-api.vercel.app/api/search/songs?query=${cleanQuery}
+ * Active JioSaavn Mirror Endpoints:
+ * - Mirror 1: https://saavn.dev/api/search/songs?query=${cleanQuery}&limit=30
+ * - Mirror 2: https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${cleanQuery}
+ * - Mirror 3: https://saavn-api.vercel.app/api/search/songs?query=${cleanQuery}
  */
 const buildEndpoints = (cleanQuery: string): string[] => [
-  `https://saavn.dev/api/search/songs?query=${cleanQuery}`,
-  `https://saavn.dev/api/search?query=${cleanQuery}`,
+  `https://saavn.dev/api/search/songs?query=${cleanQuery}&limit=30`,
   `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${cleanQuery}`,
   `https://saavn-api.vercel.app/api/search/songs?query=${cleanQuery}`,
+  `https://saavn.dev/api/search?query=${cleanQuery}`,
   `https://jiosaavn-api-privatecvc2.vercel.app/api/search/songs?query=${cleanQuery}`,
-  `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&n=20&p=1&q=${cleanQuery}`,
+  `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&n=30&p=1&q=${cleanQuery}`,
 ];
 
 /**
- * Live search across mirrors with 4000ms AbortController timeout.
+ * Searches tracks with 3500ms AbortController timeout per request.
  */
 export async function searchSongs(query: string): Promise<Song[]> {
   const trimmed = query.trim();
@@ -314,17 +310,17 @@ export async function searchSongs(query: string): Promise<Song[]> {
             "User-Agent":
               "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
           },
-          connectTimeout: 4000,
-          readTimeout: 4000,
+          connectTimeout: 3500,
+          readTimeout: 3500,
         });
 
         if (capRes.status >= 200 && capRes.status < 300) {
           data = typeof capRes.data === "string" ? JSON.parse(capRes.data) : capRes.data;
         }
       } else {
-        // Web standard fetch with 4000ms AbortController timeout
+        // Web standard fetch with 3500ms AbortController timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
 
         const res = await fetch(url, {
           cache: "no-store",
@@ -401,7 +397,7 @@ export async function getLiveCategory(categoryQuery: string): Promise<Song[]> {
   if (lower.includes("arijit") || lower.includes("hits") || lower.includes("romance")) {
     return (curatedTracks.trendingHits as Song[]) || (curatedTracks.romance as Song[]);
   }
-  if (lower.includes("sidhu") || lower.includes("punjabi") || lower.includes("mood")) {
+  if (lower.includes("sidhu") || lower.includes("punjabi") || lower.includes("mood") || lower.includes("party")) {
     return (curatedTracks.moodStations as Song[]) || (curatedTracks.punjabi as Song[]);
   }
   if (lower.includes("gym") || lower.includes("workout") || lower.includes("hype")) {
@@ -420,13 +416,54 @@ export async function getLiveCategory(categoryQuery: string): Promise<Song[]> {
 }
 
 /**
- * YouTube Music Style Home Feeds:
- * Parallel fetches for:
- * - "Trending Hindi 2026" (Quick Picks)
- * - "Arijit Singh Hits" (Trending Hits)
- * - "Sidhu Moose Wala Punjabi" (Mood Stations)
- * - "Gym Workout Hype" (Workout Hype)
- * - "Lo-Fi Midnight Beats" (Chill Vibes)
+ * YouTube Music Premium Home Feed:
+ * Fetches in parallel using Promise.allSettled:
+ * - quickPicks: "Trending Hindi 2026"
+ * - trending: "Arijit Singh Hits"
+ * - workout: "Gym Workout Hype"
+ * - chill: "Lo-Fi Midnight Beats"
+ * - party: "Party Dance Hits"
+ */
+export async function getHomeFeed(): Promise<{
+  quickPicks: Song[];
+  trending: Song[];
+  workout: Song[];
+  chill: Song[];
+  party: Song[];
+}> {
+  const settled = await Promise.allSettled([
+    getLiveCategory("Trending Hindi 2026"),
+    getLiveCategory("Arijit Singh Hits"),
+    getLiveCategory("Gym Workout Hype"),
+    getLiveCategory("Lo-Fi Midnight Beats"),
+    getLiveCategory("Party Dance Hits"),
+  ]);
+
+  const [qp, tr, wo, ch, pa] = settled.map((res, idx) => {
+    if (res.status === "fulfilled" && Array.isArray(res.value) && res.value.length > 0) {
+      return res.value;
+    }
+    const fallbacks = [
+      curatedTracks.quickPicks,
+      curatedTracks.trendingHits,
+      curatedTracks.workoutHype,
+      curatedTracks.chillVibes,
+      curatedTracks.moodStations,
+    ];
+    return (fallbacks[idx] as Song[]) || [];
+  });
+
+  return {
+    quickPicks: qp.length > 0 ? qp : (curatedTracks.quickPicks as Song[]),
+    trending: tr.length > 0 ? tr : (curatedTracks.trendingHits as Song[]),
+    workout: wo.length > 0 ? wo : (curatedTracks.workoutHype as Song[]),
+    chill: ch.length > 0 ? ch : (curatedTracks.chillVibes as Song[]),
+    party: pa.length > 0 ? pa : (curatedTracks.moodStations as Song[]),
+  };
+}
+
+/**
+ * Backward compatibility alias for getHomeFeed
  */
 export async function getYTMusicHomeFeeds(): Promise<{
   quickPicks: Song[];
@@ -435,26 +472,13 @@ export async function getYTMusicHomeFeeds(): Promise<{
   workoutHype: Song[];
   chillVibes: Song[];
 }> {
-  const [quickPicks, trendingHits, moodStations, workoutHype, chillVibes] =
-    await Promise.all([
-      getLiveCategory("Trending Hindi 2026"),
-      getLiveCategory("Arijit Singh Hits"),
-      getLiveCategory("Sidhu Moose Wala Punjabi"),
-      getLiveCategory("Gym Workout Hype"),
-      getLiveCategory("Lo-Fi Midnight Beats"),
-    ]);
-
+  const feed = await getHomeFeed();
   return {
-    quickPicks:
-      quickPicks.length > 0 ? quickPicks : (curatedTracks.quickPicks as Song[]),
-    trendingHits:
-      trendingHits.length > 0 ? trendingHits : (curatedTracks.trendingHits as Song[]),
-    moodStations:
-      moodStations.length > 0 ? moodStations : (curatedTracks.moodStations as Song[]),
-    workoutHype:
-      workoutHype.length > 0 ? workoutHype : (curatedTracks.workoutHype as Song[]),
-    chillVibes:
-      chillVibes.length > 0 ? chillVibes : (curatedTracks.chillVibes as Song[]),
+    quickPicks: feed.quickPicks,
+    trendingHits: feed.trending,
+    moodStations: feed.party,
+    workoutHype: feed.workout,
+    chillVibes: feed.chill,
   };
 }
 
@@ -476,7 +500,7 @@ export async function getLyrics(songId: string): Promise<string> {
   for (const url of lyricEndpoints) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
 
       const res = await fetch(url, {
         cache: "no-store",
@@ -498,7 +522,7 @@ export async function getLyrics(songId: string): Promise<string> {
         }
       }
     } catch {
-      // Continue to next mirror or fallback
+      // Continue to next mirror
     }
   }
 

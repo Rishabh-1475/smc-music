@@ -1,45 +1,25 @@
 export interface Song {
   id: string;
   name: string;
-  title?: string;
-  album:
-    | string
-    | {
-        id?: string;
-        name: string;
-        url?: string;
-        [key: string]: any;
-      };
+  title: string;
+  album: string | { name: string; [key: string]: any };
   duration: number | string;
   primaryArtists: string;
-  artists?: string;
   imageUrl: string;
   audioUrl: string;
   hasLyrics?: boolean;
   lyrics?: string;
   year?: string | number;
   copyright?: string;
-  image?:
-    | string
-    | {
-        quality?: string;
-        url?: string;
-        link?: string;
-        [key: string]: any;
-      }[]
-    | any;
-  downloadUrl?:
-    | string
-    | {
-        quality?: string;
-        url?: string;
-        link?: string;
-        [key: string]: any;
-      }[]
-    | any;
-  featuredArtists?: string;
-  label?: string;
-  url?: string;
+  artists?: string;
+  image?: any;
+  downloadUrl?: any;
+  [key: string]: any;
+}
+
+export interface QuickPickGroup {
+  title: string;
+  tracks: Song[];
   [key: string]: any;
 }
 

@@ -24,7 +24,7 @@ if (typeof window !== "undefined") {
 }
 
 const CLEAN_VINYL_COVER =
-  "https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600&q=80";
+  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
 
 export interface PlayerState {
   currentTrack: Song | null;
@@ -35,10 +35,12 @@ export interface PlayerState {
   progress: number;
   volume: number;
   isPlayerOpen: boolean;
+  activeTab: "up_next" | "lyrics" | "related";
   isShuffled: boolean;
   repeatMode: "off" | "all" | "one";
-  isLiked: Record<string, boolean>;
-  activeTab: "up_next" | "lyrics" | "related";
+  likedTracks: Record<string, boolean>;
+  isLiked: Record<string, boolean>; // Compatibility alias
+  autoplay: boolean;
 
   // Actions
   playSong: (track: Song, playlistContext?: Song[]) => void;
@@ -50,17 +52,19 @@ export interface PlayerState {
   seekTo: (percent: number) => void;
   setVolume: (level: number) => void;
   togglePlayerOpen: (open?: boolean) => void;
+  setActiveTab: (tab: "up_next" | "lyrics" | "related") => void;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
   toggleLike: (id: string) => void;
   removeFromQueue: (index: number) => void;
-  reorderQueue: (startIndex: number, endIndex: number) => void;
-  setActiveTab: (tab: "up_next" | "lyrics" | "related") => void;
+  clearQueue: () => void;
+  reorderQueue?: (startIndex: number, endIndex: number) => void;
+  setQueue?: (tracks: Song[]) => void;
 
   [key: string]: any;
 }
 
-// Initial liked tracks from localStorage if available
+// Initial liked tracks from localStorage
 const loadInitialLikes = (): Record<string, boolean> => {
   if (typeof window !== "undefined") {
     try {
@@ -122,8 +126,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
           set({ currentTime: details.seekTime, progress: prog });
         }
       });
-    } catch (err) {
-      console.warn("[MediaSession Sync Error]", err);
+    } catch {
+      // Suppress MediaSession errors
     }
   };
 
@@ -137,17 +141,25 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     };
 
     globalAudio.onended = () => {
-      const { repeatMode, currentTrack } = get();
+      const { repeatMode, currentTrack, autoplay } = get();
+
+      // Loop current if repeat is 'one'
       if (repeatMode === "one" && currentTrack && globalAudio) {
         globalAudio.currentTime = 0;
-        globalAudio.play().catch(console.error);
+        globalAudio.play().catch(() => {});
         return;
       }
-      get().playNext();
+
+      // Auto-advance if autoplay is enabled
+      if (autoplay) {
+        get().playNext();
+      } else {
+        set({ isPlaying: false });
+      }
     };
 
-    globalAudio.onerror = (e) => {
-      console.error("[SMC Audio Stream Error]", e, globalAudio?.error);
+    globalAudio.onerror = () => {
+      // Graceful error suppression
       set({ isPlaying: false });
       if (typeof window !== "undefined" && "mediaSession" in navigator) {
         navigator.mediaSession.playbackState = "none";
@@ -162,7 +174,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
 
     if (repeatMode === "one" && currentTrack && globalAudio) {
       globalAudio.currentTime = 0;
-      globalAudio.play().catch(console.error);
+      globalAudio.play().catch(() => {});
       return;
     }
 
@@ -182,7 +194,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     if (nextIdx < queue.length) {
       get().playSong(queue[nextIdx], queue);
     } else {
-      // End of queue: loop if repeat is 'all' or default
+      // Loop around if repeat is 'all' or default
       if (repeatMode === "all" || repeatMode === "off") {
         get().playSong(queue[0], queue);
       }
@@ -194,7 +206,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     const { queue, currentTrack, currentTime } = get();
     if (!queue || queue.length === 0) return;
 
-    // If song is more than 3 seconds in, restart track
+    // Restart track if more than 3s in
     if (currentTime > 3 && globalAudio) {
       globalAudio.currentTime = 0;
       set({ currentTime: 0, progress: 0 });
@@ -206,6 +218,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     get().playSong(queue[prevIdx], queue);
   };
 
+  const initialLikes = loadInitialLikes();
+
   return {
     currentTrack: null,
     queue: [],
@@ -215,18 +229,17 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     progress: 0,
     volume: 1,
     isPlayerOpen: false,
+    activeTab: "up_next",
     isShuffled: false,
     repeatMode: "off",
-    isLiked: loadInitialLikes(),
-    activeTab: "up_next",
+    likedTracks: initialLikes,
+    isLiked: initialLikes,
+    autoplay: true,
 
     setQueue: (tracks: Song[]) => set({ queue: tracks }),
 
     playSong: (track: Song, playlistContext?: Song[]) => {
-      if (!track?.audioUrl) {
-        console.warn("[SMC Playback] Ignored song without valid audioUrl:", track);
-        return;
-      }
+      if (!track?.audioUrl) return;
 
       const activeQueue =
         playlistContext && playlistContext.length > 0
@@ -251,8 +264,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
               set({ isPlaying: true });
               syncMediaSession(track, true);
             })
-            .catch((err) => {
-              console.error("Audio play failed:", err);
+            .catch(() => {
+              // Suppress browser autoplay restrictions
               set({ isPlaying: false });
               if (typeof window !== "undefined" && "mediaSession" in navigator) {
                 navigator.mediaSession.playbackState = "paused";
@@ -288,8 +301,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
                   navigator.mediaSession.playbackState = "playing";
                 }
               })
-              .catch((err) => {
-                console.error("Audio play failed:", err);
+              .catch(() => {
                 set({ isPlaying: false });
               });
           }
@@ -325,6 +337,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       set({ isPlayerOpen: open !== undefined ? open : !get().isPlayerOpen });
     },
 
+    setActiveTab: (tab: "up_next" | "lyrics" | "related") => {
+      set({ activeTab: tab });
+    },
+
     toggleShuffle: () => {
       set({ isShuffled: !get().isShuffled });
     },
@@ -337,8 +353,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     },
 
     toggleLike: (id: string) => {
-      const nextLikes = { ...get().isLiked, [id]: !get().isLiked[id] };
-      set({ isLiked: nextLikes });
+      const current = get().likedTracks[id] || false;
+      const nextLikes = { ...get().likedTracks, [id]: !current };
+      set({ likedTracks: nextLikes, isLiked: nextLikes });
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("smc_liked_tracks", JSON.stringify(nextLikes));
@@ -354,15 +371,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       set({ queue: newQueue });
     },
 
+    clearQueue: () => {
+      set({ queue: [] });
+    },
+
     reorderQueue: (startIndex: number, endIndex: number) => {
       const newQueue = Array.from(get().queue);
       const [removed] = newQueue.splice(startIndex, 1);
       newQueue.splice(endIndex, 0, removed);
       set({ queue: newQueue });
-    },
-
-    setActiveTab: (tab: "up_next" | "lyrics" | "related") => {
-      set({ activeTab: tab });
     },
   };
 });
