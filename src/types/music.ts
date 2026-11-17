@@ -1,19 +1,28 @@
+export type CategoryMood =
+  | 'All'
+  | 'Energize'
+  | 'Workout'
+  | 'Relax'
+  | 'Focus'
+  | 'Commute'
+  | 'Party'
+  | 'Romance';
+
 export interface Song {
   id: string;
   name: string;
   title: string;
-  album: string | { name: string; [key: string]: any };
-  duration: number | string;
+  album: string;
   primaryArtists: string;
+  duration: number | string;
   imageUrl: string;
   audioUrl: string;
   hasLyrics?: boolean;
   lyrics?: string;
-  year?: string | number;
-  copyright?: string;
-  artists?: string;
-  image?: any;
-  downloadUrl?: any;
+  year?: string;
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  playCount?: number;
   [key: string]: any;
 }
 

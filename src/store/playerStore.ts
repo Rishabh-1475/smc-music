@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { Song } from "@/types/music";
+import { Song, CategoryMood } from "@/types/music";
+import { getRadioForTrack } from "@/services/api";
 
 declare global {
   interface Window {
@@ -27,8 +28,10 @@ const CLEAN_VINYL_COVER =
   "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
 
 export interface PlayerState {
+  // State
   currentTrack: Song | null;
   queue: Song[];
+  originalQueue: Song[];
   isPlaying: boolean;
   currentTime: number;
   duration: number;
@@ -38,12 +41,15 @@ export interface PlayerState {
   activeTab: "up_next" | "lyrics" | "related";
   isShuffled: boolean;
   repeatMode: "off" | "all" | "one";
-  likedTracks: Record<string, boolean>;
-  isLiked: Record<string, boolean>; // Compatibility alias
+  likedSongIds: Record<string, boolean>;
+  dislikedSongIds: Record<string, boolean>;
+  listeningHistory: Song[];
+  activeMood: CategoryMood;
+  isLiked?: Record<string, boolean>; // Compatibility alias
   autoplay: boolean;
 
   // Actions
-  playSong: (track: Song, playlistContext?: Song[]) => void;
+  playSong: (song: Song, contextQueue?: Song[]) => void;
   togglePlay: () => void;
   playNext: () => void;
   nextTrack: () => void;
@@ -55,45 +61,54 @@ export interface PlayerState {
   setActiveTab: (tab: "up_next" | "lyrics" | "related") => void;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
-  toggleLike: (id: string) => void;
+  toggleLike: (songOrId: Song | string) => void;
+  toggleDislike: (songOrId: Song | string) => void;
   removeFromQueue: (index: number) => void;
+  reorderQueue: (fromIndex: number, toIndex: number) => void;
+  setActiveMood: (mood: CategoryMood) => void;
   clearQueue: () => void;
   toggleAutoplay?: () => void;
-  reorderQueue?: (startIndex: number, endIndex: number) => void;
   setQueue?: (tracks: Song[]) => void;
 
   [key: string]: any;
 }
 
-// Initial liked tracks from localStorage
-const loadInitialLikes = (): Record<string, boolean> => {
+// LocalStorage helpers
+const loadStorage = <T>(key: string, defaultValue: T): T => {
   if (typeof window !== "undefined") {
     try {
-      const stored = localStorage.getItem("smc_liked_tracks");
-      if (stored) return JSON.parse(stored);
+      const item = localStorage.getItem(key);
+      if (item) return JSON.parse(item);
     } catch {
-      // Ignore storage errors
+      // Ignore parse failure
     }
   }
-  return {};
+  return defaultValue;
+};
+
+const saveStorage = (key: string, value: any) => {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Ignore quota error
+    }
+  }
 };
 
 export const usePlayerStore = create<PlayerState>((set, get) => {
-  // Sync MediaSession with lockscreen action handlers & artwork
-  const syncMediaSession = (track: Song, isPlayingState: boolean = true) => {
+  // Sync MediaSession API
+  const syncMediaSession = (track: Song, isPlayingState = true) => {
     if (typeof window === "undefined" || !("mediaSession" in navigator)) return;
 
     const artworkUrl = track.imageUrl || CLEAN_VINYL_COVER;
-    const albumName =
-      typeof track.album === "string"
-        ? track.album
-        : track.album?.name || "SMC Music";
+    const albumTitle = track.album || "SMC Music";
 
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: track.name || track.title || "Track",
         artist: track.primaryArtists || "Singhs Music Co",
-        album: albumName,
+        album: albumTitle,
         artwork: [
           { src: artworkUrl, sizes: "96x96", type: "image/jpeg" },
           { src: artworkUrl, sizes: "192x192", type: "image/jpeg" },
@@ -106,19 +121,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       navigator.mediaSession.setActionHandler("play", () => {
         get().togglePlay();
       });
-
       navigator.mediaSession.setActionHandler("pause", () => {
         get().togglePlay();
       });
-
       navigator.mediaSession.setActionHandler("nexttrack", () => {
         get().playNext();
       });
-
       navigator.mediaSession.setActionHandler("previoustrack", () => {
         get().playPrev();
       });
-
       navigator.mediaSession.setActionHandler("seekto", (details) => {
         if (details.seekTime !== undefined && globalAudio) {
           globalAudio.currentTime = details.seekTime;
@@ -160,7 +171,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     };
 
     globalAudio.onerror = () => {
-      // Graceful error suppression
       set({ isPlaying: false });
       if (typeof window !== "undefined" && "mediaSession" in navigator) {
         navigator.mediaSession.playbackState = "none";
@@ -170,7 +180,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
 
   // Next track progression handler with Repeat & Shuffle awareness
   const handleNextTrack = () => {
-    const { queue, currentTrack, isShuffled, repeatMode } = get();
+    const { queue, currentTrack, isShuffled, repeatMode, autoplay } = get();
     if (!queue || queue.length === 0) return;
 
     if (repeatMode === "one" && currentTrack && globalAudio) {
@@ -195,19 +205,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     if (nextIdx < queue.length) {
       get().playSong(queue[nextIdx], queue);
     } else {
-      // Loop around if repeat is 'all' or default
-      if (repeatMode === "all" || repeatMode === "off") {
+      if (repeatMode === "all" || (autoplay && repeatMode !== "off")) {
         get().playSong(queue[0], queue);
+      } else if (repeatMode === "off") {
+        set({ isPlaying: false });
       }
     }
   };
 
-  // Previous track handler with track restart logic (>3 seconds)
+  // Previous track handler (>3s restarts current track)
   const handlePrevTrack = () => {
     const { queue, currentTrack, currentTime } = get();
     if (!queue || queue.length === 0) return;
 
-    // Restart track if more than 3s in
     if (currentTime > 3 && globalAudio) {
       globalAudio.currentTime = 0;
       set({ currentTime: 0, progress: 0 });
@@ -219,11 +229,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     get().playSong(queue[prevIdx], queue);
   };
 
-  const initialLikes = loadInitialLikes();
+  // Initial persistent state from localStorage
+  const initialLikes = loadStorage<Record<string, boolean>>("smc_liked_song_ids", {});
+  const initialDislikes = loadStorage<Record<string, boolean>>("smc_disliked_song_ids", {});
+  const initialHistory = loadStorage<Song[]>("smc_listening_history", []);
 
   return {
     currentTrack: null,
     queue: [],
+    originalQueue: [],
     isPlaying: false,
     currentTime: 0,
     duration: 0,
@@ -233,29 +247,55 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     activeTab: "up_next",
     isShuffled: false,
     repeatMode: "off",
-    likedTracks: initialLikes,
-    isLiked: initialLikes,
+    likedSongIds: initialLikes,
+    dislikedSongIds: initialDislikes,
+    listeningHistory: initialHistory,
+    activeMood: "All",
+    isLiked: initialLikes, // Backward-compatibility alias
     autoplay: true,
 
-    setQueue: (tracks: Song[]) => set({ queue: tracks }),
+    playSong: (song: Song, contextQueue?: Song[]) => {
+      if (!song?.audioUrl) return;
 
-    playSong: (track: Song, playlistContext?: Song[]) => {
-      if (!track?.audioUrl) return;
-
+      // 1. Maintain queue
       const activeQueue =
-        playlistContext && playlistContext.length > 0
-          ? playlistContext
-          : get().queue;
-      const exists = activeQueue.some((s) => s.id === track.id);
-      const finalQueue = exists ? activeQueue : [track, ...activeQueue];
+        contextQueue && contextQueue.length > 0
+          ? contextQueue
+          : get().queue.length > 0
+          ? get().queue
+          : [song];
 
-      set({ currentTrack: track, queue: finalQueue, isPlaying: true });
+      const exists = activeQueue.some((s) => s.id === song.id);
+      const finalQueue = exists ? activeQueue : [song, ...activeQueue];
 
+      // 2. Update listening history & playCount
+      const currentHistory = get().listeningHistory || [];
+      const updatedHistory = [
+        song,
+        ...currentHistory.filter((s) => s.id !== song.id),
+      ].slice(0, 30);
+      saveStorage("smc_listening_history", updatedHistory);
+
+      const updatedSong: Song = {
+        ...song,
+        playCount: (song.playCount || 0) + 1,
+        isLiked: Boolean(get().likedSongIds[song.id]),
+        isDisliked: Boolean(get().dislikedSongIds[song.id]),
+      };
+
+      set({
+        currentTrack: updatedSong,
+        queue: finalQueue,
+        originalQueue: finalQueue,
+        listeningHistory: updatedHistory,
+        isPlaying: true,
+      });
+
+      // 3. Audio stream initialization
       if (globalAudio) {
-        // Sequential reset for mobile WebView audio pipeline
         globalAudio.pause();
         globalAudio.currentTime = 0;
-        globalAudio.src = track.audioUrl;
+        globalAudio.src = song.audioUrl;
         globalAudio.load();
 
         const playPromise = globalAudio.play();
@@ -263,16 +303,28 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
           playPromise
             .then(() => {
               set({ isPlaying: true });
-              syncMediaSession(track, true);
+              syncMediaSession(updatedSong, true);
             })
             .catch(() => {
-              // Suppress browser autoplay restrictions
               set({ isPlaying: false });
               if (typeof window !== "undefined" && "mediaSession" in navigator) {
                 navigator.mediaSession.playbackState = "paused";
               }
             });
         }
+      }
+
+      // 4. Auto-generate "Related / Up Next" queue using the artist/genre if queue is short
+      if (finalQueue.length <= 2) {
+        getRadioForTrack(song.primaryArtists || song.name).then((radioTracks) => {
+          if (radioTracks.length > 0) {
+            const currentQ = get().queue;
+            const newTracks = radioTracks.filter((t) => !currentQ.some((q) => q.id === t.id));
+            if (newTracks.length > 0) {
+              set({ queue: [...currentQ, ...newTracks] });
+            }
+          }
+        }).catch(() => {});
       }
     },
 
@@ -310,7 +362,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       }
     },
 
-    // Aliased actions
     playNext: handleNextTrack,
     nextTrack: handleNextTrack,
     playPrev: handlePrevTrack,
@@ -343,7 +394,25 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     },
 
     toggleShuffle: () => {
-      set({ isShuffled: !get().isShuffled });
+      const { isShuffled, queue, originalQueue, currentTrack } = get();
+      if (!isShuffled) {
+        // Shuffle queue keeping currentTrack first
+        const remaining = queue.filter((t) => t.id !== currentTrack?.id);
+        for (let i = remaining.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [remaining[i], remaining[j]] = [remaining[j], remaining[i]];
+        }
+        set({
+          isShuffled: true,
+          queue: currentTrack ? [currentTrack, ...remaining] : remaining,
+        });
+      } else {
+        // Restore original queue order
+        set({
+          isShuffled: false,
+          queue: originalQueue.length > 0 ? originalQueue : queue,
+        });
+      }
     },
 
     toggleRepeat: () => {
@@ -353,16 +422,66 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       set({ repeatMode: nextMode });
     },
 
-    toggleLike: (id: string) => {
-      const current = get().likedTracks[id] || false;
-      const nextLikes = { ...get().likedTracks, [id]: !current };
-      set({ likedTracks: nextLikes, isLiked: nextLikes });
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem("smc_liked_tracks", JSON.stringify(nextLikes));
-        } catch {
-          // Ignore storage failures
-        }
+    toggleLike: (songOrId: Song | string) => {
+      const songId = typeof songOrId === "string" ? songOrId : songOrId.id;
+      const { likedSongIds, dislikedSongIds, currentTrack } = get();
+
+      const isCurrentlyLiked = Boolean(likedSongIds[songId]);
+      const nextLiked = { ...likedSongIds };
+      const nextDisliked = { ...dislikedSongIds };
+
+      if (isCurrentlyLiked) {
+        delete nextLiked[songId];
+      } else {
+        nextLiked[songId] = true;
+        delete nextDisliked[songId]; // If liked, remove from disliked
+      }
+
+      saveStorage("smc_liked_song_ids", nextLiked);
+      saveStorage("smc_disliked_song_ids", nextDisliked);
+
+      set({
+        likedSongIds: nextLiked,
+        dislikedSongIds: nextDisliked,
+        isLiked: nextLiked, // Compatibility alias
+        currentTrack:
+          currentTrack?.id === songId
+            ? { ...currentTrack, isLiked: !isCurrentlyLiked, isDisliked: false }
+            : currentTrack,
+      });
+    },
+
+    toggleDislike: (songOrId: Song | string) => {
+      const songId = typeof songOrId === "string" ? songOrId : songOrId.id;
+      const { likedSongIds, dislikedSongIds, currentTrack } = get();
+
+      const isCurrentlyDisliked = Boolean(dislikedSongIds[songId]);
+      const nextLiked = { ...likedSongIds };
+      const nextDisliked = { ...dislikedSongIds };
+
+      if (isCurrentlyDisliked) {
+        delete nextDisliked[songId];
+      } else {
+        nextDisliked[songId] = true;
+        delete nextLiked[songId]; // If disliked, remove from liked
+      }
+
+      saveStorage("smc_liked_song_ids", nextLiked);
+      saveStorage("smc_disliked_song_ids", nextDisliked);
+
+      set({
+        likedSongIds: nextLiked,
+        dislikedSongIds: nextDisliked,
+        isLiked: nextLiked,
+        currentTrack:
+          currentTrack?.id === songId
+            ? { ...currentTrack, isDisliked: !isCurrentlyDisliked, isLiked: false }
+            : currentTrack,
+      });
+
+      // If disliked currently playing song, auto-skip to next track
+      if (!isCurrentlyDisliked && currentTrack?.id === songId) {
+        get().playNext();
       }
     },
 
@@ -372,19 +491,27 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       set({ queue: newQueue });
     },
 
+    reorderQueue: (fromIndex: number, toIndex: number) => {
+      const newQueue = Array.from(get().queue);
+      const [movedItem] = newQueue.splice(fromIndex, 1);
+      newQueue.splice(toIndex, 0, movedItem);
+      set({ queue: newQueue });
+    },
+
+    setActiveMood: (mood: CategoryMood) => {
+      set({ activeMood: mood });
+    },
+
     clearQueue: () => {
       set({ queue: [] });
     },
 
     toggleAutoplay: () => {
-      set((state) => ({ autoplay: !state.autoplay }));
+      set((s) => ({ autoplay: !s.autoplay }));
     },
 
-    reorderQueue: (startIndex: number, endIndex: number) => {
-      const newQueue = Array.from(get().queue);
-      const [removed] = newQueue.splice(startIndex, 1);
-      newQueue.splice(endIndex, 0, removed);
-      set({ queue: newQueue });
+    setQueue: (tracks: Song[]) => {
+      set({ queue: tracks, originalQueue: tracks });
     },
   };
 });

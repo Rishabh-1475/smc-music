@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   Sparkles,
@@ -8,25 +8,27 @@ import {
   ExternalLink,
   Play,
   CheckCircle2,
+  Heart,
 } from "lucide-react";
 import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
-import QuickPicks from "@/components/QuickPicks";
+import SpeedDialGrid from "@/components/SpeedDialGrid";
+import QuickPicksList from "@/components/QuickPicksList";
 import ShelfCarousel from "@/components/ShelfCarousel";
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
 import FullPlayerModal from "@/components/FullPlayerModal";
 import { searchSongs, getHomeFeed, getLiveCategory } from "@/services/api";
-import { Song } from "@/types/music";
+import { Song, CategoryMood } from "@/types/music";
 import { usePlayerStore } from "@/store/playerStore";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string>("");
 
-  const { playSong } = usePlayerStore();
+  const { playSong, likedSongIds, listeningHistory } = usePlayerStore();
 
   // YouTube Music Home Feed Sections
   const [feeds, setFeeds] = useState<{
@@ -70,9 +72,9 @@ export default function Home() {
   }, []);
 
   // Category chip filter selection handler
-  const handleCategorySelect = async (category: string) => {
+  const handleCategorySelect = async (category: CategoryMood | string) => {
     setActiveCategory(category);
-    if (!category) {
+    if (!category || category === "All") {
       setSearchResults([]);
       return;
     }
@@ -92,7 +94,7 @@ export default function Home() {
   useEffect(() => {
     const trimmed = searchQuery.trim();
     if (!trimmed) {
-      if (!activeCategory) {
+      if (!activeCategory || activeCategory === "All") {
         setSearchResults([]);
       }
       setIsSearching(false);
@@ -115,6 +117,27 @@ export default function Home() {
     return () => clearTimeout(handler);
   }, [searchQuery, activeCategory]);
 
+  // Dynamically derive liked songs collection for Liked Songs shelf
+  const likedSongs = useMemo(() => {
+    const allPool: Song[] = [
+      ...(listeningHistory || []),
+      ...feeds.quickPicks,
+      ...feeds.trending,
+      ...feeds.workout,
+      ...feeds.chill,
+      ...feeds.party,
+      ...searchResults,
+    ];
+
+    const uniqueMap = new Map<string, Song>();
+    for (const song of allPool) {
+      if (likedSongIds[song.id] && !uniqueMap.has(song.id)) {
+        uniqueMap.set(song.id, song);
+      }
+    }
+    return Array.from(uniqueMap.values());
+  }, [likedSongIds, listeningHistory, feeds, searchResults]);
+
   // YouTube Music smooth pulse skeleton loaders
   const renderSkeletons = (count = 6) => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -132,7 +155,7 @@ export default function Home() {
   );
 
   const hasSearchOrFilter =
-    searchQuery.trim().length > 0 || activeCategory.length > 0;
+    searchQuery.trim().length > 0 || (activeCategory !== "" && activeCategory !== "All");
 
   return (
     <div className="min-h-screen bg-[#030303] text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
@@ -143,20 +166,22 @@ export default function Home() {
         isSearching={isSearching}
       />
 
-      {/* 2. Horizontal CategoryChips Bar Right Below the Header */}
+      {/* 2. Sticky CategoryChips */}
       <CategoryChips
         activeCategory={activeCategory}
         onSelectCategory={handleCategorySelect}
       />
 
       <main className="flex-1 w-full mx-auto pb-36">
-        {/* Search State: Instant Search Results Grid when input is active */}
+        {/* Real-time search grid with instant playback when search or mood is active */}
         {hasSearchOrFilter ? (
           <section className="px-4 md:px-8 py-6 space-y-4">
             <div className="flex items-center space-x-2">
               <Sparkles className="w-5 h-5 text-emerald-400" />
               <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">
-                {activeCategory ? `${activeCategory} Mix` : "Search Results"}
+                {activeCategory && activeCategory !== "All"
+                  ? `${activeCategory} Mix`
+                  : "Search Results"}
               </h2>
             </div>
 
@@ -197,40 +222,53 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          /* Default YouTube Music Feed View */
-          <div className="space-y-4">
-            {/* Section 1: "Quick Picks" (4-row YouTube Music grid) */}
-            <QuickPicks
+          /* Complete YouTube Music Home Feed */
+          <div className="space-y-2">
+            {/* 1. "Speed Dial" (Listen again / favorites) */}
+            <SpeedDialGrid fallbackSongs={feeds.quickPicks} />
+
+            {/* 2. "Quick Picks" (4-row vertical list) */}
+            <QuickPicksList
               title="Quick picks"
               subtitle="START RADIO FROM A SONG"
               songs={feeds.quickPicks}
             />
 
-            {/* Section 2: "Trending Now" (horizontal carousel) */}
+            {/* 3. "Trending Hindi & Punjabi Hits" (Carousel) */}
             <ShelfCarousel
-              title="Trending Now"
-              subtitle="TOP CHARTS & VIRAL HITS"
+              title="Trending Hindi &amp; Punjabi Hits"
+              subtitle="TOP CHARTS &amp; VIRAL HITS"
               songs={feeds.trending}
               variant="square"
             />
 
-            {/* Section 3: "Workout & Energy" (horizontal carousel) */}
+            {/* 4. "Energize & Workout Station" (Carousel) */}
             <ShelfCarousel
-              title="Workout & Energy"
-              subtitle="CARDIO, PUMP & POWER"
+              title="Energize &amp; Workout Station"
+              subtitle="CARDIO, PUMP &amp; POWER"
               songs={feeds.workout}
               variant="square"
             />
 
-            {/* Section 4: "Chill & Focus" (horizontal carousel) */}
+            {/* 5. "Chill & Focus Beats" (Carousel) */}
             <ShelfCarousel
-              title="Chill & Focus"
-              subtitle="DEEP WORK & RELAXATION"
+              title="Chill &amp; Focus Beats"
+              subtitle="DEEP WORK &amp; RELAXATION"
               songs={feeds.chill}
               variant="square"
             />
 
-            {/* Section 5: Creator Spotlight Banner Honoring Rishabh Singh */}
+            {/* 6. "Liked Songs" section (automatically populated when user thumbs-up songs) */}
+            {likedSongs.length > 0 && (
+              <ShelfCarousel
+                title="Liked Songs"
+                subtitle="YOUR FAVORITES &amp; THUMBS UP"
+                songs={likedSongs}
+                variant="square"
+              />
+            )}
+
+            {/* 7. Creator Spotlight Banner Honoring Rishabh Singh */}
             <section className="my-10 px-4 md:px-8">
               <div className="relative rounded-3xl bg-gradient-to-r from-emerald-950/70 via-[#181818] to-[#121212] border border-emerald-500/25 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-5 flex-1 min-w-0">

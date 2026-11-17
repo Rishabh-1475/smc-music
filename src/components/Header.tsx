@@ -22,7 +22,7 @@ export default function Header({
     setLocalQuery(searchQuery);
   }, [searchQuery]);
 
-  // 250ms debounce on local query change
+  // 250ms debounce on input change
   useEffect(() => {
     if (!onSearchChange) return;
     const timer = setTimeout(() => {
@@ -38,14 +38,14 @@ export default function Header({
 
   return (
     <header className="sticky top-0 z-30 w-full backdrop-blur-xl bg-[#030303]/95 border-b border-white/10 px-4 md:px-8 py-2.5 flex items-center justify-between gap-3 md:gap-6">
-      {/* Left: YouTube Music styled pill with red/emerald SMC accent: Play icon + "SMC Music" */}
+      {/* Left: YouTube Music Pill Logo with SMC Icon and "SMC Music" */}
       <div className="flex items-center space-x-3 flex-shrink-0">
         <Link
           href="/"
           className="flex items-center space-x-2.5 group transition-transform active:scale-95"
           aria-label="SMC Music Home"
         >
-          {/* YouTube Music Red/Emerald Accent Icon */}
+          {/* YouTube Music Red/Emerald Icon */}
           <div className="relative w-9 h-9 rounded-full bg-gradient-to-tr from-red-600 via-rose-600 to-emerald-500 p-[2px] shadow-lg shadow-red-500/20 group-hover:shadow-emerald-500/30 transition-all">
             <div className="w-full h-full rounded-full bg-[#030303] flex items-center justify-center">
               <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center">
@@ -54,7 +54,7 @@ export default function Header({
             </div>
           </div>
 
-          {/* YouTube Music Styled "SMC Music" Branding */}
+          {/* YouTube Music Style "SMC Music" Branding */}
           <div className="flex items-center">
             <span className="text-lg md:text-xl font-bold tracking-tight text-white">
               SMC
@@ -62,14 +62,11 @@ export default function Header({
             <span className="text-lg md:text-xl font-medium tracking-tight text-neutral-200 ml-1">
               Music
             </span>
-            <span className="ml-1.5 text-[9px] font-extrabold uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-1.5 py-0.5 rounded-full">
-              PRO
-            </span>
           </div>
         </Link>
       </div>
 
-      {/* Center: Sleek dark rounded search bar with clear button & 250ms debounce */}
+      {/* Center: Functional Search Input with Debounce, Search Icon, and Clear "X" Button */}
       <div className="flex-1 max-w-xl mx-2 md:mx-4">
         <div className="relative w-full">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
@@ -98,7 +95,7 @@ export default function Header({
         </div>
       </div>
 
-      {/* Right: Creator profile badge with /creator.jpg in a 44px circle with ring-2 ring-emerald-500/60 */}
+      {/* Right: Creator Circular Avatar (/creator.jpg) inside 44px container with ring-2 ring-emerald-500/50 */}
       <div className="flex items-center space-x-2 flex-shrink-0">
         <Link
           href="https://www.instagram.com/rish4bhsiingh/"
@@ -107,7 +104,7 @@ export default function Header({
           className="group flex items-center space-x-3 bg-[#181818]/90 hover:bg-[#212121] transition-all border border-white/10 hover:border-emerald-500/50 rounded-full pl-1 pr-3.5 py-1 shadow-md"
           title="Rishabh Singh • Founder & Lead Dev"
         >
-          <div className="w-[44px] h-[44px] rounded-full overflow-hidden ring-2 ring-emerald-500/60 group-hover:ring-emerald-400 transition-all flex-shrink-0 bg-neutral-900 flex items-center justify-center shadow-lg">
+          <div className="w-[44px] h-[44px] rounded-full overflow-hidden ring-2 ring-emerald-500/50 group-hover:ring-emerald-400 transition-all flex-shrink-0 bg-neutral-900 flex items-center justify-center shadow-lg">
             {!imgError ? (
               <img
                 src="/creator.jpg"

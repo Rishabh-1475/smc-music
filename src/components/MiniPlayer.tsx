@@ -16,13 +16,13 @@ export default function MiniPlayer() {
     playNext,
     togglePlayerOpen,
     toggleLike,
-    isLiked,
+    likedSongIds,
     isPlayerOpen,
   } = usePlayerStore();
 
   if (!currentTrack || isPlayerOpen) return null;
 
-  const liked = isLiked?.[currentTrack.id] || false;
+  const isLiked = Boolean(likedSongIds[currentTrack.id]);
 
   return (
     <div
@@ -32,7 +32,7 @@ export default function MiniPlayer() {
       aria-label="Open Full Player"
       className="fixed bottom-0 left-0 right-0 z-40 bg-[#0d0d0d]/95 backdrop-blur-2xl border-t border-white/10 px-4 md:px-8 py-2 pb-safe cursor-pointer transition-all duration-200 hover:bg-[#161616] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] select-none"
     >
-      {/* Ultra-thin progress bar running along the top edge */}
+      {/* Hairline progress bar along the very top border showing current stream percentage */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-neutral-800/80">
         <div
           className="h-full bg-emerald-500 transition-all duration-150"
@@ -63,21 +63,21 @@ export default function MiniPlayer() {
           </div>
         </div>
 
-        {/* Right Controls: Like, Play/Pause, Skip Forward, Expand */}
+        {/* Right Controls: Like, Play/Pause, Next, Expand */}
         <div className="flex items-center space-x-2 sm:space-x-3.5 flex-shrink-0">
           {/* Like Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
-              toggleLike(currentTrack.id);
+              toggleLike(currentTrack);
             }}
             className={`p-2 rounded-full hover:bg-neutral-800 transition hidden sm:inline-flex ${
-              liked ? "text-emerald-400" : "text-neutral-400 hover:text-white"
+              isLiked ? "text-emerald-400" : "text-neutral-400 hover:text-white"
             }`}
-            aria-label={liked ? "Unlike Track" : "Like Track"}
+            aria-label={isLiked ? "Unlike Track" : "Like Track"}
           >
             <Heart
-              className={`w-5 h-5 ${liked ? "fill-emerald-400 stroke-emerald-400" : ""}`}
+              className={`w-5 h-5 ${isLiked ? "fill-emerald-400 stroke-emerald-400" : ""}`}
             />
           </button>
 
@@ -87,7 +87,7 @@ export default function MiniPlayer() {
               e.stopPropagation();
               togglePlay();
             }}
-            className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-lg"
+            className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-lg cursor-pointer"
             aria-label={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
@@ -97,14 +97,14 @@ export default function MiniPlayer() {
             )}
           </button>
 
-          {/* Skip Forward Button */}
+          {/* Next Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               playNext();
             }}
-            className="p-2 rounded-full text-neutral-300 hover:text-white hover:bg-neutral-800 transition active:scale-95"
-            aria-label="Skip Forward"
+            className="p-2 rounded-full text-neutral-300 hover:text-white hover:bg-neutral-800 transition active:scale-95 cursor-pointer"
+            aria-label="Next Track"
           >
             <SkipForward className="w-5 h-5 fill-current" />
           </button>

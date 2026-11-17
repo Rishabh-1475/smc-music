@@ -52,14 +52,14 @@ export default function ShelfCarousel({
         <div className="hidden sm:flex items-center space-x-2">
           <button
             onClick={() => handleScroll("left")}
-            className="w-8 h-8 rounded-full border border-white/10 hover:border-white/30 bg-[#212121] flex items-center justify-center text-neutral-300 hover:text-white transition active:scale-95"
+            className="w-8 h-8 rounded-full border border-white/10 hover:border-white/30 bg-[#212121] flex items-center justify-center text-neutral-300 hover:text-white transition active:scale-95 cursor-pointer"
             aria-label="Previous items"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleScroll("right")}
-            className="w-8 h-8 rounded-full border border-white/10 hover:border-white/30 bg-[#212121] flex items-center justify-center text-neutral-300 hover:text-white transition active:scale-95"
+            className="w-8 h-8 rounded-full border border-white/10 hover:border-white/30 bg-[#212121] flex items-center justify-center text-neutral-300 hover:text-white transition active:scale-95 cursor-pointer"
             aria-label="Next items"
           >
             <ChevronRight className="w-4 h-4" />
@@ -130,7 +130,7 @@ export default function ShelfCarousel({
                 </div>
               </div>
 
-              {/* Meta: Title & Subtitle */}
+              {/* Meta: Title & Subtitle with High Contrast */}
               <div className={`w-full ${isCircle ? "text-center" : "text-left"}`}>
                 <h4
                   className={`text-sm font-semibold truncate transition-colors ${

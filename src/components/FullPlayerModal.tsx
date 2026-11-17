@@ -12,20 +12,18 @@ import {
   Repeat1,
   ThumbsUp,
   ThumbsDown,
-  MoreVertical,
   Volume2,
   VolumeX,
   Trash2,
   ArrowUp,
   ArrowDown,
-  ListMusic,
-  FileText,
   Radio,
-  Sparkles,
   Share2,
+  FileText,
+  Sparkles,
 } from "lucide-react";
 import { usePlayerStore } from "@/store/playerStore";
-import { getLyrics, searchSongs } from "@/services/api";
+import { getLyrics, getRadioForTrack, searchSongs } from "@/services/api";
 import { Song } from "@/types/music";
 
 const FALLBACK_VINYL =
@@ -50,7 +48,8 @@ export default function FullPlayerModal() {
     isPlayerOpen,
     isShuffled,
     repeatMode,
-    isLiked,
+    likedSongIds,
+    dislikedSongIds,
     autoplay,
     activeTab = "up_next",
     togglePlay,
@@ -62,21 +61,22 @@ export default function FullPlayerModal() {
     toggleShuffle,
     toggleRepeat,
     toggleLike,
+    toggleDislike,
     removeFromQueue,
+    reorderQueue,
     setActiveTab,
     playSong,
-    reorderQueue,
     toggleAutoplay,
   } = usePlayerStore();
 
-  const [disliked, setDisliked] = useState<Record<string, boolean>>({});
   const [lyricsText, setLyricsText] = useState<string>("Loading lyrics...");
   const [loadingLyrics, setLoadingLyrics] = useState(false);
   const [relatedTracks, setRelatedTracks] = useState<Song[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(false);
+  const [radioTracks, setRadioTracks] = useState<Song[]>([]);
   const [showDrawer, setShowDrawer] = useState(false);
 
-  // Fetch dynamic lyrics on track change or lyrics tab activation
+  // Fetch dynamic lyrics on song change or when tab is open
   useEffect(() => {
     if (!currentTrack) return;
     let active = true;
@@ -84,7 +84,7 @@ export default function FullPlayerModal() {
     async function fetchLyrics() {
       setLoadingLyrics(true);
       try {
-        const text = await getLyrics(currentTrack!.id);
+        const text = await getLyrics(currentTrack!.name, currentTrack!.primaryArtists);
         if (active) setLyricsText(text);
       } catch {
         if (active) setLyricsText("[00:00.00] ♪ Instrumental / Lyrics not available ♪");
@@ -102,28 +102,40 @@ export default function FullPlayerModal() {
     };
   }, [currentTrack?.id, activeTab, showDrawer]);
 
-  // Fetch related tracks when related tab is activated
+  // Fetch related tracks & radio recommendations
   useEffect(() => {
     if (!currentTrack) return;
     let active = true;
 
-    async function fetchRelated() {
+    async function fetchRecommendations() {
       setLoadingRelated(true);
       try {
-        const query = currentTrack!.primaryArtists?.split(",")[0]?.trim() || currentTrack!.name;
-        const results = await searchSongs(query);
+        const artist = currentTrack!.primaryArtists?.split(",")[0]?.trim() || currentTrack!.name;
+        const [related, radio] = await Promise.allSettled([
+          searchSongs(artist),
+          getRadioForTrack(artist),
+        ]);
+
         if (active) {
-          setRelatedTracks(results.filter((s) => s.id !== currentTrack!.id));
+          if (related.status === "fulfilled") {
+            setRelatedTracks(related.value.filter((s) => s.id !== currentTrack!.id));
+          }
+          if (radio.status === "fulfilled") {
+            setRadioTracks(radio.value.filter((s) => s.id !== currentTrack!.id));
+          }
         }
       } catch {
-        if (active) setRelatedTracks([]);
+        if (active) {
+          setRelatedTracks([]);
+          setRadioTracks([]);
+        }
       } finally {
         if (active) setLoadingRelated(false);
       }
     }
 
-    if (activeTab === "related" || showDrawer) {
-      fetchRelated();
+    if (activeTab === "related" || activeTab === "up_next" || showDrawer) {
+      fetchRecommendations();
     }
 
     return () => {
@@ -133,21 +145,10 @@ export default function FullPlayerModal() {
 
   if (!isPlayerOpen || !currentTrack) return null;
 
-  const isCurrentLiked = isLiked?.[currentTrack.id] || false;
-  const isCurrentDisliked = disliked[currentTrack.id] || false;
+  const isCurrentLiked = Boolean(likedSongIds[currentTrack.id]);
+  const isCurrentDisliked = Boolean(dislikedSongIds[currentTrack.id]);
 
-  const handleDislike = () => {
-    setDisliked((prev) => ({
-      ...prev,
-      [currentTrack.id]: !prev[currentTrack.id],
-    }));
-  };
-
-  const albumName =
-    typeof currentTrack.album === "string"
-      ? currentTrack.album
-      : currentTrack.album?.name || "Single";
-
+  const albumName = currentTrack.album || "Single";
   const remainingTime = Math.max(0, duration - currentTime);
 
   const handleTabClick = (tab: "up_next" | "lyrics" | "related") => {
@@ -157,14 +158,14 @@ export default function FullPlayerModal() {
 
   return (
     <div className="fixed inset-0 z-50 bg-[#030303] text-white flex flex-col justify-between overflow-hidden select-none animate-in slide-in-from-bottom duration-300">
-      {/* 1. Top Bar: Down Chevron, Header Title, Menu */}
-      <div className="px-4 md:px-8 py-3.5 flex items-center justify-between border-b border-white/5 bg-[#030303]/80 backdrop-blur-md z-10">
+      {/* 1. Top Navigation Bar: Down Chevron, Album Info, Share */}
+      <div className="px-4 md:px-8 py-3.5 flex items-center justify-between border-b border-white/5 bg-[#030303]/90 backdrop-blur-xl z-10">
         <button
           onClick={() => {
             setShowDrawer(false);
             togglePlayerOpen(false);
           }}
-          className="p-2 rounded-full hover:bg-white/10 text-neutral-300 hover:text-white transition active:scale-95"
+          className="p-2 rounded-full hover:bg-white/10 text-neutral-300 hover:text-white transition active:scale-95 cursor-pointer"
           aria-label="Dismiss Player"
         >
           <ChevronDown className="w-6 h-6" />
@@ -189,14 +190,14 @@ export default function FullPlayerModal() {
               });
             }
           }}
-          className="p-2 rounded-full hover:bg-white/10 text-neutral-300 hover:text-white transition"
+          className="p-2 rounded-full hover:bg-white/10 text-neutral-300 hover:text-white transition cursor-pointer"
           aria-label="Share Track"
         >
           <Share2 className="w-5 h-5" />
         </button>
       </div>
 
-      {/* 2. Middle Content Area: Artwork & Controls OR Sliding Drawer */}
+      {/* 2. Middle Content Area: Artwork + Controls OR Sliding Drawer */}
       <div className="relative flex-1 overflow-y-auto no-scrollbar px-6 md:px-12 py-4 flex flex-col items-center justify-center">
         {/* Main Artwork & Controls View */}
         <div
@@ -204,8 +205,8 @@ export default function FullPlayerModal() {
             showDrawer ? "opacity-0 pointer-events-none absolute" : "opacity-100"
           }`}
         >
-          {/* Centered Large Rounded Album Cover with Subtle Drop Shadow */}
-          <div className="relative aspect-square w-64 sm:w-72 md:w-80 rounded-2xl md:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.85)] ring-1 ring-white/10 mb-6 bg-neutral-900 group">
+          {/* Centered Large Rounded Artwork with Smooth Glow Shadow */}
+          <div className="relative aspect-square w-64 sm:w-72 md:w-80 rounded-2xl md:rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.9)] ring-1 ring-white/10 mb-6 bg-neutral-900 group">
             <img
               src={currentTrack.imageUrl || FALLBACK_VINYL}
               alt={currentTrack.name}
@@ -216,7 +217,7 @@ export default function FullPlayerModal() {
             />
           </div>
 
-          {/* Controls: Track Title, Artist, Thumbs Up / Thumbs Down */}
+          {/* Track Info with Clickable Thumbs Up / Thumbs Down */}
           <div className="w-full flex items-center justify-between mb-4">
             <div className="min-w-0 flex-1 pr-3">
               <h3 className="text-xl md:text-2xl font-bold text-white truncate leading-tight">
@@ -228,21 +229,23 @@ export default function FullPlayerModal() {
             </div>
 
             <div className="flex items-center space-x-1.5 flex-shrink-0">
+              {/* Thumbs Down Button */}
               <button
-                onClick={handleDislike}
-                className={`p-2.5 rounded-full hover:bg-white/10 transition ${
-                  isCurrentDisliked ? "text-red-400" : "text-neutral-400 hover:text-white"
+                onClick={() => toggleDislike(currentTrack)}
+                className={`p-2.5 rounded-full hover:bg-white/10 transition cursor-pointer ${
+                  isCurrentDisliked ? "text-rose-500" : "text-neutral-400 hover:text-white"
                 }`}
                 aria-label="Thumbs Down"
               >
                 <ThumbsDown
-                  className={`w-5 h-5 ${isCurrentDisliked ? "fill-red-400 stroke-red-400" : ""}`}
+                  className={`w-5 h-5 ${isCurrentDisliked ? "fill-rose-500 stroke-rose-500" : ""}`}
                 />
               </button>
 
+              {/* Thumbs Up Button */}
               <button
-                onClick={() => toggleLike(currentTrack.id)}
-                className={`p-2.5 rounded-full hover:bg-white/10 transition ${
+                onClick={() => toggleLike(currentTrack)}
+                className={`p-2.5 rounded-full hover:bg-white/10 transition cursor-pointer ${
                   isCurrentLiked ? "text-emerald-400" : "text-neutral-400 hover:text-white"
                 }`}
                 aria-label="Thumbs Up"
@@ -254,7 +257,7 @@ export default function FullPlayerModal() {
             </div>
           </div>
 
-          {/* Interactive Seek Slider with Elapsed and Remaining Timestamps */}
+          {/* Interactive Timeline Scrubber with Elapsed & Remaining Timestamps */}
           <div className="w-full mb-4">
             <div
               role="slider"
@@ -288,12 +291,12 @@ export default function FullPlayerModal() {
             </div>
           </div>
 
-          {/* Main Playback Controls: Shuffle, Prev, Play/Pause, Next, Repeat */}
+          {/* Big Circular Play/Pause, Next, Previous, Shuffle, and Repeat Toggles */}
           <div className="w-full flex items-center justify-between mb-4 px-2">
             {/* Shuffle Toggle */}
             <button
               onClick={toggleShuffle}
-              className={`p-2 rounded-full transition ${
+              className={`p-2 rounded-full transition cursor-pointer ${
                 isShuffled ? "text-emerald-400" : "text-neutral-400 hover:text-white"
               }`}
               aria-label="Toggle Shuffle"
@@ -301,19 +304,19 @@ export default function FullPlayerModal() {
               <Shuffle className="w-5 h-5" />
             </button>
 
-            {/* Next / Prev Buttons */}
+            {/* Previous Button */}
             <button
               onClick={playPrev}
-              className="p-3 rounded-full text-white hover:bg-white/10 transition active:scale-95"
+              className="p-3 rounded-full text-white hover:bg-white/10 transition active:scale-95 cursor-pointer"
               aria-label="Previous Track"
             >
               <SkipBack className="w-7 h-7 fill-current" />
             </button>
 
-            {/* Large Play/Pause Button */}
+            {/* Big Circular Play/Pause Button */}
             <button
               onClick={togglePlay}
-              className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition"
+              className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition cursor-pointer"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
@@ -326,7 +329,7 @@ export default function FullPlayerModal() {
             {/* Next Button */}
             <button
               onClick={playNext}
-              className="p-3 rounded-full text-white hover:bg-white/10 transition active:scale-95"
+              className="p-3 rounded-full text-white hover:bg-white/10 transition active:scale-95 cursor-pointer"
               aria-label="Next Track"
             >
               <SkipForward className="w-7 h-7 fill-current" />
@@ -335,7 +338,7 @@ export default function FullPlayerModal() {
             {/* Repeat Toggle */}
             <button
               onClick={toggleRepeat}
-              className={`p-2 rounded-full transition ${
+              className={`p-2 rounded-full transition cursor-pointer ${
                 repeatMode !== "off"
                   ? "text-emerald-400"
                   : "text-neutral-400 hover:text-white"
@@ -350,11 +353,11 @@ export default function FullPlayerModal() {
             </button>
           </div>
 
-          {/* Volume Control */}
+          {/* Volume Control Slider */}
           <div className="w-full max-w-xs flex items-center space-x-3 px-2">
             <button
               onClick={() => setVolume(volume > 0 ? 0 : 1)}
-              className="text-neutral-400 hover:text-white transition"
+              className="text-neutral-400 hover:text-white transition cursor-pointer"
               aria-label="Mute toggle"
             >
               {volume === 0 ? (
@@ -376,27 +379,27 @@ export default function FullPlayerModal() {
           </div>
         </div>
 
-        {/* Sliding Drawer View when an interactive Tab is open */}
+        {/* Sliding Drawer View when an Interactive Tab is Selected */}
         {showDrawer && (
           <div className="w-full max-w-xl mx-auto h-full flex flex-col justify-start py-2 animate-in fade-in duration-200">
-            {/* Drawer Close / Header */}
+            {/* Drawer Header */}
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-white/10">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
                 {activeTab === "up_next"
-                  ? "Playing Queue"
+                  ? "Playing Queue & Radio"
                   : activeTab === "lyrics"
-                  ? "Song Lyrics"
-                  : "Related Recommendations"}
+                  ? "Synchronized Lyrics"
+                  : "Similar Tracks & Albums"}
               </span>
               <button
                 onClick={() => setShowDrawer(false)}
-                className="text-xs text-neutral-400 hover:text-white px-2.5 py-1 rounded bg-[#212121] transition"
+                className="text-xs text-neutral-400 hover:text-white px-2.5 py-1 rounded bg-[#212121] transition cursor-pointer"
               >
                 Back to Player
               </button>
             </div>
 
-            {/* TAB 1: UP NEXT Interactive Queue with Reorder, Remove & Autoplay Switch */}
+            {/* TAB 1: [UP NEXT] Reorderable/removable active queue + dynamic Radio */}
             {activeTab === "up_next" && (
               <div className="w-full flex-1 flex flex-col min-h-0">
                 {/* Autoplay Toggle Switch */}
@@ -426,7 +429,7 @@ export default function FullPlayerModal() {
                 </div>
 
                 {/* Queue List with Re-order & Remove Options */}
-                <div className="flex-1 overflow-y-auto no-scrollbar space-y-1.5 max-h-[380px] pr-1">
+                <div className="flex-1 overflow-y-auto no-scrollbar space-y-1.5 max-h-[300px] pr-1">
                   {queue.map((track, idx) => {
                     const isTrackCurrent = track.id === currentTrack.id;
                     return (
@@ -435,7 +438,7 @@ export default function FullPlayerModal() {
                         onClick={() => playSong(track, queue)}
                         className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition ${
                           isTrackCurrent
-                            ? "bg-[#212121] text-emerald-400 font-semibold shadow"
+                            ? "bg-[#212121] text-emerald-400 font-semibold shadow border border-emerald-500/20"
                             : "hover:bg-[#181818] text-neutral-300"
                         }`}
                       >
@@ -462,7 +465,7 @@ export default function FullPlayerModal() {
                             </div>
                           ) : (
                             <>
-                              {/* Re-order Up */}
+                              {/* Reorder Up */}
                               {idx > 0 && reorderQueue && (
                                 <button
                                   onClick={(e) => {
@@ -476,7 +479,7 @@ export default function FullPlayerModal() {
                                 </button>
                               )}
 
-                              {/* Re-order Down */}
+                              {/* Reorder Down */}
                               {idx < queue.length - 1 && reorderQueue && (
                                 <button
                                   onClick={(e) => {
@@ -508,10 +511,34 @@ export default function FullPlayerModal() {
                     );
                   })}
                 </div>
+
+                {/* Radio Recommendations based on current track */}
+                {radioTracks.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-white/10">
+                    <div className="flex items-center space-x-2 text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">
+                      <Radio className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Start Radio From Track</span>
+                    </div>
+                    <div className="space-y-1 max-h-[140px] overflow-y-auto no-scrollbar">
+                      {radioTracks.slice(0, 5).map((track) => (
+                        <div
+                          key={`radio-${track.id}`}
+                          onClick={() => playSong(track, [track, ...radioTracks])}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-[#181818] cursor-pointer text-xs transition"
+                        >
+                          <span className="truncate flex-1 text-neutral-300">
+                            {track.name} • {track.primaryArtists}
+                          </span>
+                          <Play className="w-3 h-3 text-emerald-400 ml-2 flex-shrink-0" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* TAB 2: LYRICS Synchronized / Formatted Typography */}
+            {/* TAB 2: [LYRICS] Formatted lyrics sheet with responsive typography */}
             {activeTab === "lyrics" && (
               <div className="w-full flex-1 overflow-y-auto no-scrollbar py-4 text-center">
                 <div className="mb-4 flex items-center justify-center space-x-2 text-emerald-400 text-sm font-semibold uppercase tracking-wider">
@@ -530,13 +557,13 @@ export default function FullPlayerModal() {
               </div>
             )}
 
-            {/* TAB 3: RELATED Dynamic Suggestions */}
+            {/* TAB 3: [RELATED] Similar artist tracks and recommended albums */}
             {activeTab === "related" && (
               <div className="w-full flex-1 overflow-y-auto no-scrollbar py-2">
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center space-x-2 text-white text-sm font-semibold">
                     <Sparkles className="w-4 h-4 text-emerald-400" />
-                    <span>Recommended for You</span>
+                    <span>Similar Artist Tracks &amp; Releases</span>
                   </div>
                   <span className="text-xs text-neutral-400 font-mono">
                     {relatedTracks.length} tracks
@@ -601,7 +628,7 @@ export default function FullPlayerModal() {
         )}
       </div>
 
-      {/* 3. Bottom Sliding Tabs (YouTube Music 3-Pill Switcher) */}
+      {/* 3. Bottom 3-Tab Navigator: [UP NEXT], [LYRICS], [RELATED] */}
       <div className="border-t border-white/10 bg-[#030303]/90 backdrop-blur-md px-6 py-2.5 pb-safe flex items-center justify-around z-10">
         <button
           onClick={() => handleTabClick("up_next")}

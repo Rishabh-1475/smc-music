@@ -1,13 +1,15 @@
 "use client";
 
 import React from "react";
+import { CategoryMood } from "@/types/music";
+import { usePlayerStore } from "@/store/playerStore";
 
 interface CategoryChipsProps {
   activeCategory?: string;
-  onSelectCategory?: (category: string) => void;
+  onSelectCategory?: (category: CategoryMood | string) => void;
 }
 
-const CATEGORIES = [
+const CATEGORIES: CategoryMood[] = [
   "All",
   "Energize",
   "Workout",
@@ -19,10 +21,20 @@ const CATEGORIES = [
 ];
 
 export default function CategoryChips({
-  activeCategory = "",
+  activeCategory = "All",
   onSelectCategory,
 }: CategoryChipsProps) {
-  const currentSelection = !activeCategory || activeCategory.toLowerCase() === "all" ? "All" : activeCategory;
+  const { activeMood, setActiveMood } = usePlayerStore();
+
+  const currentMood =
+    activeCategory && activeCategory !== "" ? activeCategory : activeMood || "All";
+
+  const handleSelect = (cat: CategoryMood) => {
+    setActiveMood(cat);
+    if (onSelectCategory) {
+      onSelectCategory(cat === "All" ? "" : cat);
+    }
+  };
 
   return (
     <nav
@@ -31,22 +43,17 @@ export default function CategoryChips({
     >
       {CATEGORIES.map((cat) => {
         const isSelected =
-          cat === "All"
-            ? currentSelection === "All"
-            : currentSelection.toLowerCase() === cat.toLowerCase();
+          currentMood.toLowerCase() === cat.toLowerCase() ||
+          (cat === "All" && (!currentMood || currentMood === ""));
 
         return (
           <button
             key={cat}
-            onClick={() => {
-              if (onSelectCategory) {
-                onSelectCategory(cat === "All" ? "" : cat);
-              }
-            }}
+            onClick={() => handleSelect(cat)}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
               isSelected
                 ? "bg-white text-black shadow-md shadow-white/10 scale-[1.02]"
-                : "bg-[#212121] hover:bg-[#2a2a2a] text-neutral-300 border border-white/10"
+                : "bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-white/10"
             }`}
           >
             {cat}

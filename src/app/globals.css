@@ -22,7 +22,7 @@
   color: #030303;
 }
 
-/* Base Body Styles with Hardware Acceleration */
+/* Base Body Styles with Mobile Optimization */
 html,
 body {
   background-color: #030303;
@@ -36,7 +36,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hardware-accelerated CSS for 60fps lag-free touch scrolling */
+/* Hardware-accelerated CSS for 60fps lag-free mobile performance */
 .gpu-accelerated,
 .scroll-smooth,
 .overflow-x-auto,
@@ -85,16 +85,6 @@ body {
 
 .yt-card:hover {
   background-color: #212121;
-}
-
-/* YouTube Music Red/Crimson Accent Badge */
-.yt-crimson-glow {
-  box-shadow: 0 0 20px rgba(225, 29, 72, 0.35);
-}
-
-/* YouTube Music Emerald Accent Glow */
-.yt-emerald-glow {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
 }
 
 /* Custom Sleek Scrollbar */
