@@ -1,15 +1,26 @@
 import { create } from "zustand";
 import { Song } from "@/types/music";
 
+declare global {
+  interface Window {
+    __smc_audio?: HTMLAudioElement;
+  }
+}
+
 /**
- * HTML5 Audio Singleton outside React's lifecycle.
+ * Permanent HTML5 Audio Singleton outside React's lifecycle.
+ * Prevent garbage collection in Mobile WebViews via window.__smc_audio.
  */
 let globalAudio: HTMLAudioElement | null = null;
 
 if (typeof window !== "undefined") {
-  globalAudio = new Audio();
-  globalAudio.preload = "auto";
-  globalAudio.crossOrigin = "anonymous";
+  if (!window.__smc_audio) {
+    const audio = new Audio();
+    audio.preload = "auto";
+    audio.crossOrigin = "anonymous";
+    window.__smc_audio = audio;
+  }
+  globalAudio = window.__smc_audio;
 }
 
 const CLEAN_VINYL_COVER =
@@ -36,7 +47,7 @@ export interface PlayerState {
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => {
-  // Sync MediaSession metadata and remote command handlers
+  // Sync MediaSession metadata and action handlers
   const syncMediaSession = (track: Song, isPlayingState: boolean = true) => {
     if (typeof window === "undefined" || !("mediaSession" in navigator)) return;
 
@@ -89,7 +100,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     }
   };
 
-  // Bind audio lifecycle listeners once on singleton
+  // Wire audio singleton lifecycle events once
   if (typeof window !== "undefined" && globalAudio) {
     globalAudio.ontimeupdate = () => {
       const cur = globalAudio?.currentTime || 0;
@@ -156,19 +167,27 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       set({ currentTrack: track, queue: finalQueue, isPlaying: true });
 
       if (globalAudio) {
+        // Sequential reset for mobile WebView audio pipeline
+        globalAudio.pause();
+        globalAudio.currentTime = 0;
         globalAudio.src = track.audioUrl;
-        globalAudio
-          .play()
-          .then(() => {
-            syncMediaSession(track, true);
-          })
-          .catch((err) => {
-            console.error("[SMC Playback Blocked]", err);
-            set({ isPlaying: false });
-            if (typeof window !== "undefined" && "mediaSession" in navigator) {
-              navigator.mediaSession.playbackState = "paused";
-            }
-          });
+        globalAudio.load();
+
+        const playPromise = globalAudio.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              set({ isPlaying: true });
+              syncMediaSession(track, true);
+            })
+            .catch((err) => {
+              console.error("Audio play failed:", err);
+              set({ isPlaying: false });
+              if (typeof window !== "undefined" && "mediaSession" in navigator) {
+                navigator.mediaSession.playbackState = "paused";
+              }
+            });
+        }
       }
     },
 
@@ -189,26 +208,27 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
             navigator.mediaSession.playbackState = "paused";
           }
         } else {
-          globalAudio
-            .play()
-            .then(() => {
-              set({ isPlaying: true });
-              if (typeof window !== "undefined" && "mediaSession" in navigator) {
-                navigator.mediaSession.playbackState = "playing";
-              }
-            })
-            .catch((err) => {
-              console.error("[SMC Toggle Play Error]", err);
-            });
+          const playPromise = globalAudio.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                set({ isPlaying: true });
+                if (typeof window !== "undefined" && "mediaSession" in navigator) {
+                  navigator.mediaSession.playbackState = "playing";
+                }
+              })
+              .catch((err) => {
+                console.error("Audio play failed:", err);
+                set({ isPlaying: false });
+              });
+          }
         }
       }
     },
 
-    // Aliased next track actions
+    // Aliased actions
     playNext: handleNextTrack,
     nextTrack: handleNextTrack,
-
-    // Aliased previous track actions
     playPrev: handlePrevTrack,
     prevTrack: handlePrevTrack,
 

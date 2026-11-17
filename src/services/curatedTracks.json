@@ -1,0 +1,728 @@
+{
+  "hindi": [
+    {
+      "id": "qcEf8GY8",
+      "name": "Apna Bana Le",
+      "title": "Apna Bana Le",
+      "primaryArtists": "Amitabh Bhattacharya, Sachin-Jigar, Arijit Singh",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "261",
+      "audioUrl": "https://aac.saavncdn.com/675/1456dc2903d0fb4465d2d2904008803b_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/1456dc2903d0fb4465d2d2904008803b_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/1456dc2903d0fb4465d2d2904008803b_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "UPJYO3v0",
+      "name": "Ishq de Fanniyar - Female",
+      "title": "Ishq de Fanniyar - Female",
+      "primaryArtists": "Jyotica Tangri, Shaarib Toshi, Kumaar",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "177",
+      "audioUrl": "https://aac.saavncdn.com/675/f1f48664e51db48f0d26a40d42d515a8_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/f1f48664e51db48f0d26a40d42d515a8_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/f1f48664e51db48f0d26a40d42d515a8_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "kHS4uHli",
+      "name": "Vaaroon",
+      "title": "Vaaroon",
+      "primaryArtists": "Anand Bhaskar",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "350",
+      "audioUrl": "https://aac.saavncdn.com/675/ff5cbe7f8c09da84cb039852eae36fce_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/ff5cbe7f8c09da84cb039852eae36fce_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/ff5cbe7f8c09da84cb039852eae36fce_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "RPY7kBp3",
+      "name": "Lae Dooba",
+      "title": "Lae Dooba",
+      "primaryArtists": "Manoj Muntashir, Rochak Kohli, Sunidhi Chauhan",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "229",
+      "audioUrl": "https://aac.saavncdn.com/675/967b4606fe77beb6b080abd334f5742d_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/967b4606fe77beb6b080abd334f5742d_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/967b4606fe77beb6b080abd334f5742d_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "BtmajL_i",
+      "name": "Vaaroon Trending Version",
+      "title": "Vaaroon Trending Version",
+      "primaryArtists": "Ginny Diwan, Anand Bhaskar, Romy",
+      "album": "Vaaroon Trending Version",
+      "imageUrl": "https://c.saavncdn.com/037/Vaaroon-Trending-Version-Hindi-2025-20250709213623-500x500.jpg",
+      "duration": "151",
+      "audioUrl": "https://aac.saavncdn.com/037/5c1b6f34a94c685bd67cb567bf688e6a_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/037/5c1b6f34a94c685bd67cb567bf688e6a_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/037/5c1b6f34a94c685bd67cb567bf688e6a_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "VkKO4wT4",
+      "name": "Jugraafiya Trending Version",
+      "title": "Jugraafiya Trending Version",
+      "primaryArtists": "Amitabh Bhattacharya, Ajay-Atul, Udit Narayan, Shreya Ghoshal",
+      "album": "Jugraafiya Trending Version",
+      "imageUrl": "https://c.saavncdn.com/022/Jugraafiya-Trending-Version-Hindi-2025-20250618165955-500x500.jpg",
+      "duration": "70",
+      "audioUrl": "https://aac.saavncdn.com/022/6f094a08dea55cf2ba3e1765b01799a6_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/022/6f094a08dea55cf2ba3e1765b01799a6_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/022/6f094a08dea55cf2ba3e1765b01799a6_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "7o2bZnQk",
+      "name": "Vaaroon Trending Version",
+      "title": "Vaaroon Trending Version",
+      "primaryArtists": "Ginny Diwan, Anand Bhaskar, Romy",
+      "album": "1 Min Insta Viral Mix",
+      "imageUrl": "https://c.saavncdn.com/835/1-Min-Insta-Viral-Mix-Hindi-2026-20260512190618-500x500.jpg",
+      "duration": "151",
+      "audioUrl": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "kXvA3QYv",
+      "name": "Teri Ore (Trending Version)",
+      "title": "Teri Ore (Trending Version)",
+      "primaryArtists": "Shreya Ghoshal",
+      "album": "Teri Ore (Trending Version)",
+      "imageUrl": "https://c.saavncdn.com/609/Teri-Ore-Trending-Version-Hindi-2025-20250815162404-500x500.jpg",
+      "duration": "90",
+      "audioUrl": "https://aac.saavncdn.com/609/991f984cf1333758acdb07bf5e0fd9f3_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/609/991f984cf1333758acdb07bf5e0fd9f3_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/609/991f984cf1333758acdb07bf5e0fd9f3_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "bl6OTcVp",
+      "name": "Jugraafiya",
+      "title": "Jugraafiya",
+      "primaryArtists": "Udit Narayan, Shreya Ghoshal",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "274",
+      "audioUrl": "https://aac.saavncdn.com/675/8a5d991f76f9e6e2e0af5ea371419572_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/8a5d991f76f9e6e2e0af5ea371419572_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/8a5d991f76f9e6e2e0af5ea371419572_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "ILnuUlkk",
+      "name": "Tu Hi Disda",
+      "title": "Tu Hi Disda",
+      "primaryArtists": "Kumaar, Pritam, Arijit Singh, Nikhita Gandhi",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "277",
+      "audioUrl": "https://aac.saavncdn.com/675/6d6322d1918ad6e7af4bbee532391646_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/6d6322d1918ad6e7af4bbee532391646_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/6d6322d1918ad6e7af4bbee532391646_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "sjQ1wKN-",
+      "name": "Jugraafiya Trending Version",
+      "title": "Jugraafiya Trending Version",
+      "primaryArtists": "Amitabh Bhattacharya, Ajay-Atul, Udit Narayan, Shreya Ghoshal",
+      "album": "1 Min Insta Viral Mix",
+      "imageUrl": "https://c.saavncdn.com/835/1-Min-Insta-Viral-Mix-Hindi-2026-20260512190618-500x500.jpg",
+      "duration": "70",
+      "audioUrl": "https://aac.saavncdn.com/835/afcc63fccd64e48b5b56b0297837b6d2_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/835/afcc63fccd64e48b5b56b0297837b6d2_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/835/afcc63fccd64e48b5b56b0297837b6d2_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "huW1RF-6",
+      "name": "Preet Re",
+      "title": "Preet Re",
+      "primaryArtists": "Gurpreet Saini, Rochak Kohli, Darshan Raval, Jonita Gandhi",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "196",
+      "audioUrl": "https://aac.saavncdn.com/675/d79c8812547b4d357fe1004c4e2f8e88_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/d79c8812547b4d357fe1004c4e2f8e88_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/d79c8812547b4d357fe1004c4e2f8e88_160.mp4"
+        }
+      ]
+    }
+  ],
+  "punjabi": [
+    {
+      "id": "OVYHcSky",
+      "name": "HYPE",
+      "title": "HYPE",
+      "primaryArtists": "Gur Sidhu, Kaptaan",
+      "album": "Known Unknowns",
+      "imageUrl": "https://c.saavncdn.com/424/Known-Unknowns-Punjabi-2026-20261115114246-500x500.jpg",
+      "duration": "158",
+      "audioUrl": "https://aac.saavncdn.com/424/8485c24a921f998c37cf7e683f370b5c_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/424/8485c24a921f998c37cf7e683f370b5c_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/424/8485c24a921f998c37cf7e683f370b5c_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "I58-Dr16",
+      "name": "Hype",
+      "title": "Hype",
+      "primaryArtists": "Ranjit Bawa, Bunty Bains, Goldy Desi Crew",
+      "album": "My Roots",
+      "imageUrl": "https://c.saavncdn.com/179/My-Roots-Punjabi-2026-20260429155612-500x500.jpg",
+      "duration": "156",
+      "audioUrl": "https://aac.saavncdn.com/179/6daec90c05b9213615265518f9190767_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/179/6daec90c05b9213615265518f9190767_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/179/6daec90c05b9213615265518f9190767_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "TSYQz50j",
+      "name": "Hype",
+      "title": "Hype",
+      "primaryArtists": "Varinder Brar",
+      "album": "Hype",
+      "imageUrl": "https://c.saavncdn.com/849/Hype-Punjabi-2026-20261016192550-500x500.jpg",
+      "duration": "159",
+      "audioUrl": "https://aac.saavncdn.com/849/79f279e06d860c0d462d2e808bc0c5e1_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/849/79f279e06d860c0d462d2e808bc0c5e1_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/849/79f279e06d860c0d462d2e808bc0c5e1_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "Sl3jbpu_",
+      "name": "Hype",
+      "title": "Hype",
+      "primaryArtists": "Sukh Lahoria, Izhan Beats",
+      "album": "Hype",
+      "imageUrl": "https://c.saavncdn.com/294/Hype-Punjabi-2026-20261029113247-500x500.jpg",
+      "duration": "168",
+      "audioUrl": "https://aac.saavncdn.com/294/3c7250d959eaf5335baa60e96fb45af8_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/294/3c7250d959eaf5335baa60e96fb45af8_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/294/3c7250d959eaf5335baa60e96fb45af8_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "to7FnCBE",
+      "name": "Hype",
+      "title": "Hype",
+      "primaryArtists": "Misaal, Shadaai, KAABIR Music",
+      "album": "Hype",
+      "imageUrl": "https://c.saavncdn.com/043/Hype-Punjabi-2026-20260817124155-500x500.jpg",
+      "duration": "162",
+      "audioUrl": "https://aac.saavncdn.com/043/31d348ed0bc4ed08f3861269b1ddffa6_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/043/31d348ed0bc4ed08f3861269b1ddffa6_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/043/31d348ed0bc4ed08f3861269b1ddffa6_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "9ayqGjwA",
+      "name": "Hype",
+      "title": "Hype",
+      "primaryArtists": "Kay, Harsh",
+      "album": "Hype",
+      "imageUrl": "https://c.saavncdn.com/246/Hype-Punjabi-2026-20260513131801-500x500.jpg",
+      "duration": "169",
+      "audioUrl": "https://aac.saavncdn.com/246/6b33ff0a4cf9dcf32c3a209fb92066f7_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/246/6b33ff0a4cf9dcf32c3a209fb92066f7_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/246/6b33ff0a4cf9dcf32c3a209fb92066f7_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "4CGGsceN",
+      "name": "Hype",
+      "title": "Hype",
+      "primaryArtists": "Jass R",
+      "album": "Hype",
+      "imageUrl": "https://c.saavncdn.com/860/Hype-Punjabi-2026-20260507161157-500x500.jpg",
+      "duration": "160",
+      "audioUrl": "https://aac.saavncdn.com/860/75e99dc7c6b00ac43b276e864d5a360a_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/860/75e99dc7c6b00ac43b276e864d5a360a_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/860/75e99dc7c6b00ac43b276e864d5a360a_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "O1fNfqlO",
+      "name": "HYPE",
+      "title": "HYPE",
+      "primaryArtists": "Gurjant Otaal",
+      "album": "HYPE",
+      "imageUrl": "https://c.saavncdn.com/586/HYPE-Punjabi-2026-20261013053230-500x500.jpg",
+      "duration": "155",
+      "audioUrl": "https://aac.saavncdn.com/586/067628850b359bcdd88a0ce8d16e6a5a_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/586/067628850b359bcdd88a0ce8d16e6a5a_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/586/067628850b359bcdd88a0ce8d16e6a5a_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "qMh6aJxP",
+      "name": "Hype",
+      "title": "Hype",
+      "primaryArtists": "Tarsem Dheer",
+      "album": "Stay High",
+      "imageUrl": "https://c.saavncdn.com/367/Stay-High-Punjabi-2026-20260219184748-500x500.jpg",
+      "duration": "137",
+      "audioUrl": "https://aac.saavncdn.com/367/1196721b0b0fed9c76a4d96a63ec6adb_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/367/1196721b0b0fed9c76a4d96a63ec6adb_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/367/1196721b0b0fed9c76a4d96a63ec6adb_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "0mHCVjVw",
+      "name": "HYPE",
+      "title": "HYPE",
+      "primaryArtists": "Karan Thabal, Yaari Ghuman",
+      "album": "HYPE",
+      "imageUrl": "https://c.saavncdn.com/774/HYPE-Punjabi-2026-20260122124350-500x500.jpg",
+      "duration": "190",
+      "audioUrl": "https://aac.saavncdn.com/774/4d578988438f3c9e3d244ee63dfaa17a_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/774/4d578988438f3c9e3d244ee63dfaa17a_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/774/4d578988438f3c9e3d244ee63dfaa17a_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "n1GXpw_k",
+      "name": "Hype",
+      "title": "Hype",
+      "primaryArtists": "Channi Rayat, Bigg Sandhu",
+      "album": "Flex",
+      "imageUrl": "https://c.saavncdn.com/491/Flex-Punjabi-2026-20261111154938-500x500.jpg",
+      "duration": "148",
+      "audioUrl": "https://aac.saavncdn.com/491/35d29645af834fff6bd4322bf6d6be15_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/491/35d29645af834fff6bd4322bf6d6be15_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/491/35d29645af834fff6bd4322bf6d6be15_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "xVr1598L",
+      "name": "Hype Again",
+      "title": "Hype Again",
+      "primaryArtists": "Avon Brar, IRIS Music",
+      "album": "Hype Again",
+      "imageUrl": "https://c.saavncdn.com/500/Hype-Again-Punjabi-2026-20260814153807-500x500.jpg",
+      "duration": "237",
+      "audioUrl": "https://aac.saavncdn.com/500/da1a8e8e910e4469a53cad8bea09437d_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/500/da1a8e8e910e4469a53cad8bea09437d_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/500/da1a8e8e910e4469a53cad8bea09437d_160.mp4"
+        }
+      ]
+    }
+  ],
+  "romance": [
+    {
+      "id": "EzGKheHd",
+      "name": "Dekha Hazaro Dafaa",
+      "title": "Dekha Hazaro Dafaa",
+      "primaryArtists": "Arijit Singh, Palak Muchhal, Jeet Gannguli, Manoj Muntashir",
+      "album": "Soft Romance Bollywood",
+      "imageUrl": "https://c.saavncdn.com/546/Soft-Romance-Bollywood-Hindi-2026-20260818072225-500x500.jpg",
+      "duration": "207",
+      "audioUrl": "https://aac.saavncdn.com/546/8c7217f7f30a4a6e795c6edc30d41cc6_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/546/8c7217f7f30a4a6e795c6edc30d41cc6_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/546/8c7217f7f30a4a6e795c6edc30d41cc6_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "MJHIKOrv",
+      "name": "Pal Pal Dil Ke Paas- Title Track",
+      "title": "Pal Pal Dil Ke Paas- Title Track",
+      "primaryArtists": "Arijit Singh, Parampara Tandon, Sachet-Parampara, Siddharth-Garima",
+      "album": "Romance Reloaded",
+      "imageUrl": "https://c.saavncdn.com/710/Romance-Reloaded-Hindi-2026-20260908183308-500x500.jpg",
+      "duration": "254",
+      "audioUrl": "https://aac.saavncdn.com/710/4d1d1dc540fb2c5fd2220b1098bcf614_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/710/4d1d1dc540fb2c5fd2220b1098bcf614_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/710/4d1d1dc540fb2c5fd2220b1098bcf614_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "jdEhkRVr",
+      "name": "Jaan Nisaar (Arijit)",
+      "title": "Jaan Nisaar (Arijit)",
+      "primaryArtists": "Arijit Singh",
+      "album": "Soft Romance Bollywood",
+      "imageUrl": "https://c.saavncdn.com/546/Soft-Romance-Bollywood-Hindi-2026-20260818072225-500x500.jpg",
+      "duration": "238",
+      "audioUrl": "https://aac.saavncdn.com/546/cff96fe9ac65691a18032b29a75ab15f_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/546/cff96fe9ac65691a18032b29a75ab15f_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/546/cff96fe9ac65691a18032b29a75ab15f_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "vRwpHMMg",
+      "name": "Jaan Ban Gaye",
+      "title": "Jaan Ban Gaye",
+      "primaryArtists": "Vishal Mishra, Mithoon, Asees Kaur",
+      "album": "Soft Romance Bollywood",
+      "imageUrl": "https://c.saavncdn.com/546/Soft-Romance-Bollywood-Hindi-2026-20260818072225-500x500.jpg",
+      "duration": "211",
+      "audioUrl": "https://aac.saavncdn.com/546/bf52319eaa32f3e38ebb2852e1f831b5_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/546/bf52319eaa32f3e38ebb2852e1f831b5_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/546/bf52319eaa32f3e38ebb2852e1f831b5_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "lTiratEs",
+      "name": "Pal Pal Dil Ke Paas- Title Track",
+      "title": "Pal Pal Dil Ke Paas- Title Track",
+      "primaryArtists": "Arijit Singh, Parampara Tandon, Sachet-Parampara, Siddharth-Garima",
+      "album": "Midnight Romance Bollywood",
+      "imageUrl": "https://c.saavncdn.com/377/Midnight-Romance-Bollywood-Hindi-2026-20261019123006-500x500.jpg",
+      "duration": "254",
+      "audioUrl": "https://aac.saavncdn.com/377/6f1a610880db18cdca50818151b22a9c_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/377/6f1a610880db18cdca50818151b22a9c_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/377/6f1a610880db18cdca50818151b22a9c_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "_ovxilTH",
+      "name": "Romance Like SRK - Mashup",
+      "title": "Romance Like SRK - Mashup",
+      "primaryArtists": "Sunny Subramanian, Roopkumar Rathod, Lata Mangeshkar, Sonu Nigam, Shreya Ghoshal, Mohit Chauhan, Udit Narayan",
+      "album": "Romance Like SRK - Mashup",
+      "imageUrl": "https://c.saavncdn.com/209/Romance-Like-SRK-Mashup-Hindi-2015-500x500.jpg",
+      "duration": "206",
+      "audioUrl": "https://aac.saavncdn.com/209/767f0d507529636a9711f612fb1d6ba3_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/209/767f0d507529636a9711f612fb1d6ba3_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/209/767f0d507529636a9711f612fb1d6ba3_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "bAtyl7m0",
+      "name": "Jitni Dafa",
+      "title": "Jitni Dafa",
+      "primaryArtists": "Yasser Desai, Jeet Gannguli, Rashmi-Virag",
+      "album": "Midnight Romance Bollywood",
+      "imageUrl": "https://c.saavncdn.com/377/Midnight-Romance-Bollywood-Hindi-2026-20261019123006-500x500.jpg",
+      "duration": "222",
+      "audioUrl": "https://aac.saavncdn.com/377/29acd36924c965fa627541fb34a0b1ec_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/377/29acd36924c965fa627541fb34a0b1ec_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/377/29acd36924c965fa627541fb34a0b1ec_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "KbqCvOn0",
+      "name": "Main Agar Kahoon (From \"Om Shanti Om\")",
+      "title": "Main Agar Kahoon (From \"Om Shanti Om\")",
+      "primaryArtists": "Sonu Nigam, Shreya Ghoshal",
+      "album": "Shah Rukh Khan Romance & Rhythm",
+      "imageUrl": "https://c.saavncdn.com/199/Shah-Rukh-Khan-Romance-Rhythm-Hindi-2025-20251114171238-500x500.jpg",
+      "duration": "308",
+      "audioUrl": "https://aac.saavncdn.com/199/e2e0147dd78f172643110ee997438fcd_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/199/e2e0147dd78f172643110ee997438fcd_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/199/e2e0147dd78f172643110ee997438fcd_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "R1Aqo-wi",
+      "name": "Chal Tere Ishq Mein",
+      "title": "Chal Tere Ishq Mein",
+      "primaryArtists": "Mithoon, Neeti Mohan, Vishal Mishra, Shehnaz Akhtar, Sahil Akhtar",
+      "album": "Midnight Romance Bollywood",
+      "imageUrl": "https://c.saavncdn.com/377/Midnight-Romance-Bollywood-Hindi-2026-20261019123006-500x500.jpg",
+      "duration": "371",
+      "audioUrl": "https://aac.saavncdn.com/377/13f259b1262e3ad425ab3687e273d5f9_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/377/13f259b1262e3ad425ab3687e273d5f9_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/377/13f259b1262e3ad425ab3687e273d5f9_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "EOhHDZle",
+      "name": "Dariya",
+      "title": "Dariya",
+      "primaryArtists": "Arko",
+      "album": "Soft Romance Bollywood",
+      "imageUrl": "https://c.saavncdn.com/546/Soft-Romance-Bollywood-Hindi-2026-20260818072225-500x500.jpg",
+      "duration": "217",
+      "audioUrl": "https://aac.saavncdn.com/546/e0600f2fb7f3f90f5d51a1db5cb89e36_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/546/e0600f2fb7f3f90f5d51a1db5cb89e36_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/546/e0600f2fb7f3f90f5d51a1db5cb89e36_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "ryZWXyLb",
+      "name": "Romance Period",
+      "title": "Romance Period",
+      "primaryArtists": "Surendra Sathi, Kumar Sanu, Nadeem-Shravan",
+      "album": "Jaan Tere Naam",
+      "imageUrl": "https://c.saavncdn.com/172/Jaan-Tere-Naam-Hindi-1992-20240408213836-500x500.jpg",
+      "duration": "413",
+      "audioUrl": "https://aac.saavncdn.com/172/ad8cbd4246ebccce97f8bcb0920318e8_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/172/ad8cbd4246ebccce97f8bcb0920318e8_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/172/ad8cbd4246ebccce97f8bcb0920318e8_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "8g43YcY4",
+      "name": "Manwa Laage (From \"Happy New Year\")",
+      "title": "Manwa Laage (From \"Happy New Year\")",
+      "primaryArtists": "Shreya Ghoshal, Arijit Singh",
+      "album": "Shah Rukh Khan Romance & Rhythm",
+      "imageUrl": "https://c.saavncdn.com/199/Shah-Rukh-Khan-Romance-Rhythm-Hindi-2025-20251114171238-500x500.jpg",
+      "duration": "272",
+      "audioUrl": "https://aac.saavncdn.com/199/8846c7613f0e2b5a047d56ff5f16d1e9_320.mp4",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/199/8846c7613f0e2b5a047d56ff5f16d1e9_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/199/8846c7613f0e2b5a047d56ff5f16d1e9_160.mp4"
+        }
+      ]
+    }
+  ]
+}
