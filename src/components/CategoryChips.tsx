@@ -8,45 +8,45 @@ interface CategoryChipsProps {
 }
 
 const CATEGORIES = [
+  "All",
   "Energize",
-  "Relax",
   "Workout",
+  "Relax",
   "Focus",
   "Commute",
-  "Romance",
   "Party",
+  "Romance",
 ];
 
 export default function CategoryChips({
   activeCategory = "",
   onSelectCategory,
 }: CategoryChipsProps) {
+  const currentSelection = !activeCategory || activeCategory.toLowerCase() === "all" ? "All" : activeCategory;
+
   return (
     <nav
-      aria-label="Moods & Genres"
-      className="w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center space-x-2.5 py-3 px-4 md:px-8 bg-black/40 backdrop-blur-sm sticky top-[57px] z-20 border-b border-white/5"
+      aria-label="YouTube Music Mood Filters"
+      className="w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center space-x-2.5 py-3 px-4 md:px-8 bg-[#030303]/90 backdrop-blur-md sticky top-[57px] z-20 border-b border-white/5"
     >
-      <button
-        onClick={() => onSelectCategory && onSelectCategory("")}
-        className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
-          activeCategory === ""
-            ? "bg-white text-black shadow-md shadow-white/10"
-            : "bg-neutral-850 hover:bg-neutral-800 text-neutral-300 border border-white/10"
-        }`}
-      >
-        All
-      </button>
-
       {CATEGORIES.map((cat) => {
-        const isActive = activeCategory === cat;
+        const isSelected =
+          cat === "All"
+            ? currentSelection === "All"
+            : currentSelection.toLowerCase() === cat.toLowerCase();
+
         return (
           <button
             key={cat}
-            onClick={() => onSelectCategory && onSelectCategory(cat)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
-              isActive
-                ? "bg-white text-black font-semibold shadow-md shadow-white/10"
-                : "bg-neutral-850 hover:bg-neutral-800 text-neutral-300 border border-white/10"
+            onClick={() => {
+              if (onSelectCategory) {
+                onSelectCategory(cat === "All" ? "" : cat);
+              }
+            }}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+              isSelected
+                ? "bg-white text-black shadow-md shadow-white/10 scale-[1.02]"
+                : "bg-[#212121] hover:bg-[#2a2a2a] text-neutral-300 border border-white/10"
             }`}
           >
             {cat}

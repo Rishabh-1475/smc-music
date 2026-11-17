@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
-import QuickPicksGrid from "@/components/QuickPicksGrid";
-import HorizontalShelf from "@/components/HorizontalShelf";
+import QuickPicks from "@/components/QuickPicks";
+import ShelfCarousel from "@/components/ShelfCarousel";
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
 import FullPlayerModal from "@/components/FullPlayerModal";
@@ -204,14 +204,14 @@ export default function Home() {
           /* Default YouTube Music Home Feed */
           <div className="space-y-4">
             {/* Section 1: "Quick Picks" (Listen again / Start radio grid) */}
-            <QuickPicksGrid
+            <QuickPicks
               title="Quick picks"
               subtitle="START RADIO FROM A SONG"
               songs={feeds.quickPicks}
             />
 
             {/* Section 2: "Mixed for You" (Horizontal cards with play overlays) */}
-            <HorizontalShelf
+            <ShelfCarousel
               title="Mixed for you"
               subtitle="RECOMMENDED FOR YOU"
               songs={feeds.trendingHits}
@@ -219,7 +219,7 @@ export default function Home() {
             />
 
             {/* Section 3: "Trending & New Releases" (Carousel) */}
-            <HorizontalShelf
+            <ShelfCarousel
               title="Trending &amp; New Releases"
               subtitle="TOP CHARTS &amp; VIRAL HITS"
               songs={feeds.moodStations}
@@ -285,7 +285,7 @@ export default function Home() {
             </section>
 
             {/* Additional Thematic Shelf: Energy & Workout */}
-            <HorizontalShelf
+            <ShelfCarousel
               title="Energy &amp; Workout Hype"
               subtitle="CARDIO &amp; STRENGTH"
               songs={feeds.workoutHype}
@@ -293,7 +293,7 @@ export default function Home() {
             />
 
             {/* Additional Thematic Shelf: Chill Vibes */}
-            <HorizontalShelf
+            <ShelfCarousel
               title="Chill &amp; Focus"
               subtitle="DEEP WORK &amp; STUDY"
               songs={feeds.chillVibes}

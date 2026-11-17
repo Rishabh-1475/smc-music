@@ -58,6 +58,7 @@ export interface PlayerState {
   toggleLike: (id: string) => void;
   removeFromQueue: (index: number) => void;
   clearQueue: () => void;
+  toggleAutoplay?: () => void;
   reorderQueue?: (startIndex: number, endIndex: number) => void;
   setQueue?: (tracks: Song[]) => void;
 
@@ -373,6 +374,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
 
     clearQueue: () => {
       set({ queue: [] });
+    },
+
+    toggleAutoplay: () => {
+      set((state) => ({ autoplay: !state.autoplay }));
     },
 
     reorderQueue: (startIndex: number, endIndex: number) => {

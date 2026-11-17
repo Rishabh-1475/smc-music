@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Play, Pause, SkipForward, Heart, Maximize2 } from "lucide-react";
+import { Play, Pause, SkipForward, Heart, ChevronUp } from "lucide-react";
 import { usePlayerStore } from "@/store/playerStore";
 
 const FALLBACK_VINYL =
@@ -22,7 +22,7 @@ export default function MiniPlayer() {
 
   if (!currentTrack || isPlayerOpen) return null;
 
-  const liked = isLiked[currentTrack.id];
+  const liked = isLiked?.[currentTrack.id] || false;
 
   return (
     <div
@@ -30,18 +30,18 @@ export default function MiniPlayer() {
       role="button"
       tabIndex={0}
       aria-label="Open Full Player"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-neutral-950/95 backdrop-blur-2xl border-t border-white/10 px-4 md:px-8 py-2 pb-safe cursor-pointer transition-all duration-300 hover:bg-neutral-900/95 shadow-[0_-8px_30px_rgba(0,0,0,0.6)]"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-[#0d0d0d]/95 backdrop-blur-2xl border-t border-white/10 px-4 md:px-8 py-2 pb-safe cursor-pointer transition-all duration-200 hover:bg-[#161616] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] select-none"
     >
-      {/* Subtle Progress Bar across the Top Border */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-neutral-800">
+      {/* Ultra-thin progress bar running along the top edge */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-neutral-800/80">
         <div
           className="h-full bg-emerald-500 transition-all duration-150"
-          style={{ width: `${progress}%` }}
+          style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
         />
       </div>
 
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        {/* Track Artwork & Meta */}
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+        {/* Track Thumbnail, Title, and Artist */}
         <div className="flex items-center space-x-3 min-w-0 flex-1">
           <div className="relative w-11 h-11 md:w-12 md:h-12 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-900 shadow-md">
             <img
@@ -63,8 +63,9 @@ export default function MiniPlayer() {
           </div>
         </div>
 
-        {/* Controls: Like, Play/Pause, Next, Expand */}
-        <div className="flex items-center space-x-3 sm:space-x-4 flex-shrink-0">
+        {/* Right Controls: Like, Play/Pause, Skip Forward, Expand */}
+        <div className="flex items-center space-x-2 sm:space-x-3.5 flex-shrink-0">
+          {/* Like Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -73,11 +74,14 @@ export default function MiniPlayer() {
             className={`p-2 rounded-full hover:bg-neutral-800 transition hidden sm:inline-flex ${
               liked ? "text-emerald-400" : "text-neutral-400 hover:text-white"
             }`}
-            aria-label="Like Track"
+            aria-label={liked ? "Unlike Track" : "Like Track"}
           >
-            <Heart className={`w-5 h-5 ${liked ? "fill-emerald-400" : ""}`} />
+            <Heart
+              className={`w-5 h-5 ${liked ? "fill-emerald-400 stroke-emerald-400" : ""}`}
+            />
           </button>
 
+          {/* Play/Pause Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -93,26 +97,28 @@ export default function MiniPlayer() {
             )}
           </button>
 
+          {/* Skip Forward Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               playNext();
             }}
             className="p-2 rounded-full text-neutral-300 hover:text-white hover:bg-neutral-800 transition active:scale-95"
-            aria-label="Next Track"
+            aria-label="Skip Forward"
           >
             <SkipForward className="w-5 h-5 fill-current" />
           </button>
 
+          {/* Expand Chevron Icon */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               togglePlayerOpen(true);
             }}
-            className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition hidden md:inline-flex"
+            className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition"
             aria-label="Expand Player"
           >
-            <Maximize2 className="w-4 h-4" />
+            <ChevronUp className="w-5 h-5" />
           </button>
         </div>
       </div>
