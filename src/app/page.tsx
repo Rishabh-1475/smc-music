@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import {
   Sparkles,
@@ -8,7 +8,7 @@ import {
   ExternalLink,
   Play,
   CheckCircle2,
-  Heart,
+  SearchX,
 } from "lucide-react";
 import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
@@ -26,20 +26,25 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string>("");
+  const [activeCategory, setActiveCategory] = useState<string>("All");
 
+  const searchReqIdRef = useRef<number>(0);
   const { playSong, likedSongIds, listeningHistory } = usePlayerStore();
 
   // YouTube Music Home Feed Sections
   const [feeds, setFeeds] = useState<{
     quickPicks: Song[];
     trending: Song[];
+    international: Song[];
+    punjabiBollywood: Song[];
     workout: Song[];
     chill: Song[];
     party: Song[];
   }>({
     quickPicks: [],
     trending: [],
+    international: [],
+    punjabiBollywood: [],
     workout: [],
     chill: [],
     party: [],
@@ -47,7 +52,7 @@ export default function Home() {
 
   const [loadingFeeds, setLoadingFeeds] = useState(true);
 
-  // Load live categories on mount using getHomeFeed()
+  // Load home feeds on mount
   useEffect(() => {
     let active = true;
 
@@ -71,58 +76,74 @@ export default function Home() {
     };
   }, []);
 
-  // Category chip filter selection handler
+  // Category Mood Chip Selection Handler
   const handleCategorySelect = async (category: CategoryMood | string) => {
     setActiveCategory(category);
     if (!category || category === "All") {
-      setSearchResults([]);
       return;
     }
 
-    setIsSearching(true);
+    // When mood chip is selected while not searching, trigger live category update
+    setLoadingFeeds(true);
     try {
       const results = await getLiveCategory(category);
-      setSearchResults(results);
+      if (results.length > 0) {
+        setFeeds((prev) => ({
+          ...prev,
+          quickPicks: results.slice(0, 12),
+          trending: results,
+        }));
+      }
     } catch (err) {
       console.error("Category query error:", err);
     } finally {
-      setIsSearching(false);
+      setLoadingFeeds(false);
     }
   };
 
-  // 250ms debounced search effect
+  // 300ms Debounced Search Engine with Promise Cancellation
   useEffect(() => {
     const trimmed = searchQuery.trim();
+
     if (!trimmed) {
-      if (!activeCategory || activeCategory === "All") {
-        setSearchResults([]);
-      }
+      setSearchResults([]);
       setIsSearching(false);
       return;
     }
 
     setIsSearching(true);
+    const currentReqId = ++searchReqIdRef.current;
+
     const handler = setTimeout(async () => {
       try {
         const results = await searchSongs(trimmed);
-        setSearchResults(results);
+        // Only accept response if this is still the active search request
+        if (currentReqId === searchReqIdRef.current) {
+          setSearchResults(results);
+        }
       } catch (err) {
         console.error("Search error:", err);
-        setSearchResults([]);
+        if (currentReqId === searchReqIdRef.current) {
+          setSearchResults([]);
+        }
       } finally {
-        setIsSearching(false);
+        if (currentReqId === searchReqIdRef.current) {
+          setIsSearching(false);
+        }
       }
-    }, 250);
+    }, 300);
 
     return () => clearTimeout(handler);
-  }, [searchQuery, activeCategory]);
+  }, [searchQuery]);
 
-  // Dynamically derive liked songs collection for Liked Songs shelf
+  // Dynamically derive liked songs collection
   const likedSongs = useMemo(() => {
     const allPool: Song[] = [
       ...(listeningHistory || []),
       ...feeds.quickPicks,
       ...feeds.trending,
+      ...feeds.international,
+      ...feeds.punjabiBollywood,
       ...feeds.workout,
       ...feeds.chill,
       ...feeds.party,
@@ -138,8 +159,8 @@ export default function Home() {
     return Array.from(uniqueMap.values());
   }, [likedSongIds, listeningHistory, feeds, searchResults]);
 
-  // YouTube Music smooth pulse skeleton loaders
-  const renderSkeletons = (count = 6) => (
+  // YouTube Music Smooth Pulse Skeleton Loaders
+  const renderSkeletons = (count = 12) => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
       {Array.from({ length: count }).map((_, i) => (
         <div
@@ -154,34 +175,34 @@ export default function Home() {
     </div>
   );
 
-  const hasSearchOrFilter =
-    searchQuery.trim().length > 0 || (activeCategory !== "" && activeCategory !== "All");
+  // Distinct search state separation
+  const isSearchActive = searchQuery.trim().length > 0;
 
   return (
     <div className="min-h-screen bg-[#030303] text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
-      {/* 1. Header at the Top */}
+      {/* 1. Header with YouTube Music Search & Creator Spotlight */}
       <Header
         searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        setSearchQuery={setSearchQuery}
         isSearching={isSearching}
       />
 
-      {/* 2. Sticky CategoryChips */}
-      <CategoryChips
-        activeCategory={activeCategory}
-        onSelectCategory={handleCategorySelect}
-      />
+      {/* 2. Top Mood Filter Chips (shown when search is not active) */}
+      {!isSearchActive && (
+        <CategoryChips
+          activeCategory={activeCategory}
+          onSelectCategory={handleCategorySelect}
+        />
+      )}
 
       <main className="flex-1 w-full mx-auto pb-36">
-        {/* Real-time search grid with instant playback when search or mood is active */}
-        {hasSearchOrFilter ? (
+        {/* WHEN isSearchActive IS TRUE: Show ONLY the Search Results Grid */}
+        {isSearchActive ? (
           <section className="px-4 md:px-8 py-6 space-y-4">
             <div className="flex items-center space-x-2">
               <Sparkles className="w-5 h-5 text-emerald-400" />
               <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">
-                {activeCategory && activeCategory !== "All"
-                  ? `${activeCategory} Mix`
-                  : "Search Results"}
+                Results for &ldquo;{searchQuery.trim()}&rdquo;
               </h2>
             </div>
 
@@ -198,19 +219,20 @@ export default function Home() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 text-neutral-400">
-                <Music className="w-12 h-12 mx-auto text-neutral-600 mb-3" />
-                <p className="text-base font-medium">
-                  No tracks found for &ldquo;{searchQuery || activeCategory}&rdquo;
-                </p>
-                <p className="text-xs text-neutral-500 mt-1">
-                  Try searching for another artist, track, or mood.
+              /* Authentic No Results Found State - NEVER falls back to home screen songs */
+              <div className="text-center py-24 text-neutral-400 max-w-md mx-auto px-4">
+                <SearchX className="w-14 h-14 mx-auto text-neutral-600 mb-4 stroke-1" />
+                <h3 className="text-lg font-bold text-white mb-1">
+                  No results found for &ldquo;{searchQuery.trim()}&rdquo;
+                </h3>
+                <p className="text-xs text-neutral-400 leading-relaxed">
+                  Try checking the spelling or searching for another international artist, Bollywood track, or Punjabi single.
                 </p>
               </div>
             )}
           </section>
         ) : loadingFeeds ? (
-          /* Loading Skeletons on Mount */
+          /* Initial Home Skeletons */
           <div className="px-4 md:px-8 py-8 space-y-8">
             <div className="space-y-4">
               <div className="h-6 w-48 bg-[#212121] rounded-md animate-pulse" />
@@ -222,43 +244,43 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          /* Complete YouTube Music Home Feed */
+          /* WHEN isSearchActive IS FALSE: Render YouTube Music Complete Home Layout */
           <div className="space-y-2">
-            {/* 1. "Speed Dial" (Listen again / favorites) */}
+            {/* 1. Speed Dial / Quick Radios (3x3 grid derived from play history or trending) */}
             <SpeedDialGrid fallbackSongs={feeds.quickPicks} />
 
-            {/* 2. "Quick Picks" (4-row vertical list) */}
+            {/* 2. Quick Picks (4-row vertical card layout with instant play) */}
             <QuickPicksList
               title="Quick picks"
               subtitle="START RADIO FROM A SONG"
               songs={feeds.quickPicks}
             />
 
-            {/* 3. "Trending Hindi & Punjabi Hits" (Carousel) */}
+            {/* 3. Trending Global & Indian Hits (Carousel) */}
             <ShelfCarousel
-              title="Trending Hindi &amp; Punjabi Hits"
+              title="Trending Global &amp; Indian Hits"
               subtitle="TOP CHARTS &amp; VIRAL HITS"
               songs={feeds.trending}
               variant="square"
             />
 
-            {/* 4. "Energize & Workout Station" (Carousel) */}
+            {/* 4. International Pop & Hip-Hop (Carousel) */}
             <ShelfCarousel
-              title="Energize &amp; Workout Station"
-              subtitle="CARDIO, PUMP &amp; POWER"
-              songs={feeds.workout}
+              title="International Pop &amp; Hip-Hop"
+              subtitle="BILLBOARD &amp; GLOBAL BANGERS"
+              songs={feeds.international}
               variant="square"
             />
 
-            {/* 5. "Chill & Focus Beats" (Carousel) */}
+            {/* 5. Punjabi Hype & Bollywood Romance (Carousel) */}
             <ShelfCarousel
-              title="Chill &amp; Focus Beats"
-              subtitle="DEEP WORK &amp; RELAXATION"
-              songs={feeds.chill}
+              title="Punjabi Hype &amp; Bollywood Romance"
+              subtitle="DESI VIBES &amp; SOULFUL MELODIES"
+              songs={feeds.punjabiBollywood}
               variant="square"
             />
 
-            {/* 6. "Liked Songs" section (automatically populated when user thumbs-up songs) */}
+            {/* 6. Liked Songs (Dynamically populated from playerStore.likedSongIds) */}
             {likedSongs.length > 0 && (
               <ShelfCarousel
                 title="Liked Songs"
@@ -295,7 +317,7 @@ export default function Home() {
                       Founder &amp; Lead Systems Mobile Architect
                     </p>
                     <p className="text-xs md:text-sm text-neutral-300 max-w-xl leading-relaxed">
-                      Architected <strong>SMC Singhs Music Co</strong> to deliver lossless 320kbps audio streaming, instant multi-mirror failover, and a fluid YouTube Music experience on mobile WebViews.
+                      Architected <strong>SMC Singhs Music Co</strong> to deliver lossless 320kbps audio streaming, instant multi-mirror failover, and a fluid YouTube Music experience on mobile WebViews with zero mock placeholders.
                     </p>
                   </div>
                 </div>
