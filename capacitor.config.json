@@ -1,0 +1,11 @@
+{
+  "appId": "co.singhsmusic.smc",
+  "appName": "SMC Singhs Music Co",
+  "webDir": "out",
+  "server": {
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
