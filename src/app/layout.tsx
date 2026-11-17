@@ -7,12 +7,17 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#000000",
+  themeColor: "#030303",
 };
 
 export const metadata: Metadata = {
-  title: "SMC Singhs Music Co",
-  description: "Singhs Music Company - High Fidelity Music Streaming",
+  title: "SMC Singhs Music Co - YouTube Music Experience",
+  description: "High Fidelity Lossless Streaming powered by SMC Singhs Music Co",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "SMC Music",
+  },
 };
 
 export default function RootLayout({
@@ -21,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark bg-black">
-      <body className="bg-black text-white antialiased selection:bg-emerald-500 selection:text-black">
+    <html lang="en" className="dark bg-[#030303]">
+      <body className="bg-[#030303] text-white antialiased selection:bg-emerald-500 selection:text-black min-h-screen">
         {children}
       </body>
     </html>

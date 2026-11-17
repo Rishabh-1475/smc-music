@@ -12,32 +12,47 @@ export interface Song {
       };
   duration: number | string;
   primaryArtists: string;
-  image:
-    | string
-    | {
-        quality?: string;
-        url?: string;
-        link?: string;
-        [key: string]: any;
-      }[]
-    | any;
-  imageUrl: string;
-  downloadUrl:
-    | string
-    | {
-        quality?: string;
-        url?: string;
-        link?: string;
-        [key: string]: any;
-      }[]
-    | any;
-  audioUrl: string;
-  year?: string | number;
-  label?: string;
   artists?: string;
-  featuredArtists?: string;
+  imageUrl: string;
+  audioUrl: string;
   hasLyrics?: boolean;
-  url?: string;
+  lyrics?: string;
+  year?: string | number;
   copyright?: string;
+  image?:
+    | string
+    | {
+        quality?: string;
+        url?: string;
+        link?: string;
+        [key: string]: any;
+      }[]
+    | any;
+  downloadUrl?:
+    | string
+    | {
+        quality?: string;
+        url?: string;
+        link?: string;
+        [key: string]: any;
+      }[]
+    | any;
+  featuredArtists?: string;
+  label?: string;
+  url?: string;
+  [key: string]: any;
+}
+
+export interface ShelfSection {
+  title: string;
+  subtitle?: string;
+  items: Song[];
+  [key: string]: any;
+}
+
+export interface CategoryChip {
+  id: string;
+  label: string;
+  query: string;
   [key: string]: any;
 }

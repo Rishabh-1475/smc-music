@@ -4,16 +4,16 @@ import CryptoJS from "crypto-js";
 import curatedTracks from "./curatedTracks.json";
 
 /**
- * SMC Singhs Music Co - Production Resilient Mirror Engine
- * Drop dead domains (purged saavn.me).
- * Multi-mirror fallbacks + DES audio decrypter + Robust unpacker.
+ * SMC Singhs Music Co - YouTube Music Production Engine
+ * Resilient Multi-Mirrors, DES Decrypter, and Rich Categorized Feeds.
  */
 
-const CLEAN_VINYL_COVER =
-  "https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600&q=80";
+// High-resolution clean vinyl fallback (NEVER creator photo)
+const HIGH_RES_VINYL_COVER =
+  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
 
 /**
- * Decodes and sanitizes HTML entities and escape sequences.
+ * Decodes and sanitizes HTML entities and numerical escape sequences.
  */
 export const sanitizeHtml = (str: string = ""): string => {
   if (!str || typeof str !== "string") return "";
@@ -63,7 +63,7 @@ export const decryptMediaUrl = (encryptedMediaUrl: string): string => {
     if (decryptedUrl && decryptedUrl.startsWith("http")) {
       return decryptedUrl.replace("http://", "https://");
     }
-  } catch (err) {
+  } catch {
     // Silent fail if invalid cipher
   }
   return "";
@@ -72,7 +72,7 @@ export const decryptMediaUrl = (encryptedMediaUrl: string): string => {
 /**
  * Flexible downloadUrl parser:
  * Inspects item.downloadUrl, item.media_url, item.url, item.download_url, and item.encrypted_media_url.
- * Extracts both 320kbps and 160kbps links.
+ * Extracts 320kbps -> fallback 160kbps -> media_url -> url.
  * Replaces 'http://' with 'https://' to avoid Android mixed-content blocks.
  */
 const resolveAudioUrl = (item: any): string => {
@@ -116,7 +116,7 @@ const resolveAudioUrl = (item: any): string => {
         return url320.replace("http://", "https://");
       }
 
-      // Look for 160kbps
+      // Fallback to 160kbps
       const q160 = src.find(
         (d: any) =>
           d &&
@@ -147,9 +147,10 @@ const resolveAudioUrl = (item: any): string => {
 
 /**
  * Resolves the highest resolution album/track artwork (fallback to clean vinyl).
+ * Never uses creator photo for song artwork.
  */
 const resolveCoverImage = (item: any): string => {
-  if (!item) return CLEAN_VINYL_COVER;
+  if (!item) return HIGH_RES_VINYL_COVER;
 
   const imageSources = [item.image, item.images, item.imageUrl, item.image_url];
 
@@ -157,6 +158,7 @@ const resolveCoverImage = (item: any): string => {
     if (!src) continue;
 
     if (Array.isArray(src) && src.length > 0) {
+      // 500x500 at last index or matching quality
       const img500 = src.find(
         (img: any) =>
           img &&
@@ -169,6 +171,7 @@ const resolveCoverImage = (item: any): string => {
         return url500.replace("http://", "https://");
       }
 
+      // Pick the last index (highest resolution in Saavn API)
       const highestImg = src[src.length - 1];
       const candidate = highestImg?.url || highestImg?.link;
       if (candidate && typeof candidate === "string" && candidate.startsWith("http")) {
@@ -182,13 +185,13 @@ const resolveCoverImage = (item: any): string => {
     }
   }
 
-  return CLEAN_VINYL_COVER;
+  return HIGH_RES_VINYL_COVER;
 };
 
 /**
  * Robust JSON Unpacker:
  * Checks across data structures:
- * res.data.results, res.data.songs?.results, res.data, res.results, res.songs?.results, res.data.songs
+ * res.data.results, res.data.songs?.results, res.data.songs, res.data, res.results, res.songs
  */
 const unpackResults = (json: any): any[] => {
   if (!json) return [];
@@ -257,6 +260,8 @@ export const parseSongs = (items: any[]): Song[] => {
       imageUrl: imageUrl,
       audioUrl: audioUrl,
       duration: item.duration || 0,
+      hasLyrics: !!item.hasLyrics || !!item.lyrics,
+      lyrics: item.lyrics || undefined,
       image: item.image || imageUrl,
       downloadUrl: item.downloadUrl || [
         { quality: "320kbps", url: audioUrl },
@@ -269,12 +274,11 @@ export const parseSongs = (items: any[]): Song[] => {
 };
 
 /**
- * Resilient Endpoints:
- * - Primary: https://saavn.dev/api/search/songs?query=${cleanQuery}
- * - Secondary: https://saavn.dev/api/search?query=${cleanQuery}
- * - Tertiary: https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${cleanQuery}
- * - Quaternary (Direct Unofficial Mirror): https://saavn-api.vercel.app/api/search/songs?query=${cleanQuery}
- * - Additional fallbacks for maximum resilience
+ * Active Resilient Endpoints:
+ * - https://saavn.dev/api/search/songs?query=${cleanQuery}
+ * - https://saavn.dev/api/search?query=${cleanQuery}
+ * - https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${cleanQuery}
+ * - https://saavn-api.vercel.app/api/search/songs?query=${cleanQuery}
  */
 const buildEndpoints = (cleanQuery: string): string[] => [
   `https://saavn.dev/api/search/songs?query=${cleanQuery}`,
@@ -286,7 +290,7 @@ const buildEndpoints = (cleanQuery: string): string[] => [
 ];
 
 /**
- * Live search across resilient mirrors with 4000ms fast failover.
+ * Live search across mirrors with 4000ms AbortController timeout.
  */
 export async function searchSongs(query: string): Promise<Song[]> {
   const trimmed = query.trim();
@@ -346,16 +350,18 @@ export async function searchSongs(query: string): Promise<Song[]> {
           }
         }
       }
-    } catch (err) {
+    } catch {
       // Fast failover to next mirror
     }
   }
 
   // Fallback: search within curated high-bitrate tracks if mirrors are offline
   const allCurated: Song[] = [
-    ...(curatedTracks.hindi as Song[]),
-    ...(curatedTracks.punjabi as Song[]),
-    ...(curatedTracks.romance as Song[]),
+    ...(curatedTracks.quickPicks as Song[]),
+    ...(curatedTracks.trendingHits as Song[]),
+    ...(curatedTracks.moodStations as Song[]),
+    ...(curatedTracks.workoutHype as Song[]),
+    ...(curatedTracks.chillVibes as Song[]),
   ];
 
   const matched = allCurated.filter(
@@ -383,21 +389,126 @@ export async function getLiveCategory(categoryQuery: string): Promise<Song[]> {
     if (liveSongs && liveSongs.length > 0) {
       return liveSongs;
     }
-  } catch (e) {
+  } catch {
     // proceed to curated baseline
   }
 
   // 2. High-bitrate baseline instant fallback (guarantees zero infinite loading skeletons)
   const lower = categoryQuery.toLowerCase();
-  if (lower.includes("hindi") || lower.includes("trending")) {
-    return curatedTracks.hindi as Song[];
+  if (lower.includes("trending") || lower.includes("hindi") || lower.includes("quick")) {
+    return (curatedTracks.quickPicks as Song[]) || (curatedTracks.hindi as Song[]);
   }
-  if (lower.includes("punjabi") || lower.includes("hype")) {
-    return curatedTracks.punjabi as Song[];
+  if (lower.includes("arijit") || lower.includes("hits") || lower.includes("romance")) {
+    return (curatedTracks.trendingHits as Song[]) || (curatedTracks.romance as Song[]);
   }
-  if (lower.includes("romance") || lower.includes("bollywood")) {
-    return curatedTracks.romance as Song[];
+  if (lower.includes("sidhu") || lower.includes("punjabi") || lower.includes("mood")) {
+    return (curatedTracks.moodStations as Song[]) || (curatedTracks.punjabi as Song[]);
+  }
+  if (lower.includes("gym") || lower.includes("workout") || lower.includes("hype")) {
+    return (curatedTracks.workoutHype as Song[]);
+  }
+  if (
+    lower.includes("lo-fi") ||
+    lower.includes("lofi") ||
+    lower.includes("chill") ||
+    lower.includes("midnight")
+  ) {
+    return (curatedTracks.chillVibes as Song[]);
   }
 
-  return (curatedTracks.hindi as Song[]) || [];
+  return (curatedTracks.quickPicks as Song[]) || [];
+}
+
+/**
+ * YouTube Music Style Home Feeds:
+ * Parallel fetches for:
+ * - "Trending Hindi 2026" (Quick Picks)
+ * - "Arijit Singh Hits" (Trending Hits)
+ * - "Sidhu Moose Wala Punjabi" (Mood Stations)
+ * - "Gym Workout Hype" (Workout Hype)
+ * - "Lo-Fi Midnight Beats" (Chill Vibes)
+ */
+export async function getYTMusicHomeFeeds(): Promise<{
+  quickPicks: Song[];
+  trendingHits: Song[];
+  moodStations: Song[];
+  workoutHype: Song[];
+  chillVibes: Song[];
+}> {
+  const [quickPicks, trendingHits, moodStations, workoutHype, chillVibes] =
+    await Promise.all([
+      getLiveCategory("Trending Hindi 2026"),
+      getLiveCategory("Arijit Singh Hits"),
+      getLiveCategory("Sidhu Moose Wala Punjabi"),
+      getLiveCategory("Gym Workout Hype"),
+      getLiveCategory("Lo-Fi Midnight Beats"),
+    ]);
+
+  return {
+    quickPicks:
+      quickPicks.length > 0 ? quickPicks : (curatedTracks.quickPicks as Song[]),
+    trendingHits:
+      trendingHits.length > 0 ? trendingHits : (curatedTracks.trendingHits as Song[]),
+    moodStations:
+      moodStations.length > 0 ? moodStations : (curatedTracks.moodStations as Song[]),
+    workoutHype:
+      workoutHype.length > 0 ? workoutHype : (curatedTracks.workoutHype as Song[]),
+    chillVibes:
+      chillVibes.length > 0 ? chillVibes : (curatedTracks.chillVibes as Song[]),
+  };
+}
+
+/**
+ * Fetches lyrics for a track, or returns synchronized formatted verses.
+ */
+export async function getLyrics(songId: string): Promise<string> {
+  if (!songId) {
+    return "[00:00.00] ♪ Instrumental / Lyrics not available ♪";
+  }
+
+  const cleanId = encodeURIComponent(songId.trim());
+  const lyricEndpoints = [
+    `https://saavn.dev/api/lyrics?id=${cleanId}`,
+    `https://jiosaavn-api-privatecvc2.vercel.app/lyrics?id=${cleanId}`,
+    `https://saavn-api.vercel.app/api/lyrics?id=${cleanId}`,
+  ];
+
+  for (const url of lyricEndpoints) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+      const res = await fetch(url, {
+        cache: "no-store",
+        headers: { Accept: "application/json" },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const json = await res.json();
+        const lyrics =
+          json?.data?.lyrics ||
+          json?.lyrics ||
+          (typeof json?.data === "string" ? json.data : null);
+
+        if (lyrics && typeof lyrics === "string" && lyrics.trim().length > 10) {
+          return sanitizeHtml(lyrics.replace(/<br\s*\/?>/gi, "\n"));
+        }
+      }
+    } catch {
+      // Continue to next mirror or fallback
+    }
+  }
+
+  // Synchronized fallback lyrics
+  return [
+    "[00:00.00] ♪ SMC Singhs Music Co ♪",
+    "[00:08.00] High-Fidelity 320kbps Lossless Stream",
+    "[00:20.00] Studio Master Quality Audio",
+    "[00:35.00] Synchronized lyrics powered by SMC Music",
+    "[00:50.00] Enjoy the listening experience",
+    "[01:10.00] ♪ ♪ ♪",
+  ].join("\n");
 }

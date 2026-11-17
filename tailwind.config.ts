@@ -10,14 +10,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: '#000000',
+        background: '#030303',
         surface: {
-          DEFAULT: '#121212',
-          light: '#181818',
-          lighter: '#242424',
+          DEFAULT: '#212121',
           card: '#181818',
+          dark: '#121212',
+          light: '#282828',
         },
         card: '#181818',
+        yt: {
+          bg: '#030303',
+          surface: '#212121',
+          card: '#181818',
+        },
         accent: {
           DEFAULT: '#10b981',
           hover: '#059669',

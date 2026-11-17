@@ -9,7 +9,7 @@ declare global {
 
 /**
  * Permanent HTML5 Audio Singleton outside React's lifecycle.
- * Prevent garbage collection in Mobile WebViews via window.__smc_audio.
+ * Bound to window.__smc_audio to prevent garbage collection in Mobile WebViews.
  */
 let globalAudio: HTMLAudioElement | null = null;
 
@@ -34,20 +34,47 @@ export interface PlayerState {
   duration: number;
   progress: number;
   volume: number;
-  setQueue: (tracks: Song[]) => void;
+  isPlayerOpen: boolean;
+  isShuffled: boolean;
+  repeatMode: "off" | "all" | "one";
+  isLiked: Record<string, boolean>;
+  activeTab: "up_next" | "lyrics" | "related";
+
+  // Actions
   playSong: (track: Song, playlistContext?: Song[]) => void;
   togglePlay: () => void;
   playNext: () => void;
   nextTrack: () => void;
   playPrev: () => void;
   prevTrack: () => void;
-  seekTo: (progressPercent: number) => void;
+  seekTo: (percent: number) => void;
   setVolume: (level: number) => void;
+  togglePlayerOpen: (open?: boolean) => void;
+  toggleShuffle: () => void;
+  toggleRepeat: () => void;
+  toggleLike: (id: string) => void;
+  removeFromQueue: (index: number) => void;
+  reorderQueue: (startIndex: number, endIndex: number) => void;
+  setActiveTab: (tab: "up_next" | "lyrics" | "related") => void;
+
   [key: string]: any;
 }
 
+// Initial liked tracks from localStorage if available
+const loadInitialLikes = (): Record<string, boolean> => {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("smc_liked_tracks");
+      if (stored) return JSON.parse(stored);
+    } catch {
+      // Ignore storage errors
+    }
+  }
+  return {};
+};
+
 export const usePlayerStore = create<PlayerState>((set, get) => {
-  // Sync MediaSession metadata and action handlers
+  // Sync MediaSession with lockscreen action handlers & artwork
   const syncMediaSession = (track: Song, isPlayingState: boolean = true) => {
     if (typeof window === "undefined" || !("mediaSession" in navigator)) return;
 
@@ -100,7 +127,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     }
   };
 
-  // Wire audio singleton lifecycle events once
+  // Wire singleton audio event listeners once outside React
   if (typeof window !== "undefined" && globalAudio) {
     globalAudio.ontimeupdate = () => {
       const cur = globalAudio?.currentTime || 0;
@@ -110,6 +137,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     };
 
     globalAudio.onended = () => {
+      const { repeatMode, currentTrack } = get();
+      if (repeatMode === "one" && currentTrack && globalAudio) {
+        globalAudio.currentTime = 0;
+        globalAudio.play().catch(console.error);
+        return;
+      }
       get().playNext();
     };
 
@@ -122,21 +155,54 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     };
   }
 
-  // Next Track Action Handler
+  // Next track progression handler with Repeat & Shuffle awareness
   const handleNextTrack = () => {
-    const { queue, currentTrack } = get();
+    const { queue, currentTrack, isShuffled, repeatMode } = get();
     if (!queue || queue.length === 0) return;
-    const idx = queue.findIndex((t) => t.id === currentTrack?.id);
-    const nextIdx = idx + 1 < queue.length ? idx + 1 : 0;
-    get().playSong(queue[nextIdx], queue);
+
+    if (repeatMode === "one" && currentTrack && globalAudio) {
+      globalAudio.currentTime = 0;
+      globalAudio.play().catch(console.error);
+      return;
+    }
+
+    if (isShuffled && queue.length > 1) {
+      const currentIdx = queue.findIndex((t) => t.id === currentTrack?.id);
+      let randIdx = Math.floor(Math.random() * queue.length);
+      while (randIdx === currentIdx && queue.length > 1) {
+        randIdx = Math.floor(Math.random() * queue.length);
+      }
+      get().playSong(queue[randIdx], queue);
+      return;
+    }
+
+    const currentIdx = queue.findIndex((t) => t.id === currentTrack?.id);
+    const nextIdx = currentIdx + 1;
+
+    if (nextIdx < queue.length) {
+      get().playSong(queue[nextIdx], queue);
+    } else {
+      // End of queue: loop if repeat is 'all' or default
+      if (repeatMode === "all" || repeatMode === "off") {
+        get().playSong(queue[0], queue);
+      }
+    }
   };
 
-  // Previous Track Action Handler
+  // Previous track handler with track restart logic (>3 seconds)
   const handlePrevTrack = () => {
-    const { queue, currentTrack } = get();
+    const { queue, currentTrack, currentTime } = get();
     if (!queue || queue.length === 0) return;
-    const idx = queue.findIndex((t) => t.id === currentTrack?.id);
-    const prevIdx = idx - 1 >= 0 ? idx - 1 : queue.length - 1;
+
+    // If song is more than 3 seconds in, restart track
+    if (currentTime > 3 && globalAudio) {
+      globalAudio.currentTime = 0;
+      set({ currentTime: 0, progress: 0 });
+      return;
+    }
+
+    const currentIdx = queue.findIndex((t) => t.id === currentTrack?.id);
+    const prevIdx = currentIdx - 1 >= 0 ? currentIdx - 1 : queue.length - 1;
     get().playSong(queue[prevIdx], queue);
   };
 
@@ -148,6 +214,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     duration: 0,
     progress: 0,
     volume: 1,
+    isPlayerOpen: false,
+    isShuffled: false,
+    repeatMode: "off",
+    isLiked: loadInitialLikes(),
+    activeTab: "up_next",
 
     setQueue: (tracks: Song[]) => set({ queue: tracks }),
 
@@ -248,6 +319,50 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         globalAudio.volume = clamped;
       }
       set({ volume: clamped });
+    },
+
+    togglePlayerOpen: (open?: boolean) => {
+      set({ isPlayerOpen: open !== undefined ? open : !get().isPlayerOpen });
+    },
+
+    toggleShuffle: () => {
+      set({ isShuffled: !get().isShuffled });
+    },
+
+    toggleRepeat: () => {
+      const { repeatMode } = get();
+      const nextMode: "off" | "all" | "one" =
+        repeatMode === "off" ? "all" : repeatMode === "all" ? "one" : "off";
+      set({ repeatMode: nextMode });
+    },
+
+    toggleLike: (id: string) => {
+      const nextLikes = { ...get().isLiked, [id]: !get().isLiked[id] };
+      set({ isLiked: nextLikes });
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("smc_liked_tracks", JSON.stringify(nextLikes));
+        } catch {
+          // Ignore storage failures
+        }
+      }
+    },
+
+    removeFromQueue: (index: number) => {
+      const newQueue = [...get().queue];
+      newQueue.splice(index, 1);
+      set({ queue: newQueue });
+    },
+
+    reorderQueue: (startIndex: number, endIndex: number) => {
+      const newQueue = Array.from(get().queue);
+      const [removed] = newQueue.splice(startIndex, 1);
+      newQueue.splice(endIndex, 0, removed);
+      set({ queue: newQueue });
+    },
+
+    setActiveTab: (tab: "up_next" | "lyrics" | "related") => {
+      set({ activeTab: tab });
     },
   };
 });

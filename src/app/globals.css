@@ -4,22 +4,26 @@
 
 :root {
   color-scheme: dark;
+  --bg-main: #030303;
+  --surface-main: #212121;
+  --surface-card: #181818;
+  --accent-emerald: #10b981;
 }
 
 /* Custom Emerald Selection Styles */
 ::selection {
   background-color: #10b981;
-  color: #000000;
+  color: #030303;
 }
 
 ::-moz-selection {
   background-color: #10b981;
-  color: #000000;
+  color: #030303;
 }
 
 /* Base Body Styles */
 body {
-  background-color: #000000;
+  background-color: #030303;
   color: #ffffff;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
@@ -45,6 +49,23 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
+/* YouTube Music Frosted Blur Glassmorphism */
+.yt-glass {
+  background: rgba(18, 18, 18, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.yt-card {
+  background-color: #181818;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.yt-card:hover {
+  background-color: #212121;
+}
+
 /* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -52,7 +73,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: #030303;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -62,4 +83,13 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #10b981;
+}
+
+/* Utility to hide scrollbar in pill carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

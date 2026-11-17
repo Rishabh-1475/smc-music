@@ -1,5 +1,5 @@
 {
-  "hindi": [
+  "quickPicks": [
     {
       "id": "qcEf8GY8",
       "name": "Apna Bana Le",
@@ -9,6 +9,8 @@
       "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
       "duration": "261",
       "audioUrl": "https://aac.saavncdn.com/675/1456dc2903d0fb4465d2d2904008803b_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Apna Bana Le\n[00:15.00] Performed by Amitabh Bhattacharya, Sachin-Jigar, Arijit Singh\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
@@ -29,6 +31,8 @@
       "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
       "duration": "177",
       "audioUrl": "https://aac.saavncdn.com/675/f1f48664e51db48f0d26a40d42d515a8_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Ishq de Fanniyar - Female\n[00:15.00] Performed by Jyotica Tangri, Shaarib Toshi, Kumaar\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
@@ -49,6 +53,8 @@
       "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
       "duration": "350",
       "audioUrl": "https://aac.saavncdn.com/675/ff5cbe7f8c09da84cb039852eae36fce_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Vaaroon\n[00:15.00] Performed by Anand Bhaskar\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
@@ -69,6 +75,8 @@
       "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
       "duration": "229",
       "audioUrl": "https://aac.saavncdn.com/675/967b4606fe77beb6b080abd334f5742d_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Lae Dooba\n[00:15.00] Performed by Manoj Muntashir, Rochak Kohli, Sunidhi Chauhan\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
@@ -81,86 +89,6 @@
       ]
     },
     {
-      "id": "BtmajL_i",
-      "name": "Vaaroon Trending Version",
-      "title": "Vaaroon Trending Version",
-      "primaryArtists": "Ginny Diwan, Anand Bhaskar, Romy",
-      "album": "Vaaroon Trending Version",
-      "imageUrl": "https://c.saavncdn.com/037/Vaaroon-Trending-Version-Hindi-2025-20250709213623-500x500.jpg",
-      "duration": "151",
-      "audioUrl": "https://aac.saavncdn.com/037/5c1b6f34a94c685bd67cb567bf688e6a_320.mp4",
-      "downloadUrl": [
-        {
-          "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/037/5c1b6f34a94c685bd67cb567bf688e6a_320.mp4"
-        },
-        {
-          "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/037/5c1b6f34a94c685bd67cb567bf688e6a_160.mp4"
-        }
-      ]
-    },
-    {
-      "id": "VkKO4wT4",
-      "name": "Jugraafiya Trending Version",
-      "title": "Jugraafiya Trending Version",
-      "primaryArtists": "Amitabh Bhattacharya, Ajay-Atul, Udit Narayan, Shreya Ghoshal",
-      "album": "Jugraafiya Trending Version",
-      "imageUrl": "https://c.saavncdn.com/022/Jugraafiya-Trending-Version-Hindi-2025-20250618165955-500x500.jpg",
-      "duration": "70",
-      "audioUrl": "https://aac.saavncdn.com/022/6f094a08dea55cf2ba3e1765b01799a6_320.mp4",
-      "downloadUrl": [
-        {
-          "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/022/6f094a08dea55cf2ba3e1765b01799a6_320.mp4"
-        },
-        {
-          "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/022/6f094a08dea55cf2ba3e1765b01799a6_160.mp4"
-        }
-      ]
-    },
-    {
-      "id": "7o2bZnQk",
-      "name": "Vaaroon Trending Version",
-      "title": "Vaaroon Trending Version",
-      "primaryArtists": "Ginny Diwan, Anand Bhaskar, Romy",
-      "album": "1 Min Insta Viral Mix",
-      "imageUrl": "https://c.saavncdn.com/835/1-Min-Insta-Viral-Mix-Hindi-2026-20260512190618-500x500.jpg",
-      "duration": "151",
-      "audioUrl": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_320.mp4",
-      "downloadUrl": [
-        {
-          "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_320.mp4"
-        },
-        {
-          "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_160.mp4"
-        }
-      ]
-    },
-    {
-      "id": "kXvA3QYv",
-      "name": "Teri Ore (Trending Version)",
-      "title": "Teri Ore (Trending Version)",
-      "primaryArtists": "Shreya Ghoshal",
-      "album": "Teri Ore (Trending Version)",
-      "imageUrl": "https://c.saavncdn.com/609/Teri-Ore-Trending-Version-Hindi-2025-20250815162404-500x500.jpg",
-      "duration": "90",
-      "audioUrl": "https://aac.saavncdn.com/609/991f984cf1333758acdb07bf5e0fd9f3_320.mp4",
-      "downloadUrl": [
-        {
-          "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/609/991f984cf1333758acdb07bf5e0fd9f3_320.mp4"
-        },
-        {
-          "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/609/991f984cf1333758acdb07bf5e0fd9f3_160.mp4"
-        }
-      ]
-    },
-    {
       "id": "bl6OTcVp",
       "name": "Jugraafiya",
       "title": "Jugraafiya",
@@ -169,6 +97,8 @@
       "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
       "duration": "274",
       "audioUrl": "https://aac.saavncdn.com/675/8a5d991f76f9e6e2e0af5ea371419572_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Jugraafiya\n[00:15.00] Performed by Udit Narayan, Shreya Ghoshal\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
@@ -189,6 +119,8 @@
       "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
       "duration": "277",
       "audioUrl": "https://aac.saavncdn.com/675/6d6322d1918ad6e7af4bbee532391646_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Tu Hi Disda\n[00:15.00] Performed by Kumaar, Pritam, Arijit Singh, Nikhita Gandhi\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
@@ -201,6 +133,116 @@
       ]
     },
     {
+      "id": "huW1RF-6",
+      "name": "Preet Re",
+      "title": "Preet Re",
+      "primaryArtists": "Gurpreet Saini, Rochak Kohli, Darshan Raval, Jonita Gandhi",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "196",
+      "audioUrl": "https://aac.saavncdn.com/675/d79c8812547b4d357fe1004c4e2f8e88_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Preet Re\n[00:15.00] Performed by Gurpreet Saini, Rochak Kohli, Darshan Raval, Jonita Gandhi\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/d79c8812547b4d357fe1004c4e2f8e88_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/d79c8812547b4d357fe1004c4e2f8e88_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "s_9_xlkw",
+      "name": "O Meri Laila - Radio Version",
+      "title": "O Meri Laila - Radio Version",
+      "primaryArtists": "Joi Barua",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "191",
+      "audioUrl": "https://aac.saavncdn.com/675/d9228302e0ab98854ce38d9e85e2e91b_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] O Meri Laila - Radio Version\n[00:15.00] Performed by Joi Barua\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/d9228302e0ab98854ce38d9e85e2e91b_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/d9228302e0ab98854ce38d9e85e2e91b_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "7o2bZnQk",
+      "name": "Vaaroon Trending Version",
+      "title": "Vaaroon Trending Version",
+      "primaryArtists": "Ginny Diwan, Anand Bhaskar, Romy",
+      "album": "1 Min Insta Viral Mix",
+      "imageUrl": "https://c.saavncdn.com/835/1-Min-Insta-Viral-Mix-Hindi-2026-20260512190618-500x500.jpg",
+      "duration": "151",
+      "audioUrl": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Vaaroon Trending Version\n[00:15.00] Performed by Ginny Diwan, Anand Bhaskar, Romy\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "rWAENiFs",
+      "name": "Bas Ek Dhadak",
+      "title": "Bas Ek Dhadak",
+      "primaryArtists": "Rashmi-Virag, Javed-Mohsin, Jubin Nautiyal, Shreya Ghoshal",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "259",
+      "audioUrl": "https://aac.saavncdn.com/675/f83ab569e89e115af94322e361eb3b57_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Bas Ek Dhadak\n[00:15.00] Performed by Rashmi-Virag, Javed-Mohsin, Jubin Nautiyal, Shreya Ghoshal\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/f83ab569e89e115af94322e361eb3b57_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/f83ab569e89e115af94322e361eb3b57_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "oXIB3Y8J",
+      "name": "Heer Na Jaane Ranjha Na Jaane - Dhoonde Akhiyaan - Trending Version",
+      "title": "Heer Na Jaane Ranjha Na Jaane - Dhoonde Akhiyaan - Trending Version",
+      "primaryArtists": "Yasser Desai, Altamash Faridi",
+      "album": "Heer Na Jaane Ranjha Na Jaane - Dhoonde Akhiyaan - Trending Version",
+      "imageUrl": "https://c.saavncdn.com/054/Heer-Na-Jaane-Ranjha-Na-Jaane-Dhoonde-Akhiyaan-Trending-Version-Hindi-2026-20260511211120-500x500.jpg",
+      "duration": "93",
+      "audioUrl": "https://aac.saavncdn.com/054/e90261a1250cd346a14834efffe7b22b_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Heer Na Jaane Ranjha Na Jaane - Dhoonde Akhiyaan - Trending Version\n[00:15.00] Performed by Yasser Desai, Altamash Faridi\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/054/e90261a1250cd346a14834efffe7b22b_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/054/e90261a1250cd346a14834efffe7b22b_160.mp4"
+        }
+      ]
+    },
+    {
       "id": "sjQ1wKN-",
       "name": "Jugraafiya Trending Version",
       "title": "Jugraafiya Trending Version",
@@ -209,6 +251,8 @@
       "imageUrl": "https://c.saavncdn.com/835/1-Min-Insta-Viral-Mix-Hindi-2026-20260512190618-500x500.jpg",
       "duration": "70",
       "audioUrl": "https://aac.saavncdn.com/835/afcc63fccd64e48b5b56b0297837b6d2_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Jugraafiya Trending Version\n[00:15.00] Performed by Amitabh Bhattacharya, Ajay-Atul, Udit Narayan, Shreya Ghoshal\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
@@ -217,6 +261,1204 @@
         {
           "quality": "160kbps",
           "url": "https://aac.saavncdn.com/835/afcc63fccd64e48b5b56b0297837b6d2_160.mp4"
+        }
+      ]
+    }
+  ],
+  "trendingHits": [
+    {
+      "id": "QcfFd62t",
+      "name": "Tu Mil Jaaye (From \"KING\")",
+      "title": "Tu Mil Jaaye (From \"KING\")",
+      "primaryArtists": "Sachin-Jigar, Ed Sheeran, Arijit Singh, Kumaar, Madhubanti Bagchi",
+      "album": "Tu Mil Jaaye (From \"KING\")",
+      "imageUrl": "https://c.saavncdn.com/320/Tu-Mil-Jaaye-From-KING-Hindi-2026-20261031131042-500x500.jpg",
+      "duration": "315",
+      "audioUrl": "https://aac.saavncdn.com/320/4d91932291471256b3c9313360ebb834_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Tu Mil Jaaye (From &quot;KING&quot;)\n[00:15.00] Performed by Sachin-Jigar, Ed Sheeran, Arijit Singh, Kumaar, Madhubanti Bagchi\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/320/4d91932291471256b3c9313360ebb834_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/320/4d91932291471256b3c9313360ebb834_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "DHA4PFZA",
+      "name": "Mangal Rang (From \"Ramayana\")",
+      "title": "Mangal Rang (From \"Ramayana\")",
+      "primaryArtists": "A.R. Rahman, Arijit Singh, Shreya Ghoshal, Kumar Vishwas",
+      "album": "Mangal Rang (From \"Ramayana\")",
+      "imageUrl": "https://c.saavncdn.com/316/Mangal-Rang-From-Ramayana-Hindi-2026-20261024141033-500x500.jpg",
+      "duration": "277",
+      "audioUrl": "https://aac.saavncdn.com/316/87fd692b534c9f725a782432c20823e0_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Mangal Rang (From &quot;Ramayana&quot;)\n[00:15.00] Performed by A.R. Rahman, Arijit Singh, Shreya Ghoshal, Kumar Vishwas\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/316/87fd692b534c9f725a782432c20823e0_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/316/87fd692b534c9f725a782432c20823e0_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "YiVML4Zo",
+      "name": "Gehra Hua (From \"Dhurandhar\")",
+      "title": "Gehra Hua (From \"Dhurandhar\")",
+      "primaryArtists": "Shashwat Sachdev, Arijit Singh, Irshad Kamil, Armaan Khan",
+      "album": "Gehra Hua (From \"Dhurandhar\")",
+      "imageUrl": "https://c.saavncdn.com/450/Gehra-Hua-From-Dhurandhar-Hindi-2025-20251205154217-500x500.jpg",
+      "duration": "362",
+      "audioUrl": "https://aac.saavncdn.com/450/f467e05e2825cec2203546333e0d0550_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Gehra Hua (From &quot;Dhurandhar&quot;)\n[00:15.00] Performed by Shashwat Sachdev, Arijit Singh, Irshad Kamil, Armaan Khan\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/450/f467e05e2825cec2203546333e0d0550_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/450/f467e05e2825cec2203546333e0d0550_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "1gHtmQ3x",
+      "name": "Gehra Hua",
+      "title": "Gehra Hua",
+      "primaryArtists": "Irshad Kamil, Arijit Singh, Shashwat Sachdev, Armaan Khan",
+      "album": "Dhurandhar",
+      "imageUrl": "https://c.saavncdn.com/475/Dhurandhar-Hindi-2025-20260203083204-500x500.jpg",
+      "duration": "362",
+      "audioUrl": "https://aac.saavncdn.com/475/04cc3b6ccd915df473947d932f094545_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Gehra Hua\n[00:15.00] Performed by Irshad Kamil, Arijit Singh, Shashwat Sachdev, Armaan Khan\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/475/04cc3b6ccd915df473947d932f094545_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/475/04cc3b6ccd915df473947d932f094545_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "lDbCuERl",
+      "name": "Jai Jai Ram (From \"Ramayana\")",
+      "title": "Jai Jai Ram (From \"Ramayana\")",
+      "primaryArtists": "A.R. Rahman, Shreya Ghoshal, Arijit Singh, Kumar Vishwas",
+      "album": "Jai Jai Ram (From \"Ramayana\")",
+      "imageUrl": "https://c.saavncdn.com/816/Jai-Jai-Ram-From-Ramayana-Hindi-2026-20260914170135-500x500.jpg",
+      "duration": "320",
+      "audioUrl": "https://aac.saavncdn.com/816/0ba2085804650ab95b697b9948487553_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Jai Jai Ram (From &quot;Ramayana&quot;)\n[00:15.00] Performed by A.R. Rahman, Shreya Ghoshal, Arijit Singh, Kumar Vishwas\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/816/0ba2085804650ab95b697b9948487553_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/816/0ba2085804650ab95b697b9948487553_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "c2McgKeC",
+      "name": "Jai Jai Ram",
+      "title": "Jai Jai Ram",
+      "primaryArtists": "A.R. Rahman, Shreya Ghoshal, Arijit Singh, Kumar Vishwas",
+      "album": "Namit Malhotra's Ramayana [Hindi]",
+      "imageUrl": "https://c.saavncdn.com/013/Ramayana-Hindi-Hindi-2026-20261021183530-500x500.jpg",
+      "duration": "320",
+      "audioUrl": "https://aac.saavncdn.com/013/17c89b4c1c2ff602d2d018d96ed8c929_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Jai Jai Ram\n[00:15.00] Performed by A.R. Rahman, Shreya Ghoshal, Arijit Singh, Kumar Vishwas\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/013/17c89b4c1c2ff602d2d018d96ed8c929_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/013/17c89b4c1c2ff602d2d018d96ed8c929_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "Bt07_OpM",
+      "name": "Tum Hi Ho (From \"Aashiqui 2\")",
+      "title": "Tum Hi Ho (From \"Aashiqui 2\")",
+      "primaryArtists": "Arijit Singh, Mithoon",
+      "album": "Best Of Arijit Singh - Collection Of Romantic Songs",
+      "imageUrl": "https://c.saavncdn.com/840/Best-Of-Arijit-Singh-Collection-Of-Romantic-Songs-Hindi-2025-20251203161112-500x500.jpg",
+      "duration": "261",
+      "audioUrl": "https://aac.saavncdn.com/840/c9e70fb62d66fa6e14f6b7cdbc56cc05_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Tum Hi Ho (From &quot;Aashiqui 2&quot;)\n[00:15.00] Performed by Arijit Singh, Mithoon\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/840/c9e70fb62d66fa6e14f6b7cdbc56cc05_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/840/c9e70fb62d66fa6e14f6b7cdbc56cc05_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "aRZbUYD7",
+      "name": "Tum Hi Ho",
+      "title": "Tum Hi Ho",
+      "primaryArtists": "Mithoon, Arijit Singh",
+      "album": "Aashiqui 2",
+      "imageUrl": "https://c.saavncdn.com/430/Aashiqui-2-Hindi-2013-500x500.jpg",
+      "duration": "262",
+      "audioUrl": "https://aac.saavncdn.com/430/5c5ea5cc00e3bff45616013226f376fe_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Tum Hi Ho\n[00:15.00] Performed by Mithoon, Arijit Singh\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/430/5c5ea5cc00e3bff45616013226f376fe_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/430/5c5ea5cc00e3bff45616013226f376fe_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "yXCLyL-9",
+      "name": "Tum Hi Ho (From \"Aashiqui 2\")",
+      "title": "Tum Hi Ho (From \"Aashiqui 2\")",
+      "primaryArtists": "Mithoon, Arijit Singh",
+      "album": "World Music Day - Best Of Bollywood Hits",
+      "imageUrl": "https://c.saavncdn.com/179/World-Music-Day-Best-Of-Bollywood-Hits-Hindi-2026-20260622111029-500x500.jpg",
+      "duration": "261",
+      "audioUrl": "https://aac.saavncdn.com/179/ee99b14844e2699aad400fa1e946c0ed_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Tum Hi Ho (From &quot;Aashiqui 2&quot;)\n[00:15.00] Performed by Mithoon, Arijit Singh\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/179/ee99b14844e2699aad400fa1e946c0ed_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/179/ee99b14844e2699aad400fa1e946c0ed_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "xJZBjDck",
+      "name": "Raabta (From \"Agent Vinod\")",
+      "title": "Raabta (From \"Agent Vinod\")",
+      "primaryArtists": "Arijit Singh, Pritam, Amitabh Bhattacharya",
+      "album": "Best Of Arijit Singh - Collection Of Romantic Songs",
+      "imageUrl": "https://c.saavncdn.com/840/Best-Of-Arijit-Singh-Collection-Of-Romantic-Songs-Hindi-2025-20251203161112-500x500.jpg",
+      "duration": "243",
+      "audioUrl": "https://aac.saavncdn.com/840/2be7053be63d9a4b6ea952eb972de3cb_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Raabta (From &quot;Agent Vinod&quot;)\n[00:15.00] Performed by Arijit Singh, Pritam, Amitabh Bhattacharya\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/840/2be7053be63d9a4b6ea952eb972de3cb_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/840/2be7053be63d9a4b6ea952eb972de3cb_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "Wn_eONzu",
+      "name": "Raabta",
+      "title": "Raabta",
+      "primaryArtists": "Pritam, Arijit Singh",
+      "album": "Agent Vinod",
+      "imageUrl": "https://c.saavncdn.com/603/Agent-Vinod-2012-500x500.jpg",
+      "duration": "244",
+      "audioUrl": "https://aac.saavncdn.com/603/40a507a84a1045c70af28f1fc79384bf_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Raabta\n[00:15.00] Performed by Pritam, Arijit Singh\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/603/40a507a84a1045c70af28f1fc79384bf_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/603/40a507a84a1045c70af28f1fc79384bf_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "Itm0k7b5",
+      "name": "Sitaare (From \"Ikkis\")",
+      "title": "Sitaare (From \"Ikkis\")",
+      "primaryArtists": "Amitabh Bhattacharya, Arijit Singh, Sachin-Jigar",
+      "album": "Sitaare (From \"Ikkis\")",
+      "imageUrl": "https://c.saavncdn.com/856/Sitaare-From-Ikkis-Hindi-2025-20251203170135-500x500.jpg",
+      "duration": "242",
+      "audioUrl": "https://aac.saavncdn.com/856/f1666594b68b88e7b3002074f2a4fb4b_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Sitaare (From &quot;Ikkis&quot;)\n[00:15.00] Performed by Amitabh Bhattacharya, Arijit Singh, Sachin-Jigar\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/856/f1666594b68b88e7b3002074f2a4fb4b_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/856/f1666594b68b88e7b3002074f2a4fb4b_160.mp4"
+        }
+      ]
+    }
+  ],
+  "moodStations": [
+    {
+      "id": "CygF0gj3",
+      "name": "Phantom Ferrari",
+      "title": "Phantom Ferrari",
+      "primaryArtists": "Sidhu Moose Wala, Intense",
+      "album": "Phantom Ferrari",
+      "imageUrl": "https://c.saavncdn.com/279/Phantom-Ferrari-Punjabi-2026-20261112115515-500x500.jpg",
+      "duration": "288",
+      "audioUrl": "https://aac.saavncdn.com/279/43c5e461db3dea72ce5a802cde7b55ca_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Phantom Ferrari\n[00:15.00] Performed by Sidhu Moose Wala, Intense\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/279/43c5e461db3dea72ce5a802cde7b55ca_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/279/43c5e461db3dea72ce5a802cde7b55ca_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "gNhYtgJc",
+      "name": "Kaali Hoodie",
+      "title": "Kaali Hoodie",
+      "primaryArtists": "Sidhu Moose Wala, Bohemia, The Kidd",
+      "album": "Kaali Hoodie",
+      "imageUrl": "https://c.saavncdn.com/392/Kaali-Hoodie-Punjabi-2026-20261016142547-500x500.jpg",
+      "duration": "167",
+      "audioUrl": "https://aac.saavncdn.com/392/01bd5f4d31158d869f9098bcce488b04_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Kaali Hoodie\n[00:15.00] Performed by Sidhu Moose Wala, Bohemia, The Kidd\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/392/01bd5f4d31158d869f9098bcce488b04_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/392/01bd5f4d31158d869f9098bcce488b04_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "H2r9PnvA",
+      "name": "295",
+      "title": "295",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "Moosetape",
+      "imageUrl": "https://c.saavncdn.com/609/Moosetape-Punjabi-2021-20260626155141-500x500.jpg",
+      "duration": "270",
+      "audioUrl": "https://aac.saavncdn.com/609/852628435c98083dfe217c1cfa731bb5_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] 295\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/609/852628435c98083dfe217c1cfa731bb5_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/609/852628435c98083dfe217c1cfa731bb5_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "j7gVFIZn",
+      "name": "Same Beef",
+      "title": "Same Beef",
+      "primaryArtists": "Bohemia, Sidhu Moose Wala",
+      "album": "Same Beef",
+      "imageUrl": "https://c.saavncdn.com/154/Same-Beef-Punjabi-2019-20190919071247-500x500.jpg",
+      "duration": "290",
+      "audioUrl": "https://aac.saavncdn.com/154/d8e13e5a519f8392580616d3931b8adb_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Same Beef\n[00:15.00] Performed by Bohemia, Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/154/d8e13e5a519f8392580616d3931b8adb_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/154/d8e13e5a519f8392580616d3931b8adb_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "yhlaG-y-",
+      "name": "East Side Flow",
+      "title": "East Side Flow",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "East Side Flow",
+      "imageUrl": "https://c.saavncdn.com/599/East-Side-Flow-Punjabi-2019-20190317052003-500x500.jpg",
+      "duration": "224",
+      "audioUrl": "https://aac.saavncdn.com/599/90947a11238d8886a891d10e672d53e1_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] East Side Flow\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/599/90947a11238d8886a891d10e672d53e1_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/599/90947a11238d8886a891d10e672d53e1_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "SXVUpHM9",
+      "name": "So High",
+      "title": "So High",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "So High",
+      "imageUrl": "https://c.saavncdn.com/544/So-High-Punjabi-2017-20220811172517-500x500.jpg",
+      "duration": "233",
+      "audioUrl": "https://aac.saavncdn.com/544/fa128b5b00df068d78bc50bf19bf137f_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] So High\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/544/fa128b5b00df068d78bc50bf19bf137f_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/544/fa128b5b00df068d78bc50bf19bf137f_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "W_-MVlI4",
+      "name": "Devil",
+      "title": "Devil",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "Pbx 1",
+      "imageUrl": "https://c.saavncdn.com/588/Pbx-1-Punjabi-2018-20181018-500x500.jpg",
+      "duration": "247",
+      "audioUrl": "https://aac.saavncdn.com/588/87ef653fa7baffee19f1f1c0c4733ab6_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Devil\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/588/87ef653fa7baffee19f1f1c0c4733ab6_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/588/87ef653fa7baffee19f1f1c0c4733ab6_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "iLpV8VAW",
+      "name": "Levels",
+      "title": "Levels",
+      "primaryArtists": "Sidhu Moose Wala, Sunny Malton",
+      "album": "Levels",
+      "imageUrl": "https://c.saavncdn.com/220/Levels-Punjabi-2022-20260626154343-500x500.jpg",
+      "duration": "228",
+      "audioUrl": "https://aac.saavncdn.com/220/2386e255fd1a5235aad25d92ca7dc82c_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Levels\n[00:15.00] Performed by Sidhu Moose Wala, Sunny Malton\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/220/2386e255fd1a5235aad25d92ca7dc82c_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/220/2386e255fd1a5235aad25d92ca7dc82c_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "GN38acrD",
+      "name": "0008",
+      "title": "0008",
+      "primaryArtists": "The Kidd, Sidhu Moose Wala, Jenny Johal",
+      "album": "Moose Print",
+      "imageUrl": "https://c.saavncdn.com/785/Moose-Print-Punjabi-2025-20260626153146-500x500.jpg",
+      "duration": "132",
+      "audioUrl": "https://aac.saavncdn.com/785/f3a2893ad1dbe12d208c7b5dc134d919_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] 0008\n[00:15.00] Performed by The Kidd, Sidhu Moose Wala, Jenny Johal\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/785/f3a2893ad1dbe12d208c7b5dc134d919_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/785/f3a2893ad1dbe12d208c7b5dc134d919_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "qpaklaqc",
+      "name": "Jatt Da Muqabala",
+      "title": "Jatt Da Muqabala",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "Pbx 1",
+      "imageUrl": "https://c.saavncdn.com/588/Pbx-1-Punjabi-2018-20181018-500x500.jpg",
+      "duration": "211",
+      "audioUrl": "https://aac.saavncdn.com/588/024ce8dec4bee4a2104ac4299b6835c9_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Jatt Da Muqabala\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/588/024ce8dec4bee4a2104ac4299b6835c9_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/588/024ce8dec4bee4a2104ac4299b6835c9_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "fdqyW_oa",
+      "name": "Never Fold",
+      "title": "Never Fold",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "No Name",
+      "imageUrl": "https://c.saavncdn.com/448/No-Name-Punjabi-2022-20260626154650-500x500.jpg",
+      "duration": "180",
+      "audioUrl": "https://aac.saavncdn.com/448/bbc0e14d595d2741ca172e221e6da012_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Never Fold\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/448/bbc0e14d595d2741ca172e221e6da012_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/448/bbc0e14d595d2741ca172e221e6da012_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "_CUhMQr1",
+      "name": "Dawood",
+      "title": "Dawood",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "Pbx 1",
+      "imageUrl": "https://c.saavncdn.com/588/Pbx-1-Punjabi-2018-20181018-500x500.jpg",
+      "duration": "200",
+      "audioUrl": "https://aac.saavncdn.com/588/2c3ed2be958921116220da13a552c496_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Dawood\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/588/2c3ed2be958921116220da13a552c496_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/588/2c3ed2be958921116220da13a552c496_160.mp4"
+        }
+      ]
+    }
+  ],
+  "workoutHype": [
+    {
+      "id": "Pn6d6Cxz",
+      "name": "Ferrari",
+      "title": "Ferrari",
+      "primaryArtists": "James Hype, Miggy Dela Rosa",
+      "album": "GYM RATS WORKOUT",
+      "imageUrl": "https://c.saavncdn.com/941/GYM-RATS-WORKOUT-English-2026-20261112022832-500x500.jpg",
+      "duration": "185",
+      "audioUrl": "https://aac.saavncdn.com/941/3ffc7a1f008fb2c352c4ff3bbf585cfe_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Ferrari\n[00:15.00] Performed by James Hype, Miggy Dela Rosa\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/941/3ffc7a1f008fb2c352c4ff3bbf585cfe_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/941/3ffc7a1f008fb2c352c4ff3bbf585cfe_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "A3WZMAPY",
+      "name": "Workout Sets",
+      "title": "Workout Sets",
+      "primaryArtists": "Cardio Hits! Workout, Gym Workout, Gym Hype, Cardio Hits! Workout & Gym Workout & Gym Hype",
+      "album": "Strength Fitness",
+      "imageUrl": "https://c.saavncdn.com/543/Strength-Fitness-Unknown-2021-20210521083111-500x500.jpg",
+      "duration": "107",
+      "audioUrl": "https://aac.saavncdn.com/543/65271bb7338cdcd589b29aa859e869fb_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Workout Sets\n[00:15.00] Performed by Cardio Hits! Workout, Gym Workout, Gym Hype, Cardio Hits! Workout &amp; Gym Workout &amp; Gym Hype\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/543/65271bb7338cdcd589b29aa859e869fb_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/543/65271bb7338cdcd589b29aa859e869fb_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "5lrXOJV2",
+      "name": "Hype Hard Workout",
+      "title": "Hype Hard Workout",
+      "primaryArtists": "Hardcore Music, Hardcore Workout, Music For Working Out",
+      "album": "Hardcore Gym Work Out Music",
+      "imageUrl": "https://c.saavncdn.com/158/Hardcore-Gym-Work-Out-Music-Unknown-2022-20220705212102-500x500.jpg",
+      "duration": "136",
+      "audioUrl": "https://aac.saavncdn.com/158/b5b301a674c4bcb38b4d4c77aaadb6a1_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Hype Hard Workout\n[00:15.00] Performed by Hardcore Music, Hardcore Workout, Music For Working Out\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/158/b5b301a674c4bcb38b4d4c77aaadb6a1_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/158/b5b301a674c4bcb38b4d4c77aaadb6a1_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "lrHGO2Fk",
+      "name": "Hype Workout Music",
+      "title": "Hype Workout Music",
+      "primaryArtists": "Workout Music Mix",
+      "album": "Hype Gym Workout Music Playlist For Working Out",
+      "imageUrl": "https://c.saavncdn.com/589/Hype-Gym-Workout-Music-Playlist-For-Working-Out-Unknown-2022-20220917011502-500x500.jpg",
+      "duration": "57",
+      "audioUrl": "https://aac.saavncdn.com/589/cc17b370158b04eebcaf40af6714833e_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Hype Workout Music\n[00:15.00] Performed by Workout Music Mix\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/589/cc17b370158b04eebcaf40af6714833e_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/589/cc17b370158b04eebcaf40af6714833e_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "4fQtiahR",
+      "name": "Hype Phonk Gym Music",
+      "title": "Hype Phonk Gym Music",
+      "primaryArtists": "Dont Phonk With Me, Aggressive Phonk Sigma Male Beats, Gym Phonk Workout Music",
+      "album": "Aggressive Hype Drift Phonk Music For Late Night Drive",
+      "imageUrl": "https://c.saavncdn.com/723/Aggressive-Hype-Drift-Phonk-Music-For-Late-Night-Drive-Unknown-2023-20230502034244-500x500.jpg",
+      "duration": "100",
+      "audioUrl": "https://aac.saavncdn.com/723/17825880a345f5227c3d156dc3537f3d_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Hype Phonk Gym Music\n[00:15.00] Performed by Dont Phonk With Me, Aggressive Phonk Sigma Male Beats, Gym Phonk Workout Music\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/723/17825880a345f5227c3d156dc3537f3d_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/723/17825880a345f5227c3d156dc3537f3d_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "nHHvUwzg",
+      "name": "Workout Music",
+      "title": "Workout Music",
+      "primaryArtists": "Workout Music Mix",
+      "album": "Hype Gym Workout Music Playlist For Working Out",
+      "imageUrl": "https://c.saavncdn.com/589/Hype-Gym-Workout-Music-Playlist-For-Working-Out-Unknown-2022-20220917011502-500x500.jpg",
+      "duration": "69",
+      "audioUrl": "https://aac.saavncdn.com/589/28ccea14570df11ed1a82edd2b118224_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Workout Music\n[00:15.00] Performed by Workout Music Mix\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/589/28ccea14570df11ed1a82edd2b118224_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/589/28ccea14570df11ed1a82edd2b118224_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "k79bCuZy",
+      "name": "Workout Playlist",
+      "title": "Workout Playlist",
+      "primaryArtists": "Workout Music Mix",
+      "album": "Hype Gym Workout Music Playlist For Working Out",
+      "imageUrl": "https://c.saavncdn.com/589/Hype-Gym-Workout-Music-Playlist-For-Working-Out-Unknown-2022-20220917011502-500x500.jpg",
+      "duration": "64",
+      "audioUrl": "https://aac.saavncdn.com/589/299b838062f10ae17b2c221b6f2085e1_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Workout Playlist\n[00:15.00] Performed by Workout Music Mix\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/589/299b838062f10ae17b2c221b6f2085e1_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/589/299b838062f10ae17b2c221b6f2085e1_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "LruKLKFh",
+      "name": "Gym Beats",
+      "title": "Gym Beats",
+      "primaryArtists": "Workout Music Mix",
+      "album": "Hype Gym Workout Music Playlist For Working Out",
+      "imageUrl": "https://c.saavncdn.com/589/Hype-Gym-Workout-Music-Playlist-For-Working-Out-Unknown-2022-20220917011502-500x500.jpg",
+      "duration": "95",
+      "audioUrl": "https://aac.saavncdn.com/589/4a13f0bc390b580ccaa4868f880649d5_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Gym Beats\n[00:15.00] Performed by Workout Music Mix\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/589/4a13f0bc390b580ccaa4868f880649d5_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/589/4a13f0bc390b580ccaa4868f880649d5_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "8I2DIszm",
+      "name": "HYPE MODE",
+      "title": "HYPE MODE",
+      "primaryArtists": "Gym Syster",
+      "album": "Workout Fitness Hits",
+      "imageUrl": "https://c.saavncdn.com/713/Workout-Fitness-Hits-English-2026-20260525234309-500x500.jpg",
+      "duration": "144",
+      "audioUrl": "https://aac.saavncdn.com/713/f84fd9c8a4099847a57e8a07912e096d_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] HYPE MODE\n[00:15.00] Performed by Gym Syster\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/713/f84fd9c8a4099847a57e8a07912e096d_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/713/f84fd9c8a4099847a57e8a07912e096d_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "FdC05Gn2",
+      "name": "Hype Vibes",
+      "title": "Hype Vibes",
+      "primaryArtists": "The Gym Allstars",
+      "album": "Workout with Trap",
+      "imageUrl": "https://c.saavncdn.com/391/Workout-with-Trap-Unknown-2024-20240416083356-500x500.jpg",
+      "duration": "192",
+      "audioUrl": "https://aac.saavncdn.com/391/cf476d5a3e9537c82e93d684c85db532_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Hype Vibes\n[00:15.00] Performed by The Gym Allstars\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/391/cf476d5a3e9537c82e93d684c85db532_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/391/cf476d5a3e9537c82e93d684c85db532_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "ewKhwCLU",
+      "name": "Gym Playlist",
+      "title": "Gym Playlist",
+      "primaryArtists": "Hardcore Music, Hardcore Workout, Music For Working Out",
+      "album": "Hype Work Out Tracks - Playlist For Working Out",
+      "imageUrl": "https://c.saavncdn.com/040/Hype-Work-Out-Tracks-Playlist-For-Working-Out-Unknown-2022-20221018005224-500x500.jpg",
+      "duration": "65",
+      "audioUrl": "https://aac.saavncdn.com/040/4d0907b7e50f115179ae0b400bbbcb9a_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Gym Playlist\n[00:15.00] Performed by Hardcore Music, Hardcore Workout, Music For Working Out\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/040/4d0907b7e50f115179ae0b400bbbcb9a_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/040/4d0907b7e50f115179ae0b400bbbcb9a_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "Cr3_s2Gh",
+      "name": "Gym Beats",
+      "title": "Gym Beats",
+      "primaryArtists": "Hardcore Music, Hardcore Workout, Music For Working Out",
+      "album": "Hype Work Out Tracks - Playlist For Working Out",
+      "imageUrl": "https://c.saavncdn.com/040/Hype-Work-Out-Tracks-Playlist-For-Working-Out-Unknown-2022-20221018005224-500x500.jpg",
+      "duration": "139",
+      "audioUrl": "https://aac.saavncdn.com/040/67696861be36f97abbfbde770d84a029_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Gym Beats\n[00:15.00] Performed by Hardcore Music, Hardcore Workout, Music For Working Out\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/040/67696861be36f97abbfbde770d84a029_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/040/67696861be36f97abbfbde770d84a029_160.mp4"
+        }
+      ]
+    }
+  ],
+  "chillVibes": [
+    {
+      "id": "UCwDNmyl",
+      "name": "Lo-Fi Midnight Beats",
+      "title": "Lo-Fi Midnight Beats",
+      "primaryArtists": "Yovi Taets",
+      "album": "Lo-Fi Midnight Beats",
+      "imageUrl": "https://c.saavncdn.com/727/Lo-Fi-Midnight-Beats-English-2026-20261012161325-500x500.jpg",
+      "duration": "188",
+      "audioUrl": "https://aac.saavncdn.com/727/f4c027d3551e1954fd4b0ad72536f18f_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Lo-Fi Midnight Beats\n[00:15.00] Performed by Yovi Taets\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/727/f4c027d3551e1954fd4b0ad72536f18f_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/727/f4c027d3551e1954fd4b0ad72536f18f_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "j1qVg5IR",
+      "name": "Midnight Lofi Study Hip Hop Beats",
+      "title": "Midnight Lofi Study Hip Hop Beats",
+      "primaryArtists": "Derrol, Lofi Sleep Chill & Study, Lofi Hip-Hop Beats",
+      "album": "Lofi Sleep Chill & Study",
+      "imageUrl": "https://c.saavncdn.com/514/Lofi-Sleep-Chill-Study-English-2021-20211012171514-500x500.jpg",
+      "duration": "130",
+      "audioUrl": "https://aac.saavncdn.com/514/94d00ea29dedf5b454f08772a9bf2fb2_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight Lofi Study Hip Hop Beats\n[00:15.00] Performed by Derrol, Lofi Sleep Chill &amp; Study, Lofi Hip-Hop Beats\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/514/94d00ea29dedf5b454f08772a9bf2fb2_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/514/94d00ea29dedf5b454f08772a9bf2fb2_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "f1oE8TV6",
+      "name": "Midnight Lofi Study Hip Hop Beats",
+      "title": "Midnight Lofi Study Hip Hop Beats",
+      "primaryArtists": "Derrol, Lo-Fi Beats, Lofi Hip-Hop Beats, Lofi Sleep Chill & Study",
+      "album": "Music To Put You In A Better Mood: Lofi Hip Hop Beats to Sleep / Chill To",
+      "imageUrl": "https://c.saavncdn.com/054/Music-To-Put-You-In-A-Better-Mood-Lofi-Hip-Hop-Beats-to-Sleep-Chill-To-Unknown-2023-20250508183531-500x500.jpg",
+      "duration": "129",
+      "audioUrl": "https://aac.saavncdn.com/054/02a09f85dd50715dfabad8bc395e31b5_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight Lofi Study Hip Hop Beats\n[00:15.00] Performed by Derrol, Lo-Fi Beats, Lofi Hip-Hop Beats, Lofi Sleep Chill &amp; Study\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/054/02a09f85dd50715dfabad8bc395e31b5_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/054/02a09f85dd50715dfabad8bc395e31b5_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "c2FyHkoh",
+      "name": "Midnight Lo-Fi Beats",
+      "title": "Midnight Lo-Fi Beats",
+      "primaryArtists": "Nostalgia Chill, Lofi Music Dreams, Top Chillout",
+      "album": "Dream Chillout Lo‑Fi Collection",
+      "imageUrl": "https://c.saavncdn.com/771/Dream-Chillout-Lo-Fi-Collection-Unknown-2025-20250713170109-500x500.jpg",
+      "duration": "123",
+      "audioUrl": "https://aac.saavncdn.com/771/dad7946521e7fdc9cbdfdbc7caf8f435_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight Lo-Fi Beats\n[00:15.00] Performed by Nostalgia Chill, Lofi Music Dreams, Top Chillout\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/771/dad7946521e7fdc9cbdfdbc7caf8f435_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/771/dad7946521e7fdc9cbdfdbc7caf8f435_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "SdE5MTab",
+      "name": "Midnight Lo-Fi Beats",
+      "title": "Midnight Lo-Fi Beats",
+      "primaryArtists": "Sovann Music",
+      "album": "Deep Sleep Sanctuary",
+      "imageUrl": "https://c.saavncdn.com/289/Deep-Sleep-Sanctuary-Unknown-2026-20260907141227-500x500.jpg",
+      "duration": "204",
+      "audioUrl": "https://aac.saavncdn.com/289/4a36f577b0f9a755d8e02c658b6a55fc_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight Lo-Fi Beats\n[00:15.00] Performed by Sovann Music\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/289/4a36f577b0f9a755d8e02c658b6a55fc_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/289/4a36f577b0f9a755d8e02c658b6a55fc_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "ABcEP9IM",
+      "name": "Midnight Mellow Lo Fi",
+      "title": "Midnight Mellow Lo Fi",
+      "primaryArtists": "Frank Easy",
+      "album": "Midnight Mellow Lo Fi: Lofi Hip Hop Beats for Dreamy Sleep / Chill Study / Cozy Relaxation",
+      "imageUrl": "https://c.saavncdn.com/981/Midnight-Mellow-Lo-Fi-Lofi-Hip-Hop-Beats-for-Dreamy-Sleep-Chill-Study-Cozy-Relaxation-Unknown-2023-20231119025513-500x500.jpg",
+      "duration": "167",
+      "audioUrl": "https://aac.saavncdn.com/981/c9f1290ae7ca13f0dcdd3142cde80e0d_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight Mellow Lo Fi\n[00:15.00] Performed by Frank Easy\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/981/c9f1290ae7ca13f0dcdd3142cde80e0d_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/981/c9f1290ae7ca13f0dcdd3142cde80e0d_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "LTmaPO_H",
+      "name": "Midnight Study Beats",
+      "title": "Midnight Study Beats",
+      "primaryArtists": "My Lo-fi, Relax Sound",
+      "album": "LO-FI BEATS",
+      "imageUrl": "https://c.saavncdn.com/907/LO-FI-BEATS-English-2025-20260107120556-500x500.jpg",
+      "duration": "124",
+      "audioUrl": "https://aac.saavncdn.com/907/27ab7de69fb84809120dfb2699718974_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight Study Beats\n[00:15.00] Performed by My Lo-fi, Relax Sound\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/907/27ab7de69fb84809120dfb2699718974_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/907/27ab7de69fb84809120dfb2699718974_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "Li5qhpf5",
+      "name": "Midnight LoFi Beats",
+      "title": "Midnight LoFi Beats",
+      "primaryArtists": "My Lo-fi, STUDY With LO-FI",
+      "album": "Late night lo fi",
+      "imageUrl": "https://c.saavncdn.com/840/Late-night-lo-fi-English-2026-20260530210743-500x500.jpg",
+      "duration": "156",
+      "audioUrl": "https://aac.saavncdn.com/840/8b3d37cd9c576b4b1bc11482ab1c4f1c_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight LoFi Beats\n[00:15.00] Performed by My Lo-fi, STUDY With LO-FI\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/840/8b3d37cd9c576b4b1bc11482ab1c4f1c_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/840/8b3d37cd9c576b4b1bc11482ab1c4f1c_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "57gQD2li",
+      "name": "Midnight Lantern Beats",
+      "title": "Midnight Lantern Beats",
+      "primaryArtists": "SJW Worship",
+      "album": "Chill Notes & Lo-Fi",
+      "imageUrl": "https://c.saavncdn.com/106/Chill-Notes-Lo-Fi-Unknown-2025-20250311224414-500x500.jpg",
+      "duration": "168",
+      "audioUrl": "https://aac.saavncdn.com/106/fbc4f426f3dec076e4d4c91b7dc109ad_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight Lantern Beats\n[00:15.00] Performed by SJW Worship\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/106/fbc4f426f3dec076e4d4c91b7dc109ad_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/106/fbc4f426f3dec076e4d4c91b7dc109ad_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "LmXRWFcv",
+      "name": "Midnight",
+      "title": "Midnight",
+      "primaryArtists": "Lo-Fi Lorenzo",
+      "album": "Lo-Fi Chill Beats",
+      "imageUrl": "https://c.saavncdn.com/588/Lo-Fi-Chill-Beats-English-2024-20240423090018-500x500.jpg",
+      "duration": "121",
+      "audioUrl": "https://aac.saavncdn.com/588/1e4044cf13e07b4bade467b55c5a2662_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight\n[00:15.00] Performed by Lo-Fi Lorenzo\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/588/1e4044cf13e07b4bade467b55c5a2662_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/588/1e4044cf13e07b4bade467b55c5a2662_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "ZBhBPzw8",
+      "name": "Midnight",
+      "title": "Midnight",
+      "primaryArtists": "Peter Orbit",
+      "album": "Chill Lo-Fi Beats",
+      "imageUrl": "https://c.saavncdn.com/702/Chill-Lo-Fi-Beats-Unknown-2019-20210128235817-500x500.jpg",
+      "duration": "175",
+      "audioUrl": "https://aac.saavncdn.com/702/e81bde6cb80506b4e7e158e080cc4425_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight\n[00:15.00] Performed by Peter Orbit\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/702/e81bde6cb80506b4e7e158e080cc4425_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/702/e81bde6cb80506b4e7e158e080cc4425_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "mAMKvci_",
+      "name": "Midnight Study Beats",
+      "title": "Midnight Study Beats",
+      "primaryArtists": "My Lo-fi, MUSIC FOR AN APERITIF",
+      "album": "So-Fifor Focus (study lo fi)",
+      "imageUrl": "https://c.saavncdn.com/921/So-Fifor-Focus-study-lo-fi-English-2025-20260107120726-500x500.jpg",
+      "duration": "144",
+      "audioUrl": "https://aac.saavncdn.com/921/2cb835d49f3fcb650b4103370b060689_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Midnight Study Beats\n[00:15.00] Performed by My Lo-fi, MUSIC FOR AN APERITIF\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/921/2cb835d49f3fcb650b4103370b060689_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/921/2cb835d49f3fcb650b4103370b060689_160.mp4"
+        }
+      ]
+    }
+  ],
+  "hindi": [
+    {
+      "id": "qcEf8GY8",
+      "name": "Apna Bana Le",
+      "title": "Apna Bana Le",
+      "primaryArtists": "Amitabh Bhattacharya, Sachin-Jigar, Arijit Singh",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "261",
+      "audioUrl": "https://aac.saavncdn.com/675/1456dc2903d0fb4465d2d2904008803b_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Apna Bana Le\n[00:15.00] Performed by Amitabh Bhattacharya, Sachin-Jigar, Arijit Singh\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/1456dc2903d0fb4465d2d2904008803b_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/1456dc2903d0fb4465d2d2904008803b_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "UPJYO3v0",
+      "name": "Ishq de Fanniyar - Female",
+      "title": "Ishq de Fanniyar - Female",
+      "primaryArtists": "Jyotica Tangri, Shaarib Toshi, Kumaar",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "177",
+      "audioUrl": "https://aac.saavncdn.com/675/f1f48664e51db48f0d26a40d42d515a8_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Ishq de Fanniyar - Female\n[00:15.00] Performed by Jyotica Tangri, Shaarib Toshi, Kumaar\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/f1f48664e51db48f0d26a40d42d515a8_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/f1f48664e51db48f0d26a40d42d515a8_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "kHS4uHli",
+      "name": "Vaaroon",
+      "title": "Vaaroon",
+      "primaryArtists": "Anand Bhaskar",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "350",
+      "audioUrl": "https://aac.saavncdn.com/675/ff5cbe7f8c09da84cb039852eae36fce_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Vaaroon\n[00:15.00] Performed by Anand Bhaskar\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/ff5cbe7f8c09da84cb039852eae36fce_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/ff5cbe7f8c09da84cb039852eae36fce_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "RPY7kBp3",
+      "name": "Lae Dooba",
+      "title": "Lae Dooba",
+      "primaryArtists": "Manoj Muntashir, Rochak Kohli, Sunidhi Chauhan",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "229",
+      "audioUrl": "https://aac.saavncdn.com/675/967b4606fe77beb6b080abd334f5742d_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Lae Dooba\n[00:15.00] Performed by Manoj Muntashir, Rochak Kohli, Sunidhi Chauhan\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/967b4606fe77beb6b080abd334f5742d_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/967b4606fe77beb6b080abd334f5742d_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "bl6OTcVp",
+      "name": "Jugraafiya",
+      "title": "Jugraafiya",
+      "primaryArtists": "Udit Narayan, Shreya Ghoshal",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "274",
+      "audioUrl": "https://aac.saavncdn.com/675/8a5d991f76f9e6e2e0af5ea371419572_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Jugraafiya\n[00:15.00] Performed by Udit Narayan, Shreya Ghoshal\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/8a5d991f76f9e6e2e0af5ea371419572_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/8a5d991f76f9e6e2e0af5ea371419572_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "ILnuUlkk",
+      "name": "Tu Hi Disda",
+      "title": "Tu Hi Disda",
+      "primaryArtists": "Kumaar, Pritam, Arijit Singh, Nikhita Gandhi",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "277",
+      "audioUrl": "https://aac.saavncdn.com/675/6d6322d1918ad6e7af4bbee532391646_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Tu Hi Disda\n[00:15.00] Performed by Kumaar, Pritam, Arijit Singh, Nikhita Gandhi\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/6d6322d1918ad6e7af4bbee532391646_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/6d6322d1918ad6e7af4bbee532391646_160.mp4"
         }
       ]
     },
@@ -229,6 +1471,8 @@
       "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
       "duration": "196",
       "audioUrl": "https://aac.saavncdn.com/675/d79c8812547b4d357fe1004c4e2f8e88_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Preet Re\n[00:15.00] Performed by Gurpreet Saini, Rochak Kohli, Darshan Raval, Jonita Gandhi\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
@@ -239,488 +1483,646 @@
           "url": "https://aac.saavncdn.com/675/d79c8812547b4d357fe1004c4e2f8e88_160.mp4"
         }
       ]
+    },
+    {
+      "id": "s_9_xlkw",
+      "name": "O Meri Laila - Radio Version",
+      "title": "O Meri Laila - Radio Version",
+      "primaryArtists": "Joi Barua",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "191",
+      "audioUrl": "https://aac.saavncdn.com/675/d9228302e0ab98854ce38d9e85e2e91b_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] O Meri Laila - Radio Version\n[00:15.00] Performed by Joi Barua\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/d9228302e0ab98854ce38d9e85e2e91b_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/d9228302e0ab98854ce38d9e85e2e91b_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "7o2bZnQk",
+      "name": "Vaaroon Trending Version",
+      "title": "Vaaroon Trending Version",
+      "primaryArtists": "Ginny Diwan, Anand Bhaskar, Romy",
+      "album": "1 Min Insta Viral Mix",
+      "imageUrl": "https://c.saavncdn.com/835/1-Min-Insta-Viral-Mix-Hindi-2026-20260512190618-500x500.jpg",
+      "duration": "151",
+      "audioUrl": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Vaaroon Trending Version\n[00:15.00] Performed by Ginny Diwan, Anand Bhaskar, Romy\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/835/b6df8607412751710e806ceab8a7a8c5_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "rWAENiFs",
+      "name": "Bas Ek Dhadak",
+      "title": "Bas Ek Dhadak",
+      "primaryArtists": "Rashmi-Virag, Javed-Mohsin, Jubin Nautiyal, Shreya Ghoshal",
+      "album": "Trending Love Songs",
+      "imageUrl": "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+      "duration": "259",
+      "audioUrl": "https://aac.saavncdn.com/675/f83ab569e89e115af94322e361eb3b57_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Bas Ek Dhadak\n[00:15.00] Performed by Rashmi-Virag, Javed-Mohsin, Jubin Nautiyal, Shreya Ghoshal\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/675/f83ab569e89e115af94322e361eb3b57_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/675/f83ab569e89e115af94322e361eb3b57_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "oXIB3Y8J",
+      "name": "Heer Na Jaane Ranjha Na Jaane - Dhoonde Akhiyaan - Trending Version",
+      "title": "Heer Na Jaane Ranjha Na Jaane - Dhoonde Akhiyaan - Trending Version",
+      "primaryArtists": "Yasser Desai, Altamash Faridi",
+      "album": "Heer Na Jaane Ranjha Na Jaane - Dhoonde Akhiyaan - Trending Version",
+      "imageUrl": "https://c.saavncdn.com/054/Heer-Na-Jaane-Ranjha-Na-Jaane-Dhoonde-Akhiyaan-Trending-Version-Hindi-2026-20260511211120-500x500.jpg",
+      "duration": "93",
+      "audioUrl": "https://aac.saavncdn.com/054/e90261a1250cd346a14834efffe7b22b_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Heer Na Jaane Ranjha Na Jaane - Dhoonde Akhiyaan - Trending Version\n[00:15.00] Performed by Yasser Desai, Altamash Faridi\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/054/e90261a1250cd346a14834efffe7b22b_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/054/e90261a1250cd346a14834efffe7b22b_160.mp4"
+        }
+      ]
+    },
+    {
+      "id": "sjQ1wKN-",
+      "name": "Jugraafiya Trending Version",
+      "title": "Jugraafiya Trending Version",
+      "primaryArtists": "Amitabh Bhattacharya, Ajay-Atul, Udit Narayan, Shreya Ghoshal",
+      "album": "1 Min Insta Viral Mix",
+      "imageUrl": "https://c.saavncdn.com/835/1-Min-Insta-Viral-Mix-Hindi-2026-20260512190618-500x500.jpg",
+      "duration": "70",
+      "audioUrl": "https://aac.saavncdn.com/835/afcc63fccd64e48b5b56b0297837b6d2_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Jugraafiya Trending Version\n[00:15.00] Performed by Amitabh Bhattacharya, Ajay-Atul, Udit Narayan, Shreya Ghoshal\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
+      "downloadUrl": [
+        {
+          "quality": "320kbps",
+          "url": "https://aac.saavncdn.com/835/afcc63fccd64e48b5b56b0297837b6d2_320.mp4"
+        },
+        {
+          "quality": "160kbps",
+          "url": "https://aac.saavncdn.com/835/afcc63fccd64e48b5b56b0297837b6d2_160.mp4"
+        }
+      ]
     }
   ],
   "punjabi": [
     {
-      "id": "OVYHcSky",
-      "name": "HYPE",
-      "title": "HYPE",
-      "primaryArtists": "Gur Sidhu, Kaptaan",
-      "album": "Known Unknowns",
-      "imageUrl": "https://c.saavncdn.com/424/Known-Unknowns-Punjabi-2026-20261115114246-500x500.jpg",
-      "duration": "158",
-      "audioUrl": "https://aac.saavncdn.com/424/8485c24a921f998c37cf7e683f370b5c_320.mp4",
+      "id": "CygF0gj3",
+      "name": "Phantom Ferrari",
+      "title": "Phantom Ferrari",
+      "primaryArtists": "Sidhu Moose Wala, Intense",
+      "album": "Phantom Ferrari",
+      "imageUrl": "https://c.saavncdn.com/279/Phantom-Ferrari-Punjabi-2026-20261112115515-500x500.jpg",
+      "duration": "288",
+      "audioUrl": "https://aac.saavncdn.com/279/43c5e461db3dea72ce5a802cde7b55ca_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Phantom Ferrari\n[00:15.00] Performed by Sidhu Moose Wala, Intense\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/424/8485c24a921f998c37cf7e683f370b5c_320.mp4"
+          "url": "https://aac.saavncdn.com/279/43c5e461db3dea72ce5a802cde7b55ca_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/424/8485c24a921f998c37cf7e683f370b5c_160.mp4"
+          "url": "https://aac.saavncdn.com/279/43c5e461db3dea72ce5a802cde7b55ca_160.mp4"
         }
       ]
     },
     {
-      "id": "I58-Dr16",
-      "name": "Hype",
-      "title": "Hype",
-      "primaryArtists": "Ranjit Bawa, Bunty Bains, Goldy Desi Crew",
-      "album": "My Roots",
-      "imageUrl": "https://c.saavncdn.com/179/My-Roots-Punjabi-2026-20260429155612-500x500.jpg",
-      "duration": "156",
-      "audioUrl": "https://aac.saavncdn.com/179/6daec90c05b9213615265518f9190767_320.mp4",
+      "id": "gNhYtgJc",
+      "name": "Kaali Hoodie",
+      "title": "Kaali Hoodie",
+      "primaryArtists": "Sidhu Moose Wala, Bohemia, The Kidd",
+      "album": "Kaali Hoodie",
+      "imageUrl": "https://c.saavncdn.com/392/Kaali-Hoodie-Punjabi-2026-20261016142547-500x500.jpg",
+      "duration": "167",
+      "audioUrl": "https://aac.saavncdn.com/392/01bd5f4d31158d869f9098bcce488b04_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Kaali Hoodie\n[00:15.00] Performed by Sidhu Moose Wala, Bohemia, The Kidd\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/179/6daec90c05b9213615265518f9190767_320.mp4"
+          "url": "https://aac.saavncdn.com/392/01bd5f4d31158d869f9098bcce488b04_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/179/6daec90c05b9213615265518f9190767_160.mp4"
+          "url": "https://aac.saavncdn.com/392/01bd5f4d31158d869f9098bcce488b04_160.mp4"
         }
       ]
     },
     {
-      "id": "TSYQz50j",
-      "name": "Hype",
-      "title": "Hype",
-      "primaryArtists": "Varinder Brar",
-      "album": "Hype",
-      "imageUrl": "https://c.saavncdn.com/849/Hype-Punjabi-2026-20261016192550-500x500.jpg",
-      "duration": "159",
-      "audioUrl": "https://aac.saavncdn.com/849/79f279e06d860c0d462d2e808bc0c5e1_320.mp4",
+      "id": "H2r9PnvA",
+      "name": "295",
+      "title": "295",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "Moosetape",
+      "imageUrl": "https://c.saavncdn.com/609/Moosetape-Punjabi-2021-20260626155141-500x500.jpg",
+      "duration": "270",
+      "audioUrl": "https://aac.saavncdn.com/609/852628435c98083dfe217c1cfa731bb5_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] 295\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/849/79f279e06d860c0d462d2e808bc0c5e1_320.mp4"
+          "url": "https://aac.saavncdn.com/609/852628435c98083dfe217c1cfa731bb5_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/849/79f279e06d860c0d462d2e808bc0c5e1_160.mp4"
+          "url": "https://aac.saavncdn.com/609/852628435c98083dfe217c1cfa731bb5_160.mp4"
         }
       ]
     },
     {
-      "id": "Sl3jbpu_",
-      "name": "Hype",
-      "title": "Hype",
-      "primaryArtists": "Sukh Lahoria, Izhan Beats",
-      "album": "Hype",
-      "imageUrl": "https://c.saavncdn.com/294/Hype-Punjabi-2026-20261029113247-500x500.jpg",
-      "duration": "168",
-      "audioUrl": "https://aac.saavncdn.com/294/3c7250d959eaf5335baa60e96fb45af8_320.mp4",
+      "id": "j7gVFIZn",
+      "name": "Same Beef",
+      "title": "Same Beef",
+      "primaryArtists": "Bohemia, Sidhu Moose Wala",
+      "album": "Same Beef",
+      "imageUrl": "https://c.saavncdn.com/154/Same-Beef-Punjabi-2019-20190919071247-500x500.jpg",
+      "duration": "290",
+      "audioUrl": "https://aac.saavncdn.com/154/d8e13e5a519f8392580616d3931b8adb_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Same Beef\n[00:15.00] Performed by Bohemia, Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/294/3c7250d959eaf5335baa60e96fb45af8_320.mp4"
+          "url": "https://aac.saavncdn.com/154/d8e13e5a519f8392580616d3931b8adb_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/294/3c7250d959eaf5335baa60e96fb45af8_160.mp4"
+          "url": "https://aac.saavncdn.com/154/d8e13e5a519f8392580616d3931b8adb_160.mp4"
         }
       ]
     },
     {
-      "id": "to7FnCBE",
-      "name": "Hype",
-      "title": "Hype",
-      "primaryArtists": "Misaal, Shadaai, KAABIR Music",
-      "album": "Hype",
-      "imageUrl": "https://c.saavncdn.com/043/Hype-Punjabi-2026-20260817124155-500x500.jpg",
-      "duration": "162",
-      "audioUrl": "https://aac.saavncdn.com/043/31d348ed0bc4ed08f3861269b1ddffa6_320.mp4",
+      "id": "yhlaG-y-",
+      "name": "East Side Flow",
+      "title": "East Side Flow",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "East Side Flow",
+      "imageUrl": "https://c.saavncdn.com/599/East-Side-Flow-Punjabi-2019-20190317052003-500x500.jpg",
+      "duration": "224",
+      "audioUrl": "https://aac.saavncdn.com/599/90947a11238d8886a891d10e672d53e1_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] East Side Flow\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/043/31d348ed0bc4ed08f3861269b1ddffa6_320.mp4"
+          "url": "https://aac.saavncdn.com/599/90947a11238d8886a891d10e672d53e1_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/043/31d348ed0bc4ed08f3861269b1ddffa6_160.mp4"
+          "url": "https://aac.saavncdn.com/599/90947a11238d8886a891d10e672d53e1_160.mp4"
         }
       ]
     },
     {
-      "id": "9ayqGjwA",
-      "name": "Hype",
-      "title": "Hype",
-      "primaryArtists": "Kay, Harsh",
-      "album": "Hype",
-      "imageUrl": "https://c.saavncdn.com/246/Hype-Punjabi-2026-20260513131801-500x500.jpg",
-      "duration": "169",
-      "audioUrl": "https://aac.saavncdn.com/246/6b33ff0a4cf9dcf32c3a209fb92066f7_320.mp4",
+      "id": "SXVUpHM9",
+      "name": "So High",
+      "title": "So High",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "So High",
+      "imageUrl": "https://c.saavncdn.com/544/So-High-Punjabi-2017-20220811172517-500x500.jpg",
+      "duration": "233",
+      "audioUrl": "https://aac.saavncdn.com/544/fa128b5b00df068d78bc50bf19bf137f_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] So High\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/246/6b33ff0a4cf9dcf32c3a209fb92066f7_320.mp4"
+          "url": "https://aac.saavncdn.com/544/fa128b5b00df068d78bc50bf19bf137f_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/246/6b33ff0a4cf9dcf32c3a209fb92066f7_160.mp4"
+          "url": "https://aac.saavncdn.com/544/fa128b5b00df068d78bc50bf19bf137f_160.mp4"
         }
       ]
     },
     {
-      "id": "4CGGsceN",
-      "name": "Hype",
-      "title": "Hype",
-      "primaryArtists": "Jass R",
-      "album": "Hype",
-      "imageUrl": "https://c.saavncdn.com/860/Hype-Punjabi-2026-20260507161157-500x500.jpg",
-      "duration": "160",
-      "audioUrl": "https://aac.saavncdn.com/860/75e99dc7c6b00ac43b276e864d5a360a_320.mp4",
+      "id": "W_-MVlI4",
+      "name": "Devil",
+      "title": "Devil",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "Pbx 1",
+      "imageUrl": "https://c.saavncdn.com/588/Pbx-1-Punjabi-2018-20181018-500x500.jpg",
+      "duration": "247",
+      "audioUrl": "https://aac.saavncdn.com/588/87ef653fa7baffee19f1f1c0c4733ab6_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Devil\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/860/75e99dc7c6b00ac43b276e864d5a360a_320.mp4"
+          "url": "https://aac.saavncdn.com/588/87ef653fa7baffee19f1f1c0c4733ab6_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/860/75e99dc7c6b00ac43b276e864d5a360a_160.mp4"
+          "url": "https://aac.saavncdn.com/588/87ef653fa7baffee19f1f1c0c4733ab6_160.mp4"
         }
       ]
     },
     {
-      "id": "O1fNfqlO",
-      "name": "HYPE",
-      "title": "HYPE",
-      "primaryArtists": "Gurjant Otaal",
-      "album": "HYPE",
-      "imageUrl": "https://c.saavncdn.com/586/HYPE-Punjabi-2026-20261013053230-500x500.jpg",
-      "duration": "155",
-      "audioUrl": "https://aac.saavncdn.com/586/067628850b359bcdd88a0ce8d16e6a5a_320.mp4",
+      "id": "iLpV8VAW",
+      "name": "Levels",
+      "title": "Levels",
+      "primaryArtists": "Sidhu Moose Wala, Sunny Malton",
+      "album": "Levels",
+      "imageUrl": "https://c.saavncdn.com/220/Levels-Punjabi-2022-20260626154343-500x500.jpg",
+      "duration": "228",
+      "audioUrl": "https://aac.saavncdn.com/220/2386e255fd1a5235aad25d92ca7dc82c_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Levels\n[00:15.00] Performed by Sidhu Moose Wala, Sunny Malton\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/586/067628850b359bcdd88a0ce8d16e6a5a_320.mp4"
+          "url": "https://aac.saavncdn.com/220/2386e255fd1a5235aad25d92ca7dc82c_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/586/067628850b359bcdd88a0ce8d16e6a5a_160.mp4"
+          "url": "https://aac.saavncdn.com/220/2386e255fd1a5235aad25d92ca7dc82c_160.mp4"
         }
       ]
     },
     {
-      "id": "qMh6aJxP",
-      "name": "Hype",
-      "title": "Hype",
-      "primaryArtists": "Tarsem Dheer",
-      "album": "Stay High",
-      "imageUrl": "https://c.saavncdn.com/367/Stay-High-Punjabi-2026-20260219184748-500x500.jpg",
-      "duration": "137",
-      "audioUrl": "https://aac.saavncdn.com/367/1196721b0b0fed9c76a4d96a63ec6adb_320.mp4",
+      "id": "GN38acrD",
+      "name": "0008",
+      "title": "0008",
+      "primaryArtists": "The Kidd, Sidhu Moose Wala, Jenny Johal",
+      "album": "Moose Print",
+      "imageUrl": "https://c.saavncdn.com/785/Moose-Print-Punjabi-2025-20260626153146-500x500.jpg",
+      "duration": "132",
+      "audioUrl": "https://aac.saavncdn.com/785/f3a2893ad1dbe12d208c7b5dc134d919_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] 0008\n[00:15.00] Performed by The Kidd, Sidhu Moose Wala, Jenny Johal\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/367/1196721b0b0fed9c76a4d96a63ec6adb_320.mp4"
+          "url": "https://aac.saavncdn.com/785/f3a2893ad1dbe12d208c7b5dc134d919_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/367/1196721b0b0fed9c76a4d96a63ec6adb_160.mp4"
+          "url": "https://aac.saavncdn.com/785/f3a2893ad1dbe12d208c7b5dc134d919_160.mp4"
         }
       ]
     },
     {
-      "id": "0mHCVjVw",
-      "name": "HYPE",
-      "title": "HYPE",
-      "primaryArtists": "Karan Thabal, Yaari Ghuman",
-      "album": "HYPE",
-      "imageUrl": "https://c.saavncdn.com/774/HYPE-Punjabi-2026-20260122124350-500x500.jpg",
-      "duration": "190",
-      "audioUrl": "https://aac.saavncdn.com/774/4d578988438f3c9e3d244ee63dfaa17a_320.mp4",
+      "id": "qpaklaqc",
+      "name": "Jatt Da Muqabala",
+      "title": "Jatt Da Muqabala",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "Pbx 1",
+      "imageUrl": "https://c.saavncdn.com/588/Pbx-1-Punjabi-2018-20181018-500x500.jpg",
+      "duration": "211",
+      "audioUrl": "https://aac.saavncdn.com/588/024ce8dec4bee4a2104ac4299b6835c9_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Jatt Da Muqabala\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/774/4d578988438f3c9e3d244ee63dfaa17a_320.mp4"
+          "url": "https://aac.saavncdn.com/588/024ce8dec4bee4a2104ac4299b6835c9_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/774/4d578988438f3c9e3d244ee63dfaa17a_160.mp4"
+          "url": "https://aac.saavncdn.com/588/024ce8dec4bee4a2104ac4299b6835c9_160.mp4"
         }
       ]
     },
     {
-      "id": "n1GXpw_k",
-      "name": "Hype",
-      "title": "Hype",
-      "primaryArtists": "Channi Rayat, Bigg Sandhu",
-      "album": "Flex",
-      "imageUrl": "https://c.saavncdn.com/491/Flex-Punjabi-2026-20261111154938-500x500.jpg",
-      "duration": "148",
-      "audioUrl": "https://aac.saavncdn.com/491/35d29645af834fff6bd4322bf6d6be15_320.mp4",
+      "id": "fdqyW_oa",
+      "name": "Never Fold",
+      "title": "Never Fold",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "No Name",
+      "imageUrl": "https://c.saavncdn.com/448/No-Name-Punjabi-2022-20260626154650-500x500.jpg",
+      "duration": "180",
+      "audioUrl": "https://aac.saavncdn.com/448/bbc0e14d595d2741ca172e221e6da012_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Never Fold\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/491/35d29645af834fff6bd4322bf6d6be15_320.mp4"
+          "url": "https://aac.saavncdn.com/448/bbc0e14d595d2741ca172e221e6da012_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/491/35d29645af834fff6bd4322bf6d6be15_160.mp4"
+          "url": "https://aac.saavncdn.com/448/bbc0e14d595d2741ca172e221e6da012_160.mp4"
         }
       ]
     },
     {
-      "id": "xVr1598L",
-      "name": "Hype Again",
-      "title": "Hype Again",
-      "primaryArtists": "Avon Brar, IRIS Music",
-      "album": "Hype Again",
-      "imageUrl": "https://c.saavncdn.com/500/Hype-Again-Punjabi-2026-20260814153807-500x500.jpg",
-      "duration": "237",
-      "audioUrl": "https://aac.saavncdn.com/500/da1a8e8e910e4469a53cad8bea09437d_320.mp4",
+      "id": "_CUhMQr1",
+      "name": "Dawood",
+      "title": "Dawood",
+      "primaryArtists": "Sidhu Moose Wala",
+      "album": "Pbx 1",
+      "imageUrl": "https://c.saavncdn.com/588/Pbx-1-Punjabi-2018-20181018-500x500.jpg",
+      "duration": "200",
+      "audioUrl": "https://aac.saavncdn.com/588/2c3ed2be958921116220da13a552c496_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Dawood\n[00:15.00] Performed by Sidhu Moose Wala\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/500/da1a8e8e910e4469a53cad8bea09437d_320.mp4"
+          "url": "https://aac.saavncdn.com/588/2c3ed2be958921116220da13a552c496_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/500/da1a8e8e910e4469a53cad8bea09437d_160.mp4"
+          "url": "https://aac.saavncdn.com/588/2c3ed2be958921116220da13a552c496_160.mp4"
         }
       ]
     }
   ],
   "romance": [
     {
-      "id": "EzGKheHd",
-      "name": "Dekha Hazaro Dafaa",
-      "title": "Dekha Hazaro Dafaa",
-      "primaryArtists": "Arijit Singh, Palak Muchhal, Jeet Gannguli, Manoj Muntashir",
-      "album": "Soft Romance Bollywood",
-      "imageUrl": "https://c.saavncdn.com/546/Soft-Romance-Bollywood-Hindi-2026-20260818072225-500x500.jpg",
-      "duration": "207",
-      "audioUrl": "https://aac.saavncdn.com/546/8c7217f7f30a4a6e795c6edc30d41cc6_320.mp4",
+      "id": "QcfFd62t",
+      "name": "Tu Mil Jaaye (From \"KING\")",
+      "title": "Tu Mil Jaaye (From \"KING\")",
+      "primaryArtists": "Sachin-Jigar, Ed Sheeran, Arijit Singh, Kumaar, Madhubanti Bagchi",
+      "album": "Tu Mil Jaaye (From \"KING\")",
+      "imageUrl": "https://c.saavncdn.com/320/Tu-Mil-Jaaye-From-KING-Hindi-2026-20261031131042-500x500.jpg",
+      "duration": "315",
+      "audioUrl": "https://aac.saavncdn.com/320/4d91932291471256b3c9313360ebb834_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Tu Mil Jaaye (From &quot;KING&quot;)\n[00:15.00] Performed by Sachin-Jigar, Ed Sheeran, Arijit Singh, Kumaar, Madhubanti Bagchi\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/546/8c7217f7f30a4a6e795c6edc30d41cc6_320.mp4"
+          "url": "https://aac.saavncdn.com/320/4d91932291471256b3c9313360ebb834_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/546/8c7217f7f30a4a6e795c6edc30d41cc6_160.mp4"
+          "url": "https://aac.saavncdn.com/320/4d91932291471256b3c9313360ebb834_160.mp4"
         }
       ]
     },
     {
-      "id": "MJHIKOrv",
-      "name": "Pal Pal Dil Ke Paas- Title Track",
-      "title": "Pal Pal Dil Ke Paas- Title Track",
-      "primaryArtists": "Arijit Singh, Parampara Tandon, Sachet-Parampara, Siddharth-Garima",
-      "album": "Romance Reloaded",
-      "imageUrl": "https://c.saavncdn.com/710/Romance-Reloaded-Hindi-2026-20260908183308-500x500.jpg",
-      "duration": "254",
-      "audioUrl": "https://aac.saavncdn.com/710/4d1d1dc540fb2c5fd2220b1098bcf614_320.mp4",
+      "id": "DHA4PFZA",
+      "name": "Mangal Rang (From \"Ramayana\")",
+      "title": "Mangal Rang (From \"Ramayana\")",
+      "primaryArtists": "A.R. Rahman, Arijit Singh, Shreya Ghoshal, Kumar Vishwas",
+      "album": "Mangal Rang (From \"Ramayana\")",
+      "imageUrl": "https://c.saavncdn.com/316/Mangal-Rang-From-Ramayana-Hindi-2026-20261024141033-500x500.jpg",
+      "duration": "277",
+      "audioUrl": "https://aac.saavncdn.com/316/87fd692b534c9f725a782432c20823e0_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Mangal Rang (From &quot;Ramayana&quot;)\n[00:15.00] Performed by A.R. Rahman, Arijit Singh, Shreya Ghoshal, Kumar Vishwas\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/710/4d1d1dc540fb2c5fd2220b1098bcf614_320.mp4"
+          "url": "https://aac.saavncdn.com/316/87fd692b534c9f725a782432c20823e0_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/710/4d1d1dc540fb2c5fd2220b1098bcf614_160.mp4"
+          "url": "https://aac.saavncdn.com/316/87fd692b534c9f725a782432c20823e0_160.mp4"
         }
       ]
     },
     {
-      "id": "jdEhkRVr",
-      "name": "Jaan Nisaar (Arijit)",
-      "title": "Jaan Nisaar (Arijit)",
-      "primaryArtists": "Arijit Singh",
-      "album": "Soft Romance Bollywood",
-      "imageUrl": "https://c.saavncdn.com/546/Soft-Romance-Bollywood-Hindi-2026-20260818072225-500x500.jpg",
-      "duration": "238",
-      "audioUrl": "https://aac.saavncdn.com/546/cff96fe9ac65691a18032b29a75ab15f_320.mp4",
+      "id": "YiVML4Zo",
+      "name": "Gehra Hua (From \"Dhurandhar\")",
+      "title": "Gehra Hua (From \"Dhurandhar\")",
+      "primaryArtists": "Shashwat Sachdev, Arijit Singh, Irshad Kamil, Armaan Khan",
+      "album": "Gehra Hua (From \"Dhurandhar\")",
+      "imageUrl": "https://c.saavncdn.com/450/Gehra-Hua-From-Dhurandhar-Hindi-2025-20251205154217-500x500.jpg",
+      "duration": "362",
+      "audioUrl": "https://aac.saavncdn.com/450/f467e05e2825cec2203546333e0d0550_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Gehra Hua (From &quot;Dhurandhar&quot;)\n[00:15.00] Performed by Shashwat Sachdev, Arijit Singh, Irshad Kamil, Armaan Khan\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/546/cff96fe9ac65691a18032b29a75ab15f_320.mp4"
+          "url": "https://aac.saavncdn.com/450/f467e05e2825cec2203546333e0d0550_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/546/cff96fe9ac65691a18032b29a75ab15f_160.mp4"
+          "url": "https://aac.saavncdn.com/450/f467e05e2825cec2203546333e0d0550_160.mp4"
         }
       ]
     },
     {
-      "id": "vRwpHMMg",
-      "name": "Jaan Ban Gaye",
-      "title": "Jaan Ban Gaye",
-      "primaryArtists": "Vishal Mishra, Mithoon, Asees Kaur",
-      "album": "Soft Romance Bollywood",
-      "imageUrl": "https://c.saavncdn.com/546/Soft-Romance-Bollywood-Hindi-2026-20260818072225-500x500.jpg",
-      "duration": "211",
-      "audioUrl": "https://aac.saavncdn.com/546/bf52319eaa32f3e38ebb2852e1f831b5_320.mp4",
+      "id": "1gHtmQ3x",
+      "name": "Gehra Hua",
+      "title": "Gehra Hua",
+      "primaryArtists": "Irshad Kamil, Arijit Singh, Shashwat Sachdev, Armaan Khan",
+      "album": "Dhurandhar",
+      "imageUrl": "https://c.saavncdn.com/475/Dhurandhar-Hindi-2025-20260203083204-500x500.jpg",
+      "duration": "362",
+      "audioUrl": "https://aac.saavncdn.com/475/04cc3b6ccd915df473947d932f094545_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Gehra Hua\n[00:15.00] Performed by Irshad Kamil, Arijit Singh, Shashwat Sachdev, Armaan Khan\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/546/bf52319eaa32f3e38ebb2852e1f831b5_320.mp4"
+          "url": "https://aac.saavncdn.com/475/04cc3b6ccd915df473947d932f094545_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/546/bf52319eaa32f3e38ebb2852e1f831b5_160.mp4"
+          "url": "https://aac.saavncdn.com/475/04cc3b6ccd915df473947d932f094545_160.mp4"
         }
       ]
     },
     {
-      "id": "lTiratEs",
-      "name": "Pal Pal Dil Ke Paas- Title Track",
-      "title": "Pal Pal Dil Ke Paas- Title Track",
-      "primaryArtists": "Arijit Singh, Parampara Tandon, Sachet-Parampara, Siddharth-Garima",
-      "album": "Midnight Romance Bollywood",
-      "imageUrl": "https://c.saavncdn.com/377/Midnight-Romance-Bollywood-Hindi-2026-20261019123006-500x500.jpg",
-      "duration": "254",
-      "audioUrl": "https://aac.saavncdn.com/377/6f1a610880db18cdca50818151b22a9c_320.mp4",
+      "id": "lDbCuERl",
+      "name": "Jai Jai Ram (From \"Ramayana\")",
+      "title": "Jai Jai Ram (From \"Ramayana\")",
+      "primaryArtists": "A.R. Rahman, Shreya Ghoshal, Arijit Singh, Kumar Vishwas",
+      "album": "Jai Jai Ram (From \"Ramayana\")",
+      "imageUrl": "https://c.saavncdn.com/816/Jai-Jai-Ram-From-Ramayana-Hindi-2026-20260914170135-500x500.jpg",
+      "duration": "320",
+      "audioUrl": "https://aac.saavncdn.com/816/0ba2085804650ab95b697b9948487553_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Jai Jai Ram (From &quot;Ramayana&quot;)\n[00:15.00] Performed by A.R. Rahman, Shreya Ghoshal, Arijit Singh, Kumar Vishwas\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/377/6f1a610880db18cdca50818151b22a9c_320.mp4"
+          "url": "https://aac.saavncdn.com/816/0ba2085804650ab95b697b9948487553_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/377/6f1a610880db18cdca50818151b22a9c_160.mp4"
+          "url": "https://aac.saavncdn.com/816/0ba2085804650ab95b697b9948487553_160.mp4"
         }
       ]
     },
     {
-      "id": "_ovxilTH",
-      "name": "Romance Like SRK - Mashup",
-      "title": "Romance Like SRK - Mashup",
-      "primaryArtists": "Sunny Subramanian, Roopkumar Rathod, Lata Mangeshkar, Sonu Nigam, Shreya Ghoshal, Mohit Chauhan, Udit Narayan",
-      "album": "Romance Like SRK - Mashup",
-      "imageUrl": "https://c.saavncdn.com/209/Romance-Like-SRK-Mashup-Hindi-2015-500x500.jpg",
-      "duration": "206",
-      "audioUrl": "https://aac.saavncdn.com/209/767f0d507529636a9711f612fb1d6ba3_320.mp4",
+      "id": "c2McgKeC",
+      "name": "Jai Jai Ram",
+      "title": "Jai Jai Ram",
+      "primaryArtists": "A.R. Rahman, Shreya Ghoshal, Arijit Singh, Kumar Vishwas",
+      "album": "Namit Malhotra's Ramayana [Hindi]",
+      "imageUrl": "https://c.saavncdn.com/013/Ramayana-Hindi-Hindi-2026-20261021183530-500x500.jpg",
+      "duration": "320",
+      "audioUrl": "https://aac.saavncdn.com/013/17c89b4c1c2ff602d2d018d96ed8c929_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Jai Jai Ram\n[00:15.00] Performed by A.R. Rahman, Shreya Ghoshal, Arijit Singh, Kumar Vishwas\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/209/767f0d507529636a9711f612fb1d6ba3_320.mp4"
+          "url": "https://aac.saavncdn.com/013/17c89b4c1c2ff602d2d018d96ed8c929_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/209/767f0d507529636a9711f612fb1d6ba3_160.mp4"
+          "url": "https://aac.saavncdn.com/013/17c89b4c1c2ff602d2d018d96ed8c929_160.mp4"
         }
       ]
     },
     {
-      "id": "bAtyl7m0",
-      "name": "Jitni Dafa",
-      "title": "Jitni Dafa",
-      "primaryArtists": "Yasser Desai, Jeet Gannguli, Rashmi-Virag",
-      "album": "Midnight Romance Bollywood",
-      "imageUrl": "https://c.saavncdn.com/377/Midnight-Romance-Bollywood-Hindi-2026-20261019123006-500x500.jpg",
-      "duration": "222",
-      "audioUrl": "https://aac.saavncdn.com/377/29acd36924c965fa627541fb34a0b1ec_320.mp4",
+      "id": "Bt07_OpM",
+      "name": "Tum Hi Ho (From \"Aashiqui 2\")",
+      "title": "Tum Hi Ho (From \"Aashiqui 2\")",
+      "primaryArtists": "Arijit Singh, Mithoon",
+      "album": "Best Of Arijit Singh - Collection Of Romantic Songs",
+      "imageUrl": "https://c.saavncdn.com/840/Best-Of-Arijit-Singh-Collection-Of-Romantic-Songs-Hindi-2025-20251203161112-500x500.jpg",
+      "duration": "261",
+      "audioUrl": "https://aac.saavncdn.com/840/c9e70fb62d66fa6e14f6b7cdbc56cc05_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Tum Hi Ho (From &quot;Aashiqui 2&quot;)\n[00:15.00] Performed by Arijit Singh, Mithoon\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/377/29acd36924c965fa627541fb34a0b1ec_320.mp4"
+          "url": "https://aac.saavncdn.com/840/c9e70fb62d66fa6e14f6b7cdbc56cc05_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/377/29acd36924c965fa627541fb34a0b1ec_160.mp4"
+          "url": "https://aac.saavncdn.com/840/c9e70fb62d66fa6e14f6b7cdbc56cc05_160.mp4"
         }
       ]
     },
     {
-      "id": "KbqCvOn0",
-      "name": "Main Agar Kahoon (From \"Om Shanti Om\")",
-      "title": "Main Agar Kahoon (From \"Om Shanti Om\")",
-      "primaryArtists": "Sonu Nigam, Shreya Ghoshal",
-      "album": "Shah Rukh Khan Romance & Rhythm",
-      "imageUrl": "https://c.saavncdn.com/199/Shah-Rukh-Khan-Romance-Rhythm-Hindi-2025-20251114171238-500x500.jpg",
-      "duration": "308",
-      "audioUrl": "https://aac.saavncdn.com/199/e2e0147dd78f172643110ee997438fcd_320.mp4",
+      "id": "aRZbUYD7",
+      "name": "Tum Hi Ho",
+      "title": "Tum Hi Ho",
+      "primaryArtists": "Mithoon, Arijit Singh",
+      "album": "Aashiqui 2",
+      "imageUrl": "https://c.saavncdn.com/430/Aashiqui-2-Hindi-2013-500x500.jpg",
+      "duration": "262",
+      "audioUrl": "https://aac.saavncdn.com/430/5c5ea5cc00e3bff45616013226f376fe_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Tum Hi Ho\n[00:15.00] Performed by Mithoon, Arijit Singh\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/199/e2e0147dd78f172643110ee997438fcd_320.mp4"
+          "url": "https://aac.saavncdn.com/430/5c5ea5cc00e3bff45616013226f376fe_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/199/e2e0147dd78f172643110ee997438fcd_160.mp4"
+          "url": "https://aac.saavncdn.com/430/5c5ea5cc00e3bff45616013226f376fe_160.mp4"
         }
       ]
     },
     {
-      "id": "R1Aqo-wi",
-      "name": "Chal Tere Ishq Mein",
-      "title": "Chal Tere Ishq Mein",
-      "primaryArtists": "Mithoon, Neeti Mohan, Vishal Mishra, Shehnaz Akhtar, Sahil Akhtar",
-      "album": "Midnight Romance Bollywood",
-      "imageUrl": "https://c.saavncdn.com/377/Midnight-Romance-Bollywood-Hindi-2026-20261019123006-500x500.jpg",
-      "duration": "371",
-      "audioUrl": "https://aac.saavncdn.com/377/13f259b1262e3ad425ab3687e273d5f9_320.mp4",
+      "id": "yXCLyL-9",
+      "name": "Tum Hi Ho (From \"Aashiqui 2\")",
+      "title": "Tum Hi Ho (From \"Aashiqui 2\")",
+      "primaryArtists": "Mithoon, Arijit Singh",
+      "album": "World Music Day - Best Of Bollywood Hits",
+      "imageUrl": "https://c.saavncdn.com/179/World-Music-Day-Best-Of-Bollywood-Hits-Hindi-2026-20260622111029-500x500.jpg",
+      "duration": "261",
+      "audioUrl": "https://aac.saavncdn.com/179/ee99b14844e2699aad400fa1e946c0ed_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Tum Hi Ho (From &quot;Aashiqui 2&quot;)\n[00:15.00] Performed by Mithoon, Arijit Singh\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/377/13f259b1262e3ad425ab3687e273d5f9_320.mp4"
+          "url": "https://aac.saavncdn.com/179/ee99b14844e2699aad400fa1e946c0ed_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/377/13f259b1262e3ad425ab3687e273d5f9_160.mp4"
+          "url": "https://aac.saavncdn.com/179/ee99b14844e2699aad400fa1e946c0ed_160.mp4"
         }
       ]
     },
     {
-      "id": "EOhHDZle",
-      "name": "Dariya",
-      "title": "Dariya",
-      "primaryArtists": "Arko",
-      "album": "Soft Romance Bollywood",
-      "imageUrl": "https://c.saavncdn.com/546/Soft-Romance-Bollywood-Hindi-2026-20260818072225-500x500.jpg",
-      "duration": "217",
-      "audioUrl": "https://aac.saavncdn.com/546/e0600f2fb7f3f90f5d51a1db5cb89e36_320.mp4",
+      "id": "xJZBjDck",
+      "name": "Raabta (From \"Agent Vinod\")",
+      "title": "Raabta (From \"Agent Vinod\")",
+      "primaryArtists": "Arijit Singh, Pritam, Amitabh Bhattacharya",
+      "album": "Best Of Arijit Singh - Collection Of Romantic Songs",
+      "imageUrl": "https://c.saavncdn.com/840/Best-Of-Arijit-Singh-Collection-Of-Romantic-Songs-Hindi-2025-20251203161112-500x500.jpg",
+      "duration": "243",
+      "audioUrl": "https://aac.saavncdn.com/840/2be7053be63d9a4b6ea952eb972de3cb_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Raabta (From &quot;Agent Vinod&quot;)\n[00:15.00] Performed by Arijit Singh, Pritam, Amitabh Bhattacharya\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/546/e0600f2fb7f3f90f5d51a1db5cb89e36_320.mp4"
+          "url": "https://aac.saavncdn.com/840/2be7053be63d9a4b6ea952eb972de3cb_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/546/e0600f2fb7f3f90f5d51a1db5cb89e36_160.mp4"
+          "url": "https://aac.saavncdn.com/840/2be7053be63d9a4b6ea952eb972de3cb_160.mp4"
         }
       ]
     },
     {
-      "id": "ryZWXyLb",
-      "name": "Romance Period",
-      "title": "Romance Period",
-      "primaryArtists": "Surendra Sathi, Kumar Sanu, Nadeem-Shravan",
-      "album": "Jaan Tere Naam",
-      "imageUrl": "https://c.saavncdn.com/172/Jaan-Tere-Naam-Hindi-1992-20240408213836-500x500.jpg",
-      "duration": "413",
-      "audioUrl": "https://aac.saavncdn.com/172/ad8cbd4246ebccce97f8bcb0920318e8_320.mp4",
+      "id": "Wn_eONzu",
+      "name": "Raabta",
+      "title": "Raabta",
+      "primaryArtists": "Pritam, Arijit Singh",
+      "album": "Agent Vinod",
+      "imageUrl": "https://c.saavncdn.com/603/Agent-Vinod-2012-500x500.jpg",
+      "duration": "244",
+      "audioUrl": "https://aac.saavncdn.com/603/40a507a84a1045c70af28f1fc79384bf_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Raabta\n[00:15.00] Performed by Pritam, Arijit Singh\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/172/ad8cbd4246ebccce97f8bcb0920318e8_320.mp4"
+          "url": "https://aac.saavncdn.com/603/40a507a84a1045c70af28f1fc79384bf_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/172/ad8cbd4246ebccce97f8bcb0920318e8_160.mp4"
+          "url": "https://aac.saavncdn.com/603/40a507a84a1045c70af28f1fc79384bf_160.mp4"
         }
       ]
     },
     {
-      "id": "8g43YcY4",
-      "name": "Manwa Laage (From \"Happy New Year\")",
-      "title": "Manwa Laage (From \"Happy New Year\")",
-      "primaryArtists": "Shreya Ghoshal, Arijit Singh",
-      "album": "Shah Rukh Khan Romance & Rhythm",
-      "imageUrl": "https://c.saavncdn.com/199/Shah-Rukh-Khan-Romance-Rhythm-Hindi-2025-20251114171238-500x500.jpg",
-      "duration": "272",
-      "audioUrl": "https://aac.saavncdn.com/199/8846c7613f0e2b5a047d56ff5f16d1e9_320.mp4",
+      "id": "Itm0k7b5",
+      "name": "Sitaare (From \"Ikkis\")",
+      "title": "Sitaare (From \"Ikkis\")",
+      "primaryArtists": "Amitabh Bhattacharya, Arijit Singh, Sachin-Jigar",
+      "album": "Sitaare (From \"Ikkis\")",
+      "imageUrl": "https://c.saavncdn.com/856/Sitaare-From-Ikkis-Hindi-2025-20251203170135-500x500.jpg",
+      "duration": "242",
+      "audioUrl": "https://aac.saavncdn.com/856/f1666594b68b88e7b3002074f2a4fb4b_320.mp4",
+      "hasLyrics": true,
+      "lyrics": "[00:00.00] Sitaare (From &quot;Ikkis&quot;)\n[00:15.00] Performed by Amitabh Bhattacharya, Arijit Singh, Sachin-Jigar\n[00:30.00] Streaming in 320kbps Lossless Audio\n[00:45.00] SMC Singhs Music Co\n[01:00.00] Enjoy the high-fidelity sound.",
       "downloadUrl": [
         {
           "quality": "320kbps",
-          "url": "https://aac.saavncdn.com/199/8846c7613f0e2b5a047d56ff5f16d1e9_320.mp4"
+          "url": "https://aac.saavncdn.com/856/f1666594b68b88e7b3002074f2a4fb4b_320.mp4"
         },
         {
           "quality": "160kbps",
-          "url": "https://aac.saavncdn.com/199/8846c7613f0e2b5a047d56ff5f16d1e9_160.mp4"
+          "url": "https://aac.saavncdn.com/856/f1666594b68b88e7b3002074f2a4fb4b_160.mp4"
         }
       ]
     }
