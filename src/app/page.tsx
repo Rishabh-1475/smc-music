@@ -5,14 +5,9 @@ import Link from "next/link";
 import {
   Sparkles,
   Music,
-  Flame,
-  Zap,
-  Coffee,
-  Heart,
   ExternalLink,
   Play,
   CheckCircle2,
-  Headphones,
 } from "lucide-react";
 import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
@@ -21,7 +16,7 @@ import ShelfCarousel from "@/components/ShelfCarousel";
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
 import FullPlayerModal from "@/components/FullPlayerModal";
-import { searchSongs, getYTMusicHomeFeeds, getLiveCategory } from "@/services/api";
+import { searchSongs, getHomeFeed, getLiveCategory } from "@/services/api";
 import { Song } from "@/types/music";
 import { usePlayerStore } from "@/store/playerStore";
 
@@ -33,36 +28,36 @@ export default function Home() {
 
   const { playSong } = usePlayerStore();
 
-  // YouTube Music Categorized Home Feeds
+  // YouTube Music Home Feed Sections
   const [feeds, setFeeds] = useState<{
     quickPicks: Song[];
-    trendingHits: Song[];
-    moodStations: Song[];
-    workoutHype: Song[];
-    chillVibes: Song[];
+    trending: Song[];
+    workout: Song[];
+    chill: Song[];
+    party: Song[];
   }>({
     quickPicks: [],
-    trendingHits: [],
-    moodStations: [],
-    workoutHype: [],
-    chillVibes: [],
+    trending: [],
+    workout: [],
+    chill: [],
+    party: [],
   });
 
   const [loadingFeeds, setLoadingFeeds] = useState(true);
 
-  // Load YouTube Music Home Feeds on Mount
+  // Load live categories on mount using getHomeFeed()
   useEffect(() => {
     let active = true;
 
     async function loadFeeds() {
       setLoadingFeeds(true);
       try {
-        const data = await getYTMusicHomeFeeds();
+        const data = await getHomeFeed();
         if (active) {
           setFeeds(data);
         }
       } catch (err) {
-        console.error("Failed to load YouTube Music home feeds:", err);
+        console.error("Failed to load YouTube Music home feed:", err);
       } finally {
         if (active) setLoadingFeeds(false);
       }
@@ -74,7 +69,7 @@ export default function Home() {
     };
   }, []);
 
-  // Category filter selection handler
+  // Category chip filter selection handler
   const handleCategorySelect = async (category: string) => {
     setActiveCategory(category);
     if (!category) {
@@ -148,14 +143,14 @@ export default function Home() {
         isSearching={isSearching}
       />
 
-      {/* 2. Sticky CategoryChips Bar beneath Header */}
+      {/* 2. Horizontal CategoryChips Bar Right Below the Header */}
       <CategoryChips
         activeCategory={activeCategory}
         onSelectCategory={handleCategorySelect}
       />
 
       <main className="flex-1 w-full mx-auto pb-36">
-        {/* Dynamic Search / Mood Filter Results View */}
+        {/* Search State: Instant Search Results Grid when input is active */}
         {hasSearchOrFilter ? (
           <section className="px-4 md:px-8 py-6 space-y-4">
             <div className="flex items-center space-x-2">
@@ -190,6 +185,7 @@ export default function Home() {
             )}
           </section>
         ) : loadingFeeds ? (
+          /* Loading Skeletons on Mount */
           <div className="px-4 md:px-8 py-8 space-y-8">
             <div className="space-y-4">
               <div className="h-6 w-48 bg-[#212121] rounded-md animate-pulse" />
@@ -201,106 +197,40 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          /* Default YouTube Music Home Feed */
+          /* Default YouTube Music Feed View */
           <div className="space-y-4">
-            {/* Section 1: "Quick Picks" (Listen again / Start radio grid) */}
+            {/* Section 1: "Quick Picks" (4-row YouTube Music grid) */}
             <QuickPicks
               title="Quick picks"
               subtitle="START RADIO FROM A SONG"
               songs={feeds.quickPicks}
             />
 
-            {/* Section 2: "Mixed for You" (Horizontal cards with play overlays) */}
+            {/* Section 2: "Trending Now" (horizontal carousel) */}
             <ShelfCarousel
-              title="Mixed for you"
-              subtitle="RECOMMENDED FOR YOU"
-              songs={feeds.trendingHits}
+              title="Trending Now"
+              subtitle="TOP CHARTS & VIRAL HITS"
+              songs={feeds.trending}
               variant="square"
             />
 
-            {/* Section 3: "Trending & New Releases" (Carousel) */}
+            {/* Section 3: "Workout & Energy" (horizontal carousel) */}
             <ShelfCarousel
-              title="Trending &amp; New Releases"
-              subtitle="TOP CHARTS &amp; VIRAL HITS"
-              songs={feeds.moodStations}
+              title="Workout & Energy"
+              subtitle="CARDIO, PUMP & POWER"
+              songs={feeds.workout}
               variant="square"
             />
 
-            {/* Section 4: "Moods & Genres" (Interactive Pill Cards) */}
-            <section className="my-8 px-4 md:px-8">
-              <div className="mb-4">
-                <p className="text-[11px] font-bold text-neutral-400 tracking-wider uppercase">
-                  EXPLORE VIBES
-                </p>
-                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mt-0.5">
-                  Moods &amp; Genres
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                <div
-                  onClick={() => handleCategorySelect("Party")}
-                  className="group relative h-28 rounded-2xl p-4 bg-gradient-to-br from-amber-600/90 to-orange-700/80 hover:scale-[1.02] transition-all cursor-pointer flex flex-col justify-between overflow-hidden shadow-lg"
-                >
-                  <Flame className="w-6 h-6 text-white/90 group-hover:scale-110 transition-transform" />
-                  <div>
-                    <h3 className="font-bold text-base text-white">Party &amp; Dance</h3>
-                    <p className="text-[11px] text-white/80">Club beats &amp; bass</p>
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => handleCategorySelect("Chill")}
-                  className="group relative h-28 rounded-2xl p-4 bg-gradient-to-br from-indigo-700/90 to-cyan-800/80 hover:scale-[1.02] transition-all cursor-pointer flex flex-col justify-between overflow-hidden shadow-lg"
-                >
-                  <Coffee className="w-6 h-6 text-white/90 group-hover:scale-110 transition-transform" />
-                  <div>
-                    <h3 className="font-bold text-base text-white">Chill &amp; Lo-Fi</h3>
-                    <p className="text-[11px] text-white/80">Late night relaxation</p>
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => handleCategorySelect("Workout")}
-                  className="group relative h-28 rounded-2xl p-4 bg-gradient-to-br from-emerald-600/90 to-teal-800/80 hover:scale-[1.02] transition-all cursor-pointer flex flex-col justify-between overflow-hidden shadow-lg"
-                >
-                  <Zap className="w-6 h-6 text-white/90 group-hover:scale-110 transition-transform" />
-                  <div>
-                    <h3 className="font-bold text-base text-white">Energy &amp; Gym</h3>
-                    <p className="text-[11px] text-white/80">High tempo motivators</p>
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => handleCategorySelect("Romance")}
-                  className="group relative h-28 rounded-2xl p-4 bg-gradient-to-br from-rose-600/90 to-pink-800/80 hover:scale-[1.02] transition-all cursor-pointer flex flex-col justify-between overflow-hidden shadow-lg"
-                >
-                  <Heart className="w-6 h-6 text-white/90 group-hover:scale-110 transition-transform" />
-                  <div>
-                    <h3 className="font-bold text-base text-white">Romance &amp; Love</h3>
-                    <p className="text-[11px] text-white/80">Soulful acoustic ballads</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Additional Thematic Shelf: Energy & Workout */}
+            {/* Section 4: "Chill & Focus" (horizontal carousel) */}
             <ShelfCarousel
-              title="Energy &amp; Workout Hype"
-              subtitle="CARDIO &amp; STRENGTH"
-              songs={feeds.workoutHype}
+              title="Chill & Focus"
+              subtitle="DEEP WORK & RELAXATION"
+              songs={feeds.chill}
               variant="square"
             />
 
-            {/* Additional Thematic Shelf: Chill Vibes */}
-            <ShelfCarousel
-              title="Chill &amp; Focus"
-              subtitle="DEEP WORK &amp; STUDY"
-              songs={feeds.chillVibes}
-              variant="square"
-            />
-
-            {/* Section 5: "Singhs Music Co Originals & Creator Spotlight" */}
+            {/* Section 5: Creator Spotlight Banner Honoring Rishabh Singh */}
             <section className="my-10 px-4 md:px-8">
               <div className="relative rounded-3xl bg-gradient-to-r from-emerald-950/70 via-[#181818] to-[#121212] border border-emerald-500/25 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-5 flex-1 min-w-0">
@@ -339,7 +269,7 @@ export default function Home() {
                         playSong(feeds.quickPicks[0], feeds.quickPicks);
                       }
                     }}
-                    className="w-full sm:w-auto px-5 py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-500/25 active:scale-95"
+                    className="w-full sm:w-auto px-5 py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-500/25 active:scale-95 cursor-pointer"
                   >
                     <Play className="w-4 h-4 fill-black stroke-black" />
                     <span>Play SMC Originals</span>
@@ -364,7 +294,7 @@ export default function Home() {
       {/* Global Persistent MiniPlayer */}
       <MiniPlayer />
 
-      {/* Global Persistent FullPlayerModal with Lyrics & Up Next Tabs */}
+      {/* Global Persistent FullPlayerModal */}
       <FullPlayerModal />
     </div>
   );
