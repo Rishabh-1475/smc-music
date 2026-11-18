@@ -4,14 +4,168 @@ import CryptoJS from "crypto-js";
 import curatedTracks from "./curatedTracks.json";
 
 /**
- * SMC Singhs Music Co - Production-Grade Dual-Layer Global JioSaavn Engine
- * Layer 1: High-capacity multi-region JioSaavn Proxies
- * Layer 2: Direct JioSaavn Autocomplete & Search Gateway (Official uncapped endpoint)
- * 3000ms Fast Failover • Strict 320kbps Audio Resolution • Zero Mock Placeholders
+ * SMC Singhs Music Co - Search Intelligence & Dual-Layer JioSaavn Engine
+ * Query Expander • Popularity & Relevance Ranker • Curated Mood Bundles • 320kbps Lossless
  */
 
 const HIGH_RES_VINYL_COVER =
   "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
+
+// Renowned Hitmakers dictionary for ranking & relevance boosting
+const RENOWNED_HITMAKERS = new Set([
+  "arijit singh",
+  "sidhu moose wala",
+  "diljit dosanjh",
+  "karan aujla",
+  "shubh",
+  "ap dhillon",
+  "badshah",
+  "yo yo honey singh",
+  "pritam",
+  "atif aslam",
+  "neha kakkar",
+  "shreya ghoshal",
+  "jubin nautiyal",
+  "b praak",
+  "sonu nigam",
+  "anirudh ravichander",
+  "a.r. rahman",
+  "ar rahman",
+  "the weeknd",
+  "drake",
+  "eminem",
+  "imagine dragons",
+  "kordhell",
+  "alan walker",
+  "taylor swift",
+  "bts",
+  "justin bieber",
+  "ed sheeran",
+  "martin garrix",
+  "david guetta",
+  "dua lipa",
+  "travis scott",
+  "post malone",
+  "kendrick lamar",
+]);
+
+// Dynamic Query Expander & Alias Dictionary
+const QUERY_EXPANSION_MAP: Record<string, string[]> = {
+  phonk: [
+    "Brazilian Phonk",
+    "Drift Phonk",
+    "Kordhell Phonk",
+    "GigaChad Phonk",
+    "Montagem Phonk",
+  ],
+  fonk: [
+    "Brazilian Phonk",
+    "Drift Phonk",
+    "Montagem Phonk",
+  ],
+  gym: [
+    "Hype Gym Workout Hindi Punjabi",
+    "Beast Mode Workout",
+    "Phonk Gym Motivation",
+    "Hardstyle Gym Hits",
+  ],
+  workout: [
+    "Gym Motivation Hindi Punjabi 2026",
+    "Beast Mode Gym Hype",
+    "High Energy Workout EDM & Phonk",
+    "Punjabi Gym Hype Sidhu Karan Aujla",
+  ],
+  motivation: [
+    "Gym Motivation Hindi Punjabi",
+    "Beast Mode Workout",
+    "Phonk Motivation",
+  ],
+  kalyani: [
+    "Kalyani Ragam Hits",
+    "Kalyani Vachane",
+    "Alaipayuthey Kalyani",
+    "Kalyani Classical Renditions",
+  ],
+  chill: [
+    "Bollywood Acoustic Chill",
+    "Midnight Lo-Fi Hindi",
+    "Arijit Singh Soulful Chill",
+    "Slowed and Reverb Trending",
+  ],
+  lofi: [
+    "Midnight Lo-Fi Hindi",
+    "Bollywood Lo-Fi Beats",
+    "Lo-Fi Instrumental Work Study",
+  ],
+  party: [
+    "Trending Club Bollywood Party",
+    "Punjabi Hype Party Hits",
+    "Commercial EDM Top Hits",
+  ],
+  sad: [
+    "Heartbreak Hits Hindi",
+    "Sad Melodies Arijit B Praak",
+    "Soulful Sad Ballads",
+  ],
+  romance: [
+    "Top Bollywood Romance Hits",
+    "Soulful Love Anthems",
+    "Acoustic Romantic Hindi",
+  ],
+  focus: [
+    "Deep Focus Ambient Beats",
+    "Lo-Fi Instrumental Work Study",
+    "Calm Piano Focus",
+  ],
+};
+
+// Curated Mood Query Bundles for Instant High-Energy Feeds
+const MOOD_QUERY_BUNDLES: Record<string, string[]> = {
+  workout: [
+    "Gym Motivation Hindi Punjabi 2026",
+    "Beast Mode Gym Hype",
+    "High Energy Workout EDM & Phonk",
+    "Punjabi Gym Hype Sidhu Karan Aujla",
+  ],
+  energize: [
+    "Trending Club Bollywood Party",
+    "Punjabi Hype Party Hits",
+    "Commercial EDM Top Hits",
+    "High Energy Dance Anthems",
+  ],
+  party: [
+    "Trending Club Bollywood Party",
+    "Punjabi Hype Party Hits",
+    "Commercial EDM Top Hits",
+  ],
+  relax: [
+    "Bollywood Acoustic Chill",
+    "Midnight Lo-Fi Hindi",
+    "Arijit Singh Soulful Chill",
+    "Slowed and Reverb Trending",
+  ],
+  chill: [
+    "Bollywood Acoustic Chill",
+    "Midnight Lo-Fi Hindi",
+    "Arijit Singh Soulful Chill",
+    "Slowed and Reverb Trending",
+  ],
+  focus: [
+    "Deep Focus Ambient Beats",
+    "Lo-Fi Instrumental Work Study",
+    "Calm Piano Focus Study",
+  ],
+  romance: [
+    "Top Bollywood Romance Hits",
+    "Soulful Love Anthems",
+    "Acoustic Romantic Hindi",
+  ],
+  commute: [
+    "Feel Good Road Trip Hits",
+    "Easy Listening Acoustic Pop",
+    "Indie Hindi Vibes",
+  ],
+};
 
 /**
  * Decodes and sanitizes HTML entities and numerical escape sequences.
@@ -49,8 +203,7 @@ export const sanitizeHtml = (str: string = ""): string => {
 
 /**
  * Query Sanitization:
- * Trims strings, removes noise characters that trigger 400 errors while preserving
- * alphanumeric words and international Unicode characters (Hindi, Punjabi, K-pop, etc.).
+ * Trims strings, cleans noise while strictly preserving multilingual Unicode characters.
  */
 export const sanitizeQuery = (query: string): string => {
   if (!query || typeof query !== "string") return "";
@@ -59,6 +212,27 @@ export const sanitizeQuery = (query: string): string => {
     .replace(/[^\w\s\u0900-\u097F\u0A00-\u0A7F\u0B80-\u0BFF\u0C00-\u0C7F\u0D00-\u0D7F\uAC00-\uD7AF\u4E00-\u9FFF-]/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
+};
+
+/**
+ * Expands user query into subgenres or alternative search variants.
+ */
+export const expandQuery = (rawQuery: string): string[] => {
+  const sanitized = sanitizeQuery(rawQuery).toLowerCase();
+  const words = sanitized.split(" ");
+  const expansions: string[] = [sanitized];
+
+  for (const word of words) {
+    if (QUERY_EXPANSION_MAP[word]) {
+      for (const item of QUERY_EXPANSION_MAP[word]) {
+        if (!expansions.includes(item.toLowerCase())) {
+          expansions.push(item);
+        }
+      }
+    }
+  }
+
+  return expansions.slice(0, 4);
 };
 
 /**
@@ -96,7 +270,7 @@ export const decryptMediaUrl = (encryptedMediaUrl: string): string => {
 const resolveAudioUrl = (item: any): string => {
   if (!item) return "";
 
-  // 1. Check direct or nested encrypted_media_url
+  // 1. Direct or nested encrypted_media_url
   const cipher =
     item.encrypted_media_url ||
     item.more_info?.encrypted_media_url ||
@@ -109,7 +283,7 @@ const resolveAudioUrl = (item: any): string => {
     }
   }
 
-  // 2. Check downloadUrl arrays
+  // 2. downloadUrl arrays
   const downloadSources = [
     item.downloadUrl,
     item.download_url,
@@ -124,7 +298,6 @@ const resolveAudioUrl = (item: any): string => {
     if (!src) continue;
 
     if (Array.isArray(src) && src.length > 0) {
-      // Find 320kbps tag or _320.mp4 link
       const found320 = src.find(
         (d: any) =>
           d?.quality === "320kbps" ||
@@ -139,7 +312,7 @@ const resolveAudioUrl = (item: any): string => {
         }
       }
 
-      // Fallback to the last item in the array (highest bitrate)
+      // Last item in array
       const lastItem = src[src.length - 1];
       const candidate =
         typeof lastItem === "string" ? lastItem : lastItem?.link || lastItem?.url;
@@ -148,13 +321,12 @@ const resolveAudioUrl = (item: any): string => {
       }
     }
 
-    // Direct string source
     if (typeof src === "string" && src.startsWith("http")) {
       return src.replace("http://", "https://");
     }
   }
 
-  // 3. Check media_preview_url or vlink as fallback
+  // 3. Media preview / vlink fallback
   const preview =
     item.media_preview_url ||
     item.more_info?.media_preview_url ||
@@ -186,7 +358,6 @@ const resolveImageUrl = (item: any): string => {
     if (!src) continue;
 
     if (Array.isArray(src) && src.length > 0) {
-      // Find 500x500
       const found500 = src.find(
         (img: any) =>
           img?.quality === "500x500" ||
@@ -200,7 +371,6 @@ const resolveImageUrl = (item: any): string => {
         }
       }
 
-      // Last item in array
       const lastImg = src[src.length - 1];
       const candidate =
         typeof lastImg === "string" ? lastImg : lastImg?.link || lastImg?.url;
@@ -209,7 +379,6 @@ const resolveImageUrl = (item: any): string => {
       }
     }
 
-    // Direct string URL: Replace 150x150 or 50x50 with 500x500
     if (typeof src === "string" && src.startsWith("http")) {
       return src
         .replace("http://", "https://")
@@ -273,8 +442,7 @@ const resolveAlbum = (item: any): string => {
 
 /**
  * Multi-Format JSON Normalizer:
- * Checks across json.data.results, json.data.songs.results, json.data, json.results, json.songs.data.
- * Discards any entry that does not resolve to a playable audio URL.
+ * Unpacks json.data.results, json.data.songs.results, json.data, json.results, json.songs.data.
  */
 export const parseSongs = (rawJson: any): Song[] => {
   if (!rawJson) return [];
@@ -316,7 +484,15 @@ export const parseSongs = (rawJson: any): Song[] => {
     const cleanArtists = resolveArtists(item);
     const cleanAlbum = resolveAlbum(item);
     const cleanCover = resolveImageUrl(item);
-    const duration = item.duration || 210;
+    const rawDur = item.duration;
+    const duration = typeof rawDur === "number" ? rawDur : parseInt(rawDur, 10) || 210;
+
+    // Parse play_count
+    let playCountNum = 0;
+    if (typeof item.play_count === "number") playCountNum = item.play_count;
+    else if (typeof item.play_count === "string") playCountNum = parseInt(item.play_count, 10) || 0;
+    else if (typeof item.playCount === "number") playCountNum = item.playCount;
+    else if (typeof item.playCount === "string") playCountNum = parseInt(item.playCount, 10) || 0;
 
     parsedSongs.push({
       id: cleanId,
@@ -330,6 +506,7 @@ export const parseSongs = (rawJson: any): Song[] => {
       hasLyrics: Boolean(item.hasLyrics || item.has_lyrics || item.more_info?.has_lyrics === "true"),
       lyrics: item.lyrics || undefined,
       year: item.year ? String(item.year) : undefined,
+      playCount: playCountNum,
     });
   }
 
@@ -337,11 +514,86 @@ export const parseSongs = (rawJson: any): Song[] => {
 };
 
 /**
+ * Popularity & Relevance Ranking Filter (Rank & Sort Engine):
+ * 1. Deduplicates near-identical tracks.
+ * 2. Purges tracks with zero-duration streams or missing metadata.
+ * 3. Ranks by playCount, modern release year, query match, and renowned hitmakers.
+ */
+export const rankAndSortSongs = (songs: Song[], originalQuery: string = ""): Song[] => {
+  if (!songs || songs.length === 0) return [];
+
+  const cleanQueryLower = originalQuery.toLowerCase().trim();
+  const queryWords = cleanQueryLower.split(/\s+/).filter(Boolean);
+
+  // 1. Deduplication using normalized signature
+  const seenSignatures = new Set<string>();
+  const uniqueSongs: Song[] = [];
+
+  for (const song of songs) {
+    if (!song.audioUrl || !song.name) continue;
+
+    const normName = song.name.toLowerCase().replace(/[^\w]/g, "");
+    const normArtist = song.primaryArtists.toLowerCase().split(",")[0].replace(/[^\w]/g, "");
+    const sig = `${normName}__${normArtist}`;
+
+    if (!seenSignatures.has(sig)) {
+      seenSignatures.add(sig);
+      uniqueSongs.push(song);
+    }
+  }
+
+  // 2. Score calculation
+  const scored = uniqueSongs.map((song) => {
+    let score = 0;
+    const nameLower = song.name.toLowerCase();
+    const artistLower = song.primaryArtists.toLowerCase();
+    const albumLower = song.album.toLowerCase();
+
+    // Exact or starting match
+    if (cleanQueryLower && nameLower === cleanQueryLower) score += 60;
+    else if (cleanQueryLower && nameLower.startsWith(cleanQueryLower)) score += 35;
+    else if (cleanQueryLower && nameLower.includes(cleanQueryLower)) score += 20;
+
+    // Word matches
+    for (const w of queryWords) {
+      if (nameLower.includes(w)) score += 15;
+      if (artistLower.includes(w)) score += 25;
+      if (albumLower.includes(w)) score += 10;
+    }
+
+    // PlayCount popularity score (log scale)
+    const pc = typeof song.playCount === "number" ? song.playCount : parseInt(String(song.playCount || 0), 10) || 0;
+    if (pc > 0) {
+      score += Math.min(35, Math.log10(pc) * 5);
+    }
+
+    // Renowned Hitmakers prominence bonus
+    for (const hitmaker of RENOWNED_HITMAKERS) {
+      if (artistLower.includes(hitmaker)) {
+        score += 25;
+        break;
+      }
+    }
+
+    // Modern release year preference
+    const yr = song.year ? parseInt(song.year, 10) : 0;
+    if (yr >= 2024) score += 15;
+    else if (yr >= 2021) score += 10;
+    else if (yr >= 2016) score += 5;
+
+    return { ...song, score };
+  });
+
+  // 3. Sort descending by score
+  scored.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  return scored;
+};
+
+/**
  * Robust fetcher with 3000ms AbortController timeout.
- * Uses CapacitorHttp in native mobile environments to bypass CORS restrictions.
  */
 async function fetchWithTimeout(url: string, timeoutMs = 3000): Promise<any> {
-  // Mobile Android / iOS via Capacitor
   if (Capacitor.isNativePlatform()) {
     try {
       const response = await CapacitorHttp.get({
@@ -361,7 +613,6 @@ async function fetchWithTimeout(url: string, timeoutMs = 3000): Promise<any> {
     }
   }
 
-  // Web Browser fetch with AbortController
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -388,22 +639,19 @@ async function fetchWithTimeout(url: string, timeoutMs = 3000): Promise<any> {
 }
 
 /**
- * Multi-Engine JioSaavn Pipeline:
- * Layer 1: High-capacity multi-region proxies
- * Layer 2: Official direct JioSaavn search & autocomplete gateway
+ * Query multi-engine endpoints with 3000ms timeout per endpoint.
  */
-async function queryMultiEngine(cleanQuery: string): Promise<Song[]> {
+async function queryEndpoints(cleanQuery: string): Promise<Song[]> {
   const encodedQuery = encodeURIComponent(cleanQuery);
 
-  // Ordered list of resilient endpoints: Layer 2 direct uncapped + Layer 1 high-speed proxies
   const endpoints = [
-    // Layer 2: Official Uncapped JioSaavn Gateway
+    // Layer 2: Direct Official JioSaavn Search Gateway
     `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&n=40&p=1&q=${encodedQuery}`,
-    // Layer 1: Active Unofficial Vercel Mirror
+    // Layer 1: High-capacity Unofficial Mirror
     `https://jiosaavn-api-unofficial.vercel.app/search/songs?query=${encodedQuery}`,
-    // Layer 2: Direct Autocomplete Gateway
+    // Layer 2: Official Autocomplete Gateway
     `https://www.jiosaavn.com/api.php?__call=autocomplete.get&_format=json&_marker=0&cc=in&includeMetaTags=1&query=${encodedQuery}`,
-    // Layer 1: Saavn Dev & Vercel Proxies
+    // Layer 1: Proxies
     `https://saavn.dev/api/search/songs?query=${encodedQuery}&page=1&limit=40`,
     `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodedQuery}`,
     `https://saavn-api.vercel.app/api/search/songs?query=${encodedQuery}`,
@@ -417,7 +665,7 @@ async function queryMultiEngine(cleanQuery: string): Promise<Song[]> {
         return parsed;
       }
     } catch {
-      // Failover seamlessly to next mirror
+      // Failover to next mirror
     }
   }
 
@@ -426,33 +674,76 @@ async function queryMultiEngine(cleanQuery: string): Promise<Song[]> {
 
 /**
  * searchSongs(query: string): Promise<Song[]>
- * Must race or sequentially failover across the endpoints with 3000ms AbortController.
- * If query is empty, returns [] immediately.
- * Does NOT return home screen items when search returns empty.
+ * Includes Dynamic Query Expansion & Ranking Filter.
+ * If query is empty, returns []. Never falls back to home screen songs.
  */
 export async function searchSongs(query: string): Promise<Song[]> {
   const sanitized = sanitizeQuery(query);
   if (!sanitized) return [];
 
-  const songs = await queryMultiEngine(sanitized);
-  // Return live search results or empty array to show authentic "No results found"
-  return songs;
+  // 1. Dynamic Query Expander
+  const expandedQueries = expandQuery(sanitized);
+
+  // 2. Query primary search target
+  const primaryResults = await queryEndpoints(sanitized);
+
+  // 3. If primary results are sparse (< 6) and expansions exist, query subgenre expansions in parallel
+  let additionalResults: Song[] = [];
+  if (primaryResults.length < 6 && expandedQueries.length > 1) {
+    const subQueries = expandedQueries.slice(1, 3);
+    const subPromises = subQueries.map((sq) => queryEndpoints(sq));
+    const settled = await Promise.allSettled(subPromises);
+
+    for (const res of settled) {
+      if (res.status === "fulfilled" && res.value.length > 0) {
+        additionalResults.push(...res.value);
+      }
+    }
+  }
+
+  const combined = [...primaryResults, ...additionalResults];
+
+  // 4. Rank & Sort Engine
+  const ranked = rankAndSortSongs(combined, sanitized);
+
+  return ranked;
+}
+
+/**
+ * searchSongsWithRadio(query: string): Promise<{ results: Song[]; radioQueue: Song[] }>
+ * For any single-track search, fetches direct song AND generates dynamic trending radio behind it.
+ */
+export async function searchSongsWithRadio(query: string): Promise<{
+  results: Song[];
+  radioQueue: Song[];
+}> {
+  const results = await searchSongs(query);
+
+  let radioQueue: Song[] = [];
+  if (results.length > 0) {
+    const leadTrack = results[0];
+    const artist = leadTrack.primaryArtists?.split(",")[0]?.trim() || leadTrack.name;
+    radioQueue = await getRadioForTrack(artist);
+  }
+
+  return { results, radioQueue };
 }
 
 /**
  * getLiveCategory(query: string): Promise<Song[]>
- * Fetches dynamic category tracks with curated backup for home shelves during network outage.
  */
 export async function getLiveCategory(query: string): Promise<Song[]> {
   const sanitized = sanitizeQuery(query);
   if (!sanitized) return curatedTracks.trendingHits as unknown as Song[];
 
-  const songs = await queryMultiEngine(sanitized);
-  if (songs.length > 0) return songs;
+  const songs = await queryEndpoints(sanitized);
+  if (songs.length > 0) {
+    return rankAndSortSongs(songs, sanitized);
+  }
 
   // Fallback to categorized curated tracks ONLY for home categories, never for search
   const q = sanitized.toLowerCase();
-  if (q.includes("workout") || q.includes("energy") || q.includes("gym")) {
+  if (q.includes("workout") || q.includes("energy") || q.includes("gym") || q.includes("phonk")) {
     return curatedTracks.workoutHype as unknown as Song[];
   }
   if (q.includes("chill") || q.includes("relax") || q.includes("focus") || q.includes("lo-fi")) {
@@ -465,6 +756,31 @@ export async function getLiveCategory(query: string): Promise<Song[]> {
 }
 
 /**
+ * getMoodCategoryBundle(mood: string): Promise<Song[]>
+ * Modern, trending, high-energy query bundles replacing stale categories.
+ */
+export async function getMoodCategoryBundle(mood: string): Promise<Song[]> {
+  const normalizedMood = mood.toLowerCase().trim();
+  const queryBundle = MOOD_QUERY_BUNDLES[normalizedMood] || [mood];
+
+  const promises = queryBundle.map((q) => queryEndpoints(q));
+  const settled = await Promise.allSettled(promises);
+
+  const pool: Song[] = [];
+  for (const res of settled) {
+    if (res.status === "fulfilled" && res.value.length > 0) {
+      pool.push(...res.value);
+    }
+  }
+
+  if (pool.length > 0) {
+    return rankAndSortSongs(pool, mood).slice(0, 30);
+  }
+
+  return getLiveCategory(mood);
+}
+
+/**
  * getRadioForTrack(artistOrTrack: string): Promise<Song[]>
  */
 export async function getRadioForTrack(artistOrTrack: string): Promise<Song[]> {
@@ -473,11 +789,11 @@ export async function getRadioForTrack(artistOrTrack: string): Promise<Song[]> {
     return curatedTracks.trendingHits as unknown as Song[];
   }
 
-  const primaryQuery = sanitized.split(" ")[0] || sanitized;
-  const results = await queryMultiEngine(primaryQuery);
+  const primaryQuery = sanitized.split(",")[0].trim() || sanitized;
+  const results = await queryEndpoints(primaryQuery);
 
   if (results.length > 0) {
-    return results;
+    return rankAndSortSongs(results, primaryQuery);
   }
 
   return curatedTracks.quickPicks as unknown as Song[];
@@ -541,25 +857,23 @@ export async function getHomeFeed(): Promise<{
   party: Song[];
 }> {
   const settled = await Promise.allSettled([
-    getLiveCategory("Trending Global 2026"),
-    getLiveCategory("Trending Hindi Hits"),
+    getMoodCategoryBundle("workout"),
+    getLiveCategory("Trending Global Hits 2026"),
     getLiveCategory("International Pop Hip-Hop"),
     getLiveCategory("Punjabi Hype Bollywood Romance"),
-    getLiveCategory("Gym Workout Energy"),
-    getLiveCategory("Lo-Fi Chill Focus"),
-    getLiveCategory("Party Dance Club"),
+    getMoodCategoryBundle("chill"),
+    getMoodCategoryBundle("party"),
   ]);
 
-  const [qp, tr, intl, pb, wo, ch, pa] = settled.map((res, idx) => {
+  const [workout, trending, intl, pb, chill, party] = settled.map((res, idx) => {
     if (res.status === "fulfilled" && res.value.length > 0) {
       return res.value;
     }
     const fallbacks = [
-      curatedTracks.quickPicks,
-      curatedTracks.trendingHits,
-      curatedTracks.quickPicks,
-      curatedTracks.trendingHits,
       curatedTracks.workoutHype,
+      curatedTracks.trendingHits,
+      curatedTracks.quickPicks,
+      curatedTracks.trendingHits,
       curatedTracks.chillVibes,
       curatedTracks.moodStations,
     ];
@@ -567,13 +881,13 @@ export async function getHomeFeed(): Promise<{
   });
 
   return {
-    quickPicks: qp,
-    trending: tr,
+    quickPicks: trending.slice(0, 12),
+    trending: trending,
     international: intl,
     punjabiBollywood: pb,
-    workout: wo,
-    chill: ch,
-    party: pa,
+    workout: workout,
+    chill: chill,
+    party: party,
   };
 }
 

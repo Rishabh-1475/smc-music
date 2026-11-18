@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Song, CategoryMood } from "@/types/music";
+import { Song, CategoryMood, UserTasteProfile } from "@/types/music";
 import { getRadioForTrack } from "@/services/api";
 
 declare global {
@@ -45,6 +45,7 @@ export interface PlayerState {
   dislikedSongIds: Record<string, boolean>;
   listeningHistory: Song[];
   activeMood: CategoryMood;
+  userTasteProfile: UserTasteProfile;
   isLiked?: Record<string, boolean>; // Compatibility alias
   autoplay: boolean;
 
@@ -69,6 +70,9 @@ export interface PlayerState {
   clearQueue: () => void;
   toggleAutoplay?: () => void;
   setQueue?: (tracks: Song[]) => void;
+  getTopAffinityGenre: () => string | null;
+  getTopArtists: () => string[];
+  getPersonalizedSpeedDial: (pool?: Song[]) => Song[];
 
   [key: string]: any;
 }
@@ -94,6 +98,47 @@ const saveStorage = (key: string, value: any) => {
       // Ignore quota error
     }
   }
+};
+
+// Genre & Mood detection helper
+const detectGenres = (song: Song): string[] => {
+  const text = `${song.name} ${song.title || ""} ${song.primaryArtists || ""} ${song.album || ""}`.toLowerCase();
+  const genres: string[] = [];
+
+  if (/workout|gym|hype|beast mode|motivation|cardio|pump|fitness/i.test(text)) {
+    genres.push("workout");
+  }
+  if (/phonk|drift|kordhell|brazilian|montagem|gigachad/i.test(text)) {
+    genres.push("phonk");
+  }
+  if (/punjabi|sidhu|moose wala|aujla|diljit|shubh|ap dhillon|bhangra|amrit maan/i.test(text)) {
+    genres.push("punjabi");
+  }
+  if (/bollywood|arijit|hindi|pritam|shreya|sachin-jigar|vishal|kishore|sonu/i.test(text)) {
+    genres.push("bollywood");
+  }
+  if (/chill|lofi|relax|acoustic|midnight|ambient|study|peaceful/i.test(text)) {
+    genres.push("chill");
+  }
+  if (/party|club|dance|remix|electronic|edm|dj|bass/i.test(text)) {
+    genres.push("party");
+  }
+  if (/romance|love|romantic|ishq|dil|pyaar|sanam/i.test(text)) {
+    genres.push("romance");
+  }
+
+  return genres;
+};
+
+// Initial state loader
+const getInitialTasteProfile = (): UserTasteProfile => {
+  return loadStorage<UserTasteProfile>("smc_user_taste_profile", {
+    artistWeights: {},
+    genreWeights: {},
+    recentlyPlayedMoods: [],
+    likedTrackIds: {},
+    dislikedTrackIds: {},
+  });
 };
 
 export const usePlayerStore = create<PlayerState>((set, get) => {
@@ -178,9 +223,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     };
   }
 
-  // Next track progression handler with Repeat & Shuffle awareness
+  // Next track progression handler with Repeat, Shuffle & Dislike filtering
   const handleNextTrack = () => {
-    const { queue, currentTrack, isShuffled, repeatMode, autoplay } = get();
+    const { queue, currentTrack, isShuffled, repeatMode, autoplay, dislikedSongIds } = get();
     if (!queue || queue.length === 0) return;
 
     if (repeatMode === "one" && currentTrack && globalAudio) {
@@ -189,24 +234,31 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       return;
     }
 
-    if (isShuffled && queue.length > 1) {
-      const currentIdx = queue.findIndex((t) => t.id === currentTrack?.id);
-      let randIdx = Math.floor(Math.random() * queue.length);
-      while (randIdx === currentIdx && queue.length > 1) {
-        randIdx = Math.floor(Math.random() * queue.length);
-      }
-      get().playSong(queue[randIdx], queue);
+    // Filter out any disliked tracks from playback
+    const playableQueue = queue.filter((t) => !dislikedSongIds[t.id]);
+    if (playableQueue.length === 0) {
+      set({ isPlaying: false });
       return;
     }
 
-    const currentIdx = queue.findIndex((t) => t.id === currentTrack?.id);
+    if (isShuffled && playableQueue.length > 1) {
+      const currentIdx = playableQueue.findIndex((t) => t.id === currentTrack?.id);
+      let randIdx = Math.floor(Math.random() * playableQueue.length);
+      while (randIdx === currentIdx && playableQueue.length > 1) {
+        randIdx = Math.floor(Math.random() * playableQueue.length);
+      }
+      get().playSong(playableQueue[randIdx], playableQueue);
+      return;
+    }
+
+    const currentIdx = playableQueue.findIndex((t) => t.id === currentTrack?.id);
     const nextIdx = currentIdx + 1;
 
-    if (nextIdx < queue.length) {
-      get().playSong(queue[nextIdx], queue);
+    if (nextIdx < playableQueue.length) {
+      get().playSong(playableQueue[nextIdx], playableQueue);
     } else {
       if (repeatMode === "all" || (autoplay && repeatMode !== "off")) {
-        get().playSong(queue[0], queue);
+        get().playSong(playableQueue[0], playableQueue);
       } else if (repeatMode === "off") {
         set({ isPlaying: false });
       }
@@ -215,7 +267,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
 
   // Previous track handler (>3s restarts current track)
   const handlePrevTrack = () => {
-    const { queue, currentTrack, currentTime } = get();
+    const { queue, currentTrack, currentTime, dislikedSongIds } = get();
     if (!queue || queue.length === 0) return;
 
     if (currentTime > 3 && globalAudio) {
@@ -224,15 +276,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       return;
     }
 
-    const currentIdx = queue.findIndex((t) => t.id === currentTrack?.id);
-    const prevIdx = currentIdx - 1 >= 0 ? currentIdx - 1 : queue.length - 1;
-    get().playSong(queue[prevIdx], queue);
+    const playableQueue = queue.filter((t) => !dislikedSongIds[t.id]);
+    const currentIdx = playableQueue.findIndex((t) => t.id === currentTrack?.id);
+    const prevIdx = currentIdx - 1 >= 0 ? currentIdx - 1 : playableQueue.length - 1;
+    if (playableQueue[prevIdx]) {
+      get().playSong(playableQueue[prevIdx], playableQueue);
+    }
   };
 
   // Initial persistent state from localStorage
   const initialLikes = loadStorage<Record<string, boolean>>("smc_liked_song_ids", {});
   const initialDislikes = loadStorage<Record<string, boolean>>("smc_disliked_song_ids", {});
   const initialHistory = loadStorage<Song[]>("smc_listening_history", []);
+  const initialTaste = getInitialTasteProfile();
 
   return {
     currentTrack: null,
@@ -251,28 +307,63 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     dislikedSongIds: initialDislikes,
     listeningHistory: initialHistory,
     activeMood: "All",
-    isLiked: initialLikes, // Backward-compatibility alias
+    userTasteProfile: initialTaste,
+    isLiked: initialLikes,
     autoplay: true,
 
     playSong: (song: Song, contextQueue?: Song[]) => {
       if (!song?.audioUrl) return;
 
-      // 1. Maintain queue
+      // 1. Maintain queue (filter out disliked songs)
+      const { dislikedSongIds, userTasteProfile } = get();
+      if (dislikedSongIds[song.id]) return;
+
       const activeQueue =
         contextQueue && contextQueue.length > 0
-          ? contextQueue
+          ? contextQueue.filter((t) => !dislikedSongIds[t.id])
           : get().queue.length > 0
-          ? get().queue
+          ? get().queue.filter((t) => !dislikedSongIds[t.id])
           : [song];
 
       const exists = activeQueue.some((s) => s.id === song.id);
       const finalQueue = exists ? activeQueue : [song, ...activeQueue];
 
-      // 2. Update listening history & playCount
+      // 2. Self-learning: update taste profile affinity (+2 for artist & detected genres)
+      const updatedArtistWeights = { ...userTasteProfile.artistWeights };
+      const artists = (song.primaryArtists || "")
+        .split(",")
+        .map((a) => a.trim().toLowerCase())
+        .filter(Boolean);
+
+      for (const a of artists) {
+        updatedArtistWeights[a] = (updatedArtistWeights[a] || 0) + 2;
+      }
+
+      const updatedGenreWeights = { ...userTasteProfile.genreWeights };
+      const detected = detectGenres(song);
+      for (const g of detected) {
+        updatedGenreWeights[g] = (updatedGenreWeights[g] || 0) + 2;
+      }
+
+      const updatedMoods = [
+        ...detected,
+        ...(userTasteProfile.recentlyPlayedMoods || []).filter((m) => !detected.includes(m)),
+      ].slice(0, 10);
+
+      const updatedTaste: UserTasteProfile = {
+        ...userTasteProfile,
+        artistWeights: updatedArtistWeights,
+        genreWeights: updatedGenreWeights,
+        recentlyPlayedMoods: updatedMoods,
+      };
+
+      saveStorage("smc_user_taste_profile", updatedTaste);
+
+      // 3. Update listening history & playCount
       const currentHistory = get().listeningHistory || [];
       const updatedHistory = [
         song,
-        ...currentHistory.filter((s) => s.id !== song.id),
+        ...currentHistory.filter((s) => s.id !== song.id && !dislikedSongIds[s.id]),
       ].slice(0, 30);
       saveStorage("smc_listening_history", updatedHistory);
 
@@ -280,7 +371,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         ...song,
         playCount: (song.playCount || 0) + 1,
         isLiked: Boolean(get().likedSongIds[song.id]),
-        isDisliked: Boolean(get().dislikedSongIds[song.id]),
+        isDisliked: false,
       };
 
       set({
@@ -288,10 +379,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         queue: finalQueue,
         originalQueue: finalQueue,
         listeningHistory: updatedHistory,
+        userTasteProfile: updatedTaste,
         isPlaying: true,
       });
 
-      // 3. Audio stream initialization
+      // 4. Audio stream initialization
       if (globalAudio) {
         globalAudio.pause();
         globalAudio.currentTime = 0;
@@ -314,17 +406,21 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         }
       }
 
-      // 4. Auto-generate "Related / Up Next" queue using the artist/genre if queue is short
+      // 5. Auto-generate "Related / Up Next" queue using the artist/genre if queue is short
       if (finalQueue.length <= 2) {
-        getRadioForTrack(song.primaryArtists || song.name).then((radioTracks) => {
-          if (radioTracks.length > 0) {
-            const currentQ = get().queue;
-            const newTracks = radioTracks.filter((t) => !currentQ.some((q) => q.id === t.id));
-            if (newTracks.length > 0) {
-              set({ queue: [...currentQ, ...newTracks] });
+        getRadioForTrack(song.primaryArtists || song.name)
+          .then((radioTracks) => {
+            if (radioTracks.length > 0) {
+              const currentQ = get().queue;
+              const newTracks = radioTracks.filter(
+                (t) => !currentQ.some((q) => q.id === t.id) && !dislikedSongIds[t.id]
+              );
+              if (newTracks.length > 0) {
+                set({ queue: [...currentQ, ...newTracks] });
+              }
             }
-          }
-        }).catch(() => {});
+          })
+          .catch(() => {});
       }
     },
 
@@ -396,7 +492,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     toggleShuffle: () => {
       const { isShuffled, queue, originalQueue, currentTrack } = get();
       if (!isShuffled) {
-        // Shuffle queue keeping currentTrack first
         const remaining = queue.filter((t) => t.id !== currentTrack?.id);
         for (let i = remaining.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -407,7 +502,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
           queue: currentTrack ? [currentTrack, ...remaining] : remaining,
         });
       } else {
-        // Restore original queue order
         set({
           isShuffled: false,
           queue: originalQueue.length > 0 ? originalQueue : queue,
@@ -424,26 +518,57 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
 
     toggleLike: (songOrId: Song | string) => {
       const songId = typeof songOrId === "string" ? songOrId : songOrId.id;
-      const { likedSongIds, dislikedSongIds, currentTrack } = get();
+      const targetSong = typeof songOrId === "string" ? get().currentTrack : songOrId;
+      const { likedSongIds, dislikedSongIds, currentTrack, userTasteProfile } = get();
 
       const isCurrentlyLiked = Boolean(likedSongIds[songId]);
       const nextLiked = { ...likedSongIds };
       const nextDisliked = { ...dislikedSongIds };
 
+      const updatedArtistWeights = { ...userTasteProfile.artistWeights };
+      const updatedGenreWeights = { ...userTasteProfile.genreWeights };
+
       if (isCurrentlyLiked) {
         delete nextLiked[songId];
       } else {
         nextLiked[songId] = true;
-        delete nextDisliked[songId]; // If liked, remove from disliked
+        delete nextDisliked[songId];
+
+        // Automatic Affinity Learning: Thumbs Up boosts artist & genres by +5
+        if (targetSong) {
+          const artists = (targetSong.primaryArtists || "")
+            .split(",")
+            .map((a) => a.trim().toLowerCase())
+            .filter(Boolean);
+
+          for (const a of artists) {
+            updatedArtistWeights[a] = (updatedArtistWeights[a] || 0) + 5;
+          }
+
+          const genres = detectGenres(targetSong);
+          for (const g of genres) {
+            updatedGenreWeights[g] = (updatedGenreWeights[g] || 0) + 5;
+          }
+        }
       }
+
+      const updatedTaste: UserTasteProfile = {
+        ...userTasteProfile,
+        artistWeights: updatedArtistWeights,
+        genreWeights: updatedGenreWeights,
+        likedTrackIds: nextLiked,
+        dislikedTrackIds: nextDisliked,
+      };
 
       saveStorage("smc_liked_song_ids", nextLiked);
       saveStorage("smc_disliked_song_ids", nextDisliked);
+      saveStorage("smc_user_taste_profile", updatedTaste);
 
       set({
         likedSongIds: nextLiked,
         dislikedSongIds: nextDisliked,
-        isLiked: nextLiked, // Compatibility alias
+        isLiked: nextLiked,
+        userTasteProfile: updatedTaste,
         currentTrack:
           currentTrack?.id === songId
             ? { ...currentTrack, isLiked: !isCurrentlyLiked, isDisliked: false }
@@ -453,33 +578,68 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
 
     toggleDislike: (songOrId: Song | string) => {
       const songId = typeof songOrId === "string" ? songOrId : songOrId.id;
-      const { likedSongIds, dislikedSongIds, currentTrack } = get();
+      const targetSong = typeof songOrId === "string" ? get().currentTrack : songOrId;
+      const { likedSongIds, dislikedSongIds, currentTrack, userTasteProfile, queue } = get();
 
       const isCurrentlyDisliked = Boolean(dislikedSongIds[songId]);
       const nextLiked = { ...likedSongIds };
       const nextDisliked = { ...dislikedSongIds };
 
+      const updatedArtistWeights = { ...userTasteProfile.artistWeights };
+      const updatedGenreWeights = { ...userTasteProfile.genreWeights };
+
       if (isCurrentlyDisliked) {
         delete nextDisliked[songId];
       } else {
         nextDisliked[songId] = true;
-        delete nextLiked[songId]; // If disliked, remove from liked
+        delete nextLiked[songId];
+
+        // Automatic Affinity Learning: Thumbs Down penalizes artist & genres by -10
+        if (targetSong) {
+          const artists = (targetSong.primaryArtists || "")
+            .split(",")
+            .map((a) => a.trim().toLowerCase())
+            .filter(Boolean);
+
+          for (const a of artists) {
+            updatedArtistWeights[a] = Math.max(0, (updatedArtistWeights[a] || 0) - 10);
+          }
+
+          const genres = detectGenres(targetSong);
+          for (const g of genres) {
+            updatedGenreWeights[g] = Math.max(0, (updatedGenreWeights[g] || 0) - 10);
+          }
+        }
       }
+
+      const updatedTaste: UserTasteProfile = {
+        ...userTasteProfile,
+        artistWeights: updatedArtistWeights,
+        genreWeights: updatedGenreWeights,
+        likedTrackIds: nextLiked,
+        dislikedTrackIds: nextDisliked,
+      };
 
       saveStorage("smc_liked_song_ids", nextLiked);
       saveStorage("smc_disliked_song_ids", nextDisliked);
+      saveStorage("smc_user_taste_profile", updatedTaste);
+
+      // Purge from active queue
+      const purgedQueue = queue.filter((t) => t.id !== songId);
 
       set({
         likedSongIds: nextLiked,
         dislikedSongIds: nextDisliked,
         isLiked: nextLiked,
+        queue: purgedQueue,
+        userTasteProfile: updatedTaste,
         currentTrack:
           currentTrack?.id === songId
             ? { ...currentTrack, isDisliked: !isCurrentlyDisliked, isLiked: false }
             : currentTrack,
       });
 
-      // If disliked currently playing song, auto-skip to next track
+      // If disliked the currently playing song, auto-advance to next track
       if (!isCurrentlyDisliked && currentTrack?.id === songId) {
         get().playNext();
       }
@@ -512,6 +672,71 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
 
     setQueue: (tracks: Song[]) => {
       set({ queue: tracks, originalQueue: tracks });
+    },
+
+    // Evaluates highest-affinity genre from userTasteProfile
+    getTopAffinityGenre: () => {
+      const { userTasteProfile } = get();
+      const genreWeights = userTasteProfile?.genreWeights || {};
+      let topGenre: string | null = null;
+      let maxWeight = 0;
+
+      for (const [genre, weight] of Object.entries(genreWeights)) {
+        if (weight > maxWeight && weight >= 4) {
+          maxWeight = weight;
+          topGenre = genre;
+        }
+      }
+
+      return topGenre;
+    },
+
+    // Returns top 5 preferred artists based on weighted playback and likes
+    getTopArtists: () => {
+      const { userTasteProfile } = get();
+      const artistWeights = userTasteProfile?.artistWeights || {};
+      return Object.entries(artistWeights)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([artist]) => artist);
+    },
+
+    // Populates 3x3 Speed Dial grid based on taste profile, history, and affinity
+    getPersonalizedSpeedDial: (pool: Song[] = []) => {
+      const { listeningHistory, userTasteProfile, dislikedSongIds } = get();
+      const history = (listeningHistory || []).filter((s) => !dislikedSongIds[s.id]);
+      const combined: Song[] = [...history];
+
+      // Add pool songs matching top artists or genres
+      const topArtists = Object.keys(userTasteProfile?.artistWeights || {});
+      const topGenres = Object.keys(userTasteProfile?.genreWeights || {});
+
+      for (const song of pool) {
+        if (dislikedSongIds[song.id] || combined.some((s) => s.id === song.id)) {
+          continue;
+        }
+
+        const songArtists = (song.primaryArtists || "").toLowerCase();
+        const matchesArtist = topArtists.some((a) => songArtists.includes(a));
+        const songGenres = detectGenres(song);
+        const matchesGenre = songGenres.some((g) => topGenres.includes(g));
+
+        if (matchesArtist || matchesGenre) {
+          combined.push(song);
+        }
+
+        if (combined.length >= 9) break;
+      }
+
+      // If still fewer than 9, fill with pool tracks
+      for (const song of pool) {
+        if (!combined.some((s) => s.id === song.id) && !dislikedSongIds[song.id]) {
+          combined.push(song);
+        }
+        if (combined.length >= 9) break;
+      }
+
+      return combined.slice(0, 9);
     },
   };
 });

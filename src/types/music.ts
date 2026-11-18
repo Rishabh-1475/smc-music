@@ -22,7 +22,17 @@ export interface Song {
   year?: string;
   isLiked?: boolean;
   isDisliked?: boolean;
-  playCount?: number;
+  playCount?: number | string;
+  score?: number;
+  [key: string]: any;
+}
+
+export interface UserTasteProfile {
+  artistWeights: Record<string, number>;
+  genreWeights: Record<string, number>;
+  recentlyPlayedMoods: string[];
+  likedTrackIds: Record<string, boolean>;
+  dislikedTrackIds: Record<string, boolean>;
   [key: string]: any;
 }
 

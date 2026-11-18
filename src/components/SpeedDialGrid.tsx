@@ -6,27 +6,26 @@ import { Song } from "@/types/music";
 import { usePlayerStore } from "@/store/playerStore";
 
 interface SpeedDialGridProps {
+  songs?: Song[];
   fallbackSongs?: Song[];
 }
 
 const FALLBACK_VINYL =
   "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
 
-export default function SpeedDialGrid({ fallbackSongs = [] }: SpeedDialGridProps) {
-  const { currentTrack, isPlaying, playSong, togglePlay, listeningHistory } =
+export default function SpeedDialGrid({
+  songs,
+  fallbackSongs = [],
+}: SpeedDialGridProps) {
+  const { currentTrack, isPlaying, playSong, togglePlay, getPersonalizedSpeedDial } =
     usePlayerStore();
 
-  // Combine user's listeningHistory with fallbackSongs to form 9 speed dial tiles
-  const historyList = listeningHistory || [];
-  const combined: Song[] = [...historyList];
-
-  for (const song of fallbackSongs) {
-    if (!combined.some((s) => s.id === song.id) && combined.length < 9) {
-      combined.push(song);
-    }
-  }
-
-  const speedDialItems = combined.slice(0, 9);
+  const speedDialItems =
+    songs && songs.length > 0
+      ? songs.slice(0, 9)
+      : getPersonalizedSpeedDial
+      ? getPersonalizedSpeedDial(fallbackSongs)
+      : fallbackSongs.slice(0, 9);
 
   if (speedDialItems.length === 0) return null;
 
