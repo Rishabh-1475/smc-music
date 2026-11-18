@@ -10,8 +10,8 @@ declare global {
 }
 
 /**
- * Global Audio Singleton outside React's render loop.
- * Attached to window.__rhythmx_audio to guarantee background playback persistence.
+ * Permanent HTML5 Audio Singleton outside React's lifecycle.
+ * Bound to window.__rhythmx_audio to guarantee continuous background playback in Mobile WebViews.
  */
 let globalAudio: HTMLAudioElement | null = null;
 let wakeLockSentinel: any = null;
@@ -21,7 +21,7 @@ const requestWakeLock = async () => {
     try {
       wakeLockSentinel = await (navigator as any).wakeLock.request("screen");
     } catch {
-      // Screen wake lock optional or restricted by browser policy
+      // Screen wake lock optional
     }
   }
 };
@@ -37,6 +37,8 @@ if (typeof window !== "undefined") {
   if (!window.__rhythmx_audio) {
     const audio = new Audio();
     audio.preload = "auto";
+    audio.setAttribute("playsinline", "true");
+    audio.setAttribute("webkit-playsinline", "true");
     audio.crossOrigin = "anonymous";
     (audio as any).playsInline = true;
     window.__rhythmx_audio = audio;
@@ -44,7 +46,8 @@ if (typeof window !== "undefined") {
   }
   globalAudio = window.__rhythmx_audio;
 
-  // Suppress visibility/focus events that cause Chromium WebViews to pause background media
+  // Prevent Visibility Pausing:
+  // Ensure no code or browser event calls audio.pause() when user switches apps or locks screen
   window.addEventListener(
     "visibilitychange",
     (e) => {
@@ -251,7 +254,10 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     saveStorage("rhythmx_user_data", current);
   };
 
-  // Android MediaSession Synchronization Handler
+  /**
+   * Full Android MediaSession Integration
+   * Mounts native controls, high-res artwork, and notification shade seeking
+   */
   const syncMediaSession = (track: Song | null, playing: boolean) => {
     if (typeof window === "undefined" || !("mediaSession" in navigator)) return;
 
@@ -260,19 +266,18 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
       return;
     }
 
-    const artworkUrl = track.imageUrl || CLEAN_VINYL_COVER;
-    const hiresArtwork = artworkUrl.replace(/150x150|50x50/g, "500x500");
+    const artUrl = track.imageUrl || CLEAN_VINYL_COVER;
+    const hiresArtwork = artUrl.replace(/150x150|50x50/g, "500x500");
 
     navigator.mediaSession.metadata = new MediaMetadata({
       title: track.name || track.title || "RhythmX Track",
-      artist: track.primaryArtists || "RhythmX Artist",
-      album: track.album || "RhythmX Music",
+      artist: track.primaryArtists || "RhythmX Stream",
+      album: track.album || "RhythmX",
       artwork: [
         { src: hiresArtwork, sizes: "96x96", type: "image/jpeg" },
         { src: hiresArtwork, sizes: "128x128", type: "image/jpeg" },
         { src: hiresArtwork, sizes: "192x192", type: "image/jpeg" },
         { src: hiresArtwork, sizes: "256x256", type: "image/jpeg" },
-        { src: hiresArtwork, sizes: "384x384", type: "image/jpeg" },
         { src: hiresArtwork, sizes: "512x512", type: "image/jpeg" },
       ],
     });
@@ -281,10 +286,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
 
     try {
       navigator.mediaSession.setActionHandler("play", () => {
-        get().togglePlay();
+        globalAudio?.play().catch(() => {});
+        set({ isPlaying: true });
       });
       navigator.mediaSession.setActionHandler("pause", () => {
-        get().togglePlay();
+        globalAudio?.pause();
+        set({ isPlaying: false });
       });
       navigator.mediaSession.setActionHandler("previoustrack", () => {
         get().playPrev();
@@ -293,33 +300,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         get().playNext();
       });
       navigator.mediaSession.setActionHandler("seekto", (details) => {
-        if (details.seekTime !== undefined && globalAudio?.duration) {
-          const targetPercent = (details.seekTime / globalAudio.duration) * 100;
-          get().seekTo(targetPercent);
-        }
-      });
-      navigator.mediaSession.setActionHandler("seekbackward", () => {
-        if (globalAudio) {
-          globalAudio.currentTime = Math.max(0, globalAudio.currentTime - 10);
-        }
-      });
-      navigator.mediaSession.setActionHandler("seekforward", () => {
-        if (globalAudio && globalAudio.duration) {
-          globalAudio.currentTime = Math.min(
-            globalAudio.duration,
-            globalAudio.currentTime + 10
-          );
-        }
-      });
-      navigator.mediaSession.setActionHandler("stop", () => {
-        if (globalAudio) {
-          globalAudio.pause();
-          set({ isPlaying: false });
-          releaseWakeLock();
+        if (details.seekTime && globalAudio?.duration) {
+          globalAudio.currentTime = details.seekTime;
         }
       });
     } catch {
-      // Catch optional unsupported MediaSession actions
+      // Ignore unsupported action handler registration
     }
   };
 
@@ -367,12 +353,18 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     globalAudio.onplay = () => {
       set({ isPlaying: true });
       requestWakeLock();
+      if (typeof window !== "undefined" && "mediaSession" in navigator) {
+        navigator.mediaSession.playbackState = "playing";
+      }
       syncMediaSession(get().currentTrack, true);
     };
 
     globalAudio.onpause = () => {
       set({ isPlaying: false });
       releaseWakeLock();
+      if (typeof window !== "undefined" && "mediaSession" in navigator) {
+        navigator.mediaSession.playbackState = "paused";
+      }
       syncMediaSession(get().currentTrack, false);
     };
 
