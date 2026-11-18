@@ -2,13 +2,7 @@
   "appId": "co.singhsmusic.rhythmx",
   "appName": "RhythmX",
   "webDir": "out",
-  "server": {
-    "url": "https://smc-music-rishabh.vercel.app",
-    "cleartext": true,
-    "androidScheme": "https"
-  },
   "android": {
-    "allowMixedContent": true,
-    "webContentsDebuggingEnabled": false
+    "allowMixedContent": true
   }
 }
