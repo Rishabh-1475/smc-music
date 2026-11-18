@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Play, Pause, MoreVertical, ThumbsUp, ThumbsDown, Share2, Radio, Heart } from "lucide-react";
+import React from "react";
+import { Play, Pause, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Song } from "@/types/music";
 import { usePlayerStore } from "@/store/playerStore";
 
@@ -23,13 +23,14 @@ const formatDuration = (secs: number | string): string => {
 };
 
 export default function QuickPicksList({
-  title = "Quick picks",
+  title = "Quick Picks",
   subtitle = "START RADIO FROM A SONG",
   songs = [],
 }: QuickPicksListProps) {
   const {
     currentTrack,
     isPlaying,
+    progress,
     playSong,
     togglePlay,
     toggleLike,
@@ -37,8 +38,6 @@ export default function QuickPicksList({
     likedSongIds,
     dislikedSongIds,
   } = usePlayerStore();
-
-  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
   if (!songs || songs.length === 0) return null;
 
@@ -52,7 +51,7 @@ export default function QuickPicksList({
               {subtitle}
             </p>
           )}
-          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mt-0.5">
+          <h2 className="text-xl md:text-2xl font-black tracking-tight text-white mt-0.5">
             {title}
           </h2>
         </div>
@@ -66,7 +65,6 @@ export default function QuickPicksList({
             const isCardPlaying = isCurrent && isPlaying;
             const isLiked = Boolean(likedSongIds[song.id]);
             const isDisliked = Boolean(dislikedSongIds[song.id]);
-            const albumName = song.album || "Single";
 
             return (
               <div
@@ -78,12 +76,22 @@ export default function QuickPicksList({
                     playSong(song, songs);
                   }
                 }}
-                className={`group relative flex items-center justify-between p-2 rounded-xl transition-all duration-200 cursor-pointer ${
+                className={`group relative flex items-center justify-between p-2.5 rounded-xl transition-all duration-200 cursor-pointer overflow-hidden ${
                   isCurrent
-                    ? "bg-[#212121] text-white shadow-md shadow-black/40 border border-emerald-500/20"
-                    : "hover:bg-[#181818] text-neutral-300"
+                    ? "bg-[#141418] text-white shadow-[0_0_15px_rgba(0,255,135,0.2)] border border-[#00FF87]/40"
+                    : "hover:bg-[#121216] text-neutral-300 border border-white/5"
                 }`}
               >
+                {/* Hairline Progress Glow Bar for Currently Playing Track */}
+                {isCurrent && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-neutral-800">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#00FF87] to-[#00F0FF] transition-all duration-150"
+                      style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
+                    />
+                  </div>
+                )}
+
                 {/* Left: Thumbnail with Dark Overlay and Play Icon */}
                 <div className="flex items-center space-x-3.5 min-w-0 flex-1">
                   <div className="relative w-12 h-12 md:w-13 md:h-13 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-900 shadow-md">
@@ -97,155 +105,74 @@ export default function QuickPicksList({
                       }}
                     />
                     <div
-                      className={`absolute inset-0 bg-black/55 flex items-center justify-center transition-opacity duration-200 ${
+                      className={`absolute inset-0 bg-black/60 flex items-center justify-center transition-opacity duration-200 ${
                         isCardPlaying
                           ? "opacity-100"
                           : "opacity-0 group-hover:opacity-100"
                       }`}
                     >
                       {isCardPlaying ? (
-                        <Pause className="w-5 h-5 fill-white text-white" />
+                        <div className="flex items-center space-x-0.5">
+                          <span className="w-1 h-3.5 bg-[#00FF87] rounded-full animate-bounce" />
+                          <span className="w-1 h-2 bg-[#00F0FF] rounded-full animate-bounce [animation-delay:0.15s]" />
+                          <span className="w-1 h-3.5 bg-[#00FF87] rounded-full animate-bounce [animation-delay:0.3s]" />
+                        </div>
                       ) : (
                         <Play className="w-5 h-5 fill-white text-white ml-0.5" />
                       )}
                     </div>
                   </div>
 
-                  {/* Title, Artist, and Duration in Clean Typography */}
-                  <div className="min-w-0 flex-1 pr-2">
+                  {/* Title & Artist & Album */}
+                  <div className="truncate min-w-0 flex-1">
                     <h4
                       className={`text-sm font-semibold truncate ${
-                        isCurrent
-                          ? "text-emerald-400 font-bold"
-                          : "text-white group-hover:text-white"
+                        isCurrent ? "text-[#00FF87]" : "text-white"
                       }`}
                     >
                       {song.name}
                     </h4>
-                    <p className="text-xs text-neutral-400 truncate mt-0.5 flex items-center space-x-1.5">
-                      <span className="truncate">{song.primaryArtists}</span>
-                      <span className="text-neutral-500">•</span>
-                      <span className="truncate">{albumName}</span>
+                    <p className="text-xs text-neutral-400 truncate mt-0.5">
+                      {song.primaryArtists} • {song.album || "Single"}
                     </p>
                   </div>
                 </div>
 
-                {/* Right: Duration, One-Tap Thumbs Up / Down, Three-Dot Menu */}
-                <div className="flex items-center space-x-1 sm:space-x-1.5 flex-shrink-0">
-                  <span className="text-xs text-neutral-400 font-mono hidden sm:inline-block mr-1">
+                {/* Right: Duration & Quick Thumbs Up/Down */}
+                <div className="flex items-center space-x-2.5 ml-3 flex-shrink-0">
+                  <span className="text-xs text-neutral-400 font-mono">
                     {formatDuration(song.duration)}
                   </span>
 
-                  {/* Thumbs Down */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleDislike(song);
-                    }}
-                    className={`p-1.5 rounded-full hover:bg-neutral-800 transition ${
-                      isDisliked
-                        ? "opacity-100 text-rose-500"
-                        : "opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-white"
-                    }`}
-                    aria-label="Thumbs Down"
-                  >
-                    <ThumbsDown
-                      className={`w-3.5 h-3.5 ${isDisliked ? "fill-rose-500 stroke-rose-500" : ""}`}
-                    />
-                  </button>
-
-                  {/* Thumbs Up */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleLike(song);
                     }}
-                    className={`p-1.5 rounded-full hover:bg-neutral-800 transition ${
-                      isLiked
-                        ? "opacity-100 text-emerald-400"
-                        : "opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-white"
+                    className={`p-1.5 rounded-full hover:bg-white/10 transition ${
+                      isLiked ? "text-[#00FF87]" : "text-neutral-400 hover:text-white"
                     }`}
-                    aria-label="Thumbs Up"
+                    aria-label={isLiked ? "Unlike" : "Like"}
                   >
                     <ThumbsUp
-                      className={`w-3.5 h-3.5 ${isLiked ? "fill-emerald-400 stroke-emerald-400" : ""}`}
+                      className={`w-3.5 h-3.5 ${isLiked ? "fill-[#00FF87] stroke-[#00FF87]" : ""}`}
                     />
                   </button>
 
-                  {/* Three-Dot Menu */}
-                  <div className="relative">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveMenuId(activeMenuId === song.id ? null : song.id);
-                      }}
-                      className="p-1.5 rounded-full hover:bg-neutral-800 text-neutral-400 hover:text-white transition"
-                      aria-label="Action Menu"
-                    >
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
-
-                    {/* Popover Dropdown Menu */}
-                    {activeMenuId === song.id && (
-                      <div
-                        onClick={(e) => e.stopPropagation()}
-                        className="absolute right-0 top-8 z-30 w-48 bg-[#212121] border border-white/10 rounded-xl shadow-2xl py-1.5 text-xs text-neutral-200 animate-in fade-in zoom-in-95 duration-150"
-                      >
-                        <button
-                          onClick={() => {
-                            playSong(song, songs);
-                            setActiveMenuId(null);
-                          }}
-                          className="w-full px-3.5 py-2 flex items-center space-x-2.5 hover:bg-[#2a2a2a] text-left transition"
-                        >
-                          <Play className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Play now</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            playSong(song, songs);
-                            setActiveMenuId(null);
-                          }}
-                          className="w-full px-3.5 py-2 flex items-center space-x-2.5 hover:bg-[#2a2a2a] text-left transition"
-                        >
-                          <Radio className="w-3.5 h-3.5" />
-                          <span>Start radio</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            toggleLike(song);
-                            setActiveMenuId(null);
-                          }}
-                          className="w-full px-3.5 py-2 flex items-center space-x-2.5 hover:bg-[#2a2a2a] text-left transition"
-                        >
-                          <Heart
-                            className={`w-3.5 h-3.5 ${
-                              isLiked ? "text-emerald-400 fill-emerald-400" : ""
-                            }`}
-                          />
-                          <span>
-                            {isLiked ? "Remove from Liked" : "Add to Liked Songs"}
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (navigator.share) {
-                              navigator.share({
-                                title: song.name,
-                                text: `Listen to ${song.name} on SMC Singhs Music Co`,
-                                url: window.location.href,
-                              });
-                            }
-                            setActiveMenuId(null);
-                          }}
-                          className="w-full px-3.5 py-2 flex items-center space-x-2.5 hover:bg-[#2a2a2a] text-left transition"
-                        >
-                          <Share2 className="w-3.5 h-3.5" />
-                          <span>Share</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleDislike(song);
+                    }}
+                    className={`p-1.5 rounded-full hover:bg-white/10 transition ${
+                      isDisliked ? "text-red-400" : "text-neutral-400 hover:text-white"
+                    }`}
+                    aria-label="Dislike"
+                  >
+                    <ThumbsDown
+                      className={`w-3.5 h-3.5 ${isDisliked ? "fill-red-400 stroke-red-400" : ""}`}
+                    />
+                  </button>
                 </div>
               </div>
             );
@@ -255,6 +182,3 @@ export default function QuickPicksList({
     </section>
   );
 }
-
-// Export aliases
-export { QuickPicksList as QuickPicks, QuickPicksList as QuickPicksGrid };

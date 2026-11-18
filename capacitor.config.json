@@ -1,9 +1,9 @@
 {
-  "appId": "co.singhsmusic.smc",
-  "appName": "SMC Singhs Music Co",
+  "appId": "co.singhsmusic.rhythmx",
+  "appName": "RhythmX",
   "webDir": "out",
   "server": {
-    "url": "https://YOUR-APP.vercel.app",
+    "url": "https://smc-music-rishabh.vercel.app",
     "cleartext": true,
     "androidScheme": "https"
   },

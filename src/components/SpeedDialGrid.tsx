@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Play, Pause, Disc3 } from "lucide-react";
+import { Play, Pause, Zap } from "lucide-react";
 import { Song } from "@/types/music";
 import { usePlayerStore } from "@/store/playerStore";
 
@@ -33,13 +33,13 @@ export default function SpeedDialGrid({
     <section className="my-6 px-4 md:px-8">
       {/* Speed Dial Header */}
       <div className="flex items-center space-x-2 mb-3">
-        <Disc3 className="w-4 h-4 text-emerald-400" />
-        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">
-          Speed dial
+        <Zap className="w-4 h-4 text-[#00FF87] fill-[#00FF87]" />
+        <h2 className="text-xl md:text-2xl font-black tracking-tight text-white">
+          Speed Dial
         </h2>
       </div>
 
-      {/* 3-Row Horizontal Scrolling Grid typical of YouTube Music */}
+      {/* 3-Row Horizontal Scrolling Grid */}
       <div className="w-full overflow-x-auto no-scrollbar scroll-smooth pb-2">
         <div className="grid grid-rows-3 grid-flow-col auto-cols-[260px] sm:auto-cols-[300px] md:auto-cols-[330px] gap-2.5">
           {speedDialItems.map((song) => {
@@ -58,8 +58,8 @@ export default function SpeedDialGrid({
                 }}
                 className={`group relative flex items-center p-2 rounded-xl transition-all duration-200 cursor-pointer ${
                   isCurrent
-                    ? "bg-[#212121] text-white shadow-md border border-emerald-500/30"
-                    : "bg-[#181818]/80 hover:bg-[#212121] text-neutral-300 border border-white/5"
+                    ? "bg-[#14141A] text-white shadow-[0_0_15px_rgba(0,255,135,0.2)] border border-[#00FF87]/40"
+                    : "bg-[#101014]/90 hover:bg-[#181820] text-neutral-300 border border-white/5"
                 }`}
               >
                 {/* Thumbnail with Hover / Tap Play Overlay */}
@@ -74,7 +74,7 @@ export default function SpeedDialGrid({
                     }}
                   />
                   <div
-                    className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity duration-200 ${
+                    className={`absolute inset-0 bg-black/60 flex items-center justify-center transition-opacity duration-200 ${
                       isCardPlaying
                         ? "opacity-100"
                         : "opacity-0 group-hover:opacity-100"
@@ -93,7 +93,7 @@ export default function SpeedDialGrid({
                   <h4
                     className={`text-sm font-semibold truncate ${
                       isCurrent
-                        ? "text-emerald-400 font-bold"
+                        ? "text-[#00FF87] font-bold"
                         : "text-white group-hover:text-white"
                     }`}
                   >

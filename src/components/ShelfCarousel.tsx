@@ -44,7 +44,7 @@ export default function ShelfCarousel({
               {subtitle}
             </p>
           )}
-          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mt-0.5">
+          <h2 className="text-xl md:text-2xl font-black tracking-tight text-white mt-0.5">
             {title}
           </h2>
         </div>
@@ -52,14 +52,14 @@ export default function ShelfCarousel({
         <div className="hidden sm:flex items-center space-x-2">
           <button
             onClick={() => handleScroll("left")}
-            className="w-8 h-8 rounded-full border border-white/10 hover:border-white/30 bg-[#212121] flex items-center justify-center text-neutral-300 hover:text-white transition active:scale-95 cursor-pointer"
+            className="w-8 h-8 rounded-full border border-white/10 hover:border-white/30 bg-[#141418] flex items-center justify-center text-neutral-300 hover:text-white transition active:scale-95 cursor-pointer"
             aria-label="Previous items"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleScroll("right")}
-            className="w-8 h-8 rounded-full border border-white/10 hover:border-white/30 bg-[#212121] flex items-center justify-center text-neutral-300 hover:text-white transition active:scale-95 cursor-pointer"
+            className="w-8 h-8 rounded-full border border-white/10 hover:border-white/30 bg-[#141418] flex items-center justify-center text-neutral-300 hover:text-white transition active:scale-95 cursor-pointer"
             aria-label="Next items"
           >
             <ChevronRight className="w-4 h-4" />
@@ -91,60 +91,55 @@ export default function ShelfCarousel({
             >
               {/* Media Thumbnail Container with Gradient Overlay */}
               <div
-                className={`relative overflow-hidden bg-neutral-900 shadow-lg mb-2.5 ${
+                className={`relative overflow-hidden bg-neutral-900 shadow-xl mb-2.5 transition-transform duration-300 group-hover:scale-[1.03] ${
                   isCircle
-                    ? "rounded-full aspect-square w-full ring-2 ring-transparent group-hover:ring-emerald-500/50"
-                    : "rounded-2xl aspect-square w-full"
+                    ? "rounded-full aspect-square w-full ring-2 ring-transparent group-hover:ring-[#00FF87]/50"
+                    : "rounded-2xl aspect-square w-full border border-white/10 group-hover:border-[#00FF87]/40 shadow-[0_10px_25px_rgba(0,0,0,0.8)]"
                 }`}
               >
                 <img
                   src={song.imageUrl || FALLBACK_VINYL}
                   alt={song.name}
                   loading="lazy"
-                  className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${
-                    isCurrent ? "ring-2 ring-emerald-500" : ""
-                  }`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
                   }}
                 />
 
-                {/* Subtle Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-
-                {/* Hover / Active Tap Play Button */}
+                {/* Ambient Hover Play Button Overlay */}
                 <div
-                  className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${
+                  className={`absolute inset-0 bg-black/55 flex items-center justify-center transition-opacity duration-200 ${
                     isCardPlaying
                       ? "opacity-100"
                       : "opacity-0 group-hover:opacity-100"
                   }`}
                 >
-                  <div className="w-12 h-12 rounded-full bg-emerald-500 text-black flex items-center justify-center shadow-xl shadow-emerald-500/40 transform transition hover:scale-110 active:scale-95">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#00FF87] to-[#00F0FF] flex items-center justify-center text-black shadow-[0_0_15px_rgba(0,255,135,0.4)]">
                     {isCardPlaying ? (
-                      <Pause className="w-5 h-5 fill-black stroke-black" />
+                      <Pause className="w-6 h-6 fill-black text-black" />
                     ) : (
-                      <Play className="w-5 h-5 fill-black stroke-black ml-0.5" />
+                      <Play className="w-6 h-6 fill-black text-black ml-0.5" />
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Meta: Title & Subtitle with High Contrast */}
-              <div className={`w-full ${isCircle ? "text-center" : "text-left"}`}>
-                <h4
-                  className={`text-sm font-semibold truncate transition-colors ${
-                    isCurrent
-                      ? "text-emerald-400 font-bold"
-                      : "text-white group-hover:text-emerald-400"
-                  }`}
-                >
-                  {song.name}
-                </h4>
-                <p className="text-xs text-neutral-400 truncate mt-0.5">
-                  {song.primaryArtists}
-                </p>
-              </div>
+              {/* Title & Artist */}
+              <h3
+                className={`text-sm font-semibold truncate ${
+                  isCurrent ? "text-[#00FF87]" : "text-white group-hover:text-white"
+                } ${isCircle ? "w-full" : ""}`}
+              >
+                {song.name}
+              </h3>
+              <p
+                className={`text-xs text-neutral-400 truncate mt-0.5 ${
+                  isCircle ? "w-full" : ""
+                }`}
+              >
+                {song.primaryArtists}
+              </p>
             </div>
           );
         })}
@@ -152,6 +147,3 @@ export default function ShelfCarousel({
     </section>
   );
 }
-
-// Export alias for backward compatibility
-export { ShelfCarousel as HorizontalShelf };

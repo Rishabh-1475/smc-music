@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Sparkles,
@@ -15,20 +15,22 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
+import HeroVisualizer from "@/components/HeroVisualizer";
 import SpeedDialGrid from "@/components/SpeedDialGrid";
 import QuickPicksList from "@/components/QuickPicksList";
 import ShelfCarousel from "@/components/ShelfCarousel";
-import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
 import FullPlayerModal from "@/components/FullPlayerModal";
 import {
   searchSongsWithRadio,
-  getHomeFeed,
-  getMoodCategoryBundle,
-  getLiveCategory,
+  getHomeShelves,
+  getCategoryFeed,
 } from "@/services/api";
-import { Song, CategoryMood } from "@/types/music";
+import { Song } from "@/types/music";
 import { usePlayerStore } from "@/store/playerStore";
+
+const FALLBACK_VINYL =
+  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,60 +43,51 @@ export default function Home() {
   const [loadingCategory, setLoadingCategory] = useState(false);
 
   const searchReqIdRef = useRef<number>(0);
-  const {
-    playSong,
-    likedSongIds,
-    listeningHistory,
-    getTopAffinityGenre,
-  } = usePlayerStore();
+  const { playSong, currentTrack } = usePlayerStore();
 
-  // YouTube Music Home Feed Sections
-  const [feeds, setFeeds] = useState<{
+  // RhythmX Home Shelves
+  const [shelves, setShelves] = useState<{
+    heroTrending: Song[];
+    speedDial: Song[];
     quickPicks: Song[];
-    trending: Song[];
-    international: Song[];
-    punjabiBollywood: Song[];
-    workout: Song[];
-    chill: Song[];
-    party: Song[];
+    gymPhonk: Song[];
+    midnightChill: Song[];
   }>({
+    heroTrending: [],
+    speedDial: [],
     quickPicks: [],
-    trending: [],
-    international: [],
-    punjabiBollywood: [],
-    workout: [],
-    chill: [],
-    party: [],
+    gymPhonk: [],
+    midnightChill: [],
   });
 
-  const [loadingFeeds, setLoadingFeeds] = useState(true);
+  const [loadingShelves, setLoadingShelves] = useState(true);
 
-  // Load home feeds on mount
+  // Load home shelves on mount
   useEffect(() => {
     let active = true;
 
-    async function loadFeeds() {
-      setLoadingFeeds(true);
+    async function loadData() {
+      setLoadingShelves(true);
       try {
-        const data = await getHomeFeed();
+        const data = await getHomeShelves();
         if (active) {
-          setFeeds(data);
+          setShelves(data);
         }
       } catch (err) {
-        console.error("Failed to load YouTube Music home feed:", err);
+        console.error("Failed to load RhythmX home shelves:", err);
       } finally {
-        if (active) setLoadingFeeds(false);
+        if (active) setLoadingShelves(false);
       }
     }
 
-    loadFeeds();
+    loadData();
     return () => {
       active = false;
     };
   }, []);
 
-  // Category Mood Chip Selection Handler (Instant Mood Bundle Swap)
-  const handleCategorySelect = async (category: CategoryMood | string) => {
+  // Category Chip Selection Handler
+  const handleCategorySelect = async (category: string) => {
     setActiveCategory(category);
     if (!category || category === "All") {
       setCategoryFeed([]);
@@ -104,20 +97,17 @@ export default function Home() {
 
     setLoadingCategory(true);
     try {
-      // Fetch dynamic high-energy query bundle for the selected mood
-      const bundleSongs = await getMoodCategoryBundle(category);
-      setCategoryFeed(bundleSongs);
+      const feed = await getCategoryFeed(category);
+      setCategoryFeed(feed);
     } catch (err) {
-      console.error("Failed to load category bundle:", err);
-      // Fallback
-      const fallback = await getLiveCategory(category);
-      setCategoryFeed(fallback);
+      console.error("Failed to load category feed:", err);
+      setCategoryFeed([]);
     } finally {
       setLoadingCategory(false);
     }
   };
 
-  // 300ms Debounced Search Engine with Promise Cancellation & Radio Queue Generation
+  // 300ms Debounced Search Engine with Cancellation & Radio Queue Generation
   useEffect(() => {
     const trimmed = searchQuery.trim();
 
@@ -154,64 +144,19 @@ export default function Home() {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // Dynamically derive liked songs collection for Liked Songs shelf
-  const likedSongs = useMemo(() => {
-    const allPool: Song[] = [
-      ...(listeningHistory || []),
-      ...feeds.quickPicks,
-      ...feeds.trending,
-      ...feeds.international,
-      ...feeds.punjabiBollywood,
-      ...feeds.workout,
-      ...feeds.chill,
-      ...feeds.party,
-      ...searchResults,
-      ...categoryFeed,
-    ];
-
-    const uniqueMap = new Map<string, Song>();
-    for (const song of allPool) {
-      if (likedSongIds[song.id] && !uniqueMap.has(song.id)) {
-        uniqueMap.set(song.id, song);
-      }
-    }
-    return Array.from(uniqueMap.values());
-  }, [likedSongIds, listeningHistory, feeds, searchResults, categoryFeed]);
-
-  // Evaluate user's top affinity genre from the self-learning recommendation engine
-  const topAffinityGenre = useMemo(() => {
-    return getTopAffinityGenre ? getTopAffinityGenre() : null;
-  }, [getTopAffinityGenre, listeningHistory, likedSongIds]);
-
-  // YouTube Music Smooth Pulse Skeleton Loaders
-  const renderSkeletons = (count = 12) => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-      {Array.from({ length: count }).map((_, i) => (
-        <div
-          key={i}
-          className="p-3 rounded-2xl bg-[#181818] border border-white/5 flex flex-col animate-pulse"
-        >
-          <div className="aspect-square w-full rounded-xl bg-[#282828] mb-3" />
-          <div className="h-4 bg-[#282828] rounded w-3/4 mb-2" />
-          <div className="h-3 bg-[#242424] rounded w-1/2" />
-        </div>
-      ))}
-    </div>
-  );
-
   const isSearchActive = searchQuery.trim().length > 0;
-  const isCategorySelected = !isSearchActive && activeCategory !== "All" && activeCategory !== "";
+  const isCategoryActive = activeCategory && activeCategory !== "All";
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
-      {/* 1. Header with YouTube Music Search & Creator Spotlight */}
+    <div className="min-h-screen bg-[#000000] text-white flex flex-col selection:bg-[#00FF87] selection:text-black">
+      {/* 1. Header with RhythmX Equalizer Branding & Search Pill */}
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         isSearching={isSearching}
       />
 
-      {/* 2. Top Mood Filter Chips (All, Energize, Workout, Relax, Focus, Party, Romance) */}
+      {/* 2. 3D Floating Category Chips Bar */}
       {!isSearchActive && (
         <CategoryChips
           activeCategory={activeCategory}
@@ -219,276 +164,279 @@ export default function Home() {
         />
       )}
 
-      <main className="flex-1 w-full mx-auto pb-36">
-        {/* VIEW 1: SEARCH ACTIVE (Shows top direct matches + Related Radio Mix) */}
+      {/* Main Content Area */}
+      <main className="flex-1 pb-32">
+        {/* ================================================================ */}
+        {/* SEARCH ACTIVE VIEW: STRICT SEARCH RESULTS GRID (NO HOME FALLBACK) */}
+        {/* ================================================================ */}
         {isSearchActive ? (
-          <section className="px-4 md:px-8 py-6 space-y-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Sparkles className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">
-                  Results for &ldquo;{searchQuery.trim()}&rdquo;
-                </h2>
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[11px] font-bold text-[#00FF87] tracking-wider uppercase">
+                  GLOBAL CATALOG SEARCH
+                </p>
+                <h1 className="text-xl md:text-2xl font-black text-white mt-0.5">
+                  Results for &ldquo;{searchQuery}&rdquo;
+                </h1>
               </div>
-
-              {isSearching ? (
-                renderSkeletons(12)
-              ) : searchResults.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {searchResults.map((song) => (
-                    <SongCard
-                      key={song.id}
-                      song={song}
-                      allSongs={searchResults}
-                    />
-                  ))}
-                </div>
-              ) : (
-                /* Authentic No Results Found State */
-                <div className="text-center py-24 text-neutral-400 max-w-md mx-auto px-4">
-                  <SearchX className="w-14 h-14 mx-auto text-neutral-600 mb-4 stroke-1" />
-                  <h3 className="text-lg font-bold text-white mb-1">
-                    No results found for &ldquo;{searchQuery.trim()}&rdquo;
-                  </h3>
-                  <p className="text-xs text-neutral-400 leading-relaxed">
-                    Try checking the spelling or searching for another international artist, Bollywood track, or Punjabi single.
-                  </p>
-                </div>
+              {searchResults.length > 0 && (
+                <span className="text-xs font-mono text-neutral-400">
+                  {searchResults.length} tracks found
+                </span>
               )}
             </div>
 
-            {/* Related Radio & Trending Mix beneath search results */}
-            {!isSearching && searchRadioQueue.length > 0 && (
-              <div className="pt-6 border-t border-white/10">
-                <div className="flex items-center space-x-2 mb-4">
-                  <Radio className="w-5 h-5 text-emerald-400" />
-                  <h3 className="text-lg md:text-xl font-bold text-white">
-                    Related Radio &amp; Trending Mix
-                  </h3>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {searchRadioQueue.slice(0, 6).map((song) => (
-                    <SongCard
-                      key={`radio-${song.id}`}
-                      song={song}
-                      allSongs={searchRadioQueue}
-                    />
-                  ))}
-                </div>
+            {/* Skeleton Pulse Loader */}
+            {isSearching && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center space-x-3 p-3 rounded-2xl bg-[#121216] border border-white/5"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-neutral-800 flex-shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-neutral-800 rounded w-3/4" />
+                      <div className="h-3 bg-neutral-800/60 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
-          </section>
-        ) : isCategorySelected ? (
-          /* VIEW 2: CATEGORY MOOD SELECTED (Seamless Swap: High Energy Gym Hype, Lo-Fi, etc.) */
-          <section className="px-4 md:px-8 py-6 space-y-6">
-            <div className="flex items-center space-x-2">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
-              <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">
-                {activeCategory} Station &amp; Curated Hits
-              </h2>
-            </div>
 
-            {loadingCategory ? (
-              renderSkeletons(12)
-            ) : categoryFeed.length > 0 ? (
-              <div className="space-y-6">
-                {/* 4-Row Quick Picks for this Category */}
-                <QuickPicksList
-                  title={`${activeCategory} Quick Picks`}
-                  subtitle="START RADIO FROM A TRACK"
-                  songs={categoryFeed.slice(0, 16)}
-                />
-
-                {/* Grid for all songs in category */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {categoryFeed.map((song) => (
-                    <SongCard
-                      key={`cat-${song.id}`}
-                      song={song}
-                      allSongs={categoryFeed}
-                    />
-                  ))}
+            {/* Empty Search State */}
+            {!isSearching && searchResults.length === 0 && (
+              <div className="text-center py-20 flex flex-col items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center mb-4">
+                  <SearchX className="w-8 h-8 text-neutral-400" />
                 </div>
-              </div>
-            ) : (
-              <div className="text-center py-20 text-neutral-400">
-                <Music className="w-12 h-12 mx-auto text-neutral-600 mb-3" />
-                <p className="text-base font-medium">
-                  Loading {activeCategory} tracks...
+                <h3 className="text-lg font-bold text-white">No tracks found</h3>
+                <p className="text-xs text-neutral-400 max-w-sm mt-1">
+                  Try searching by artist name, genre (e.g. &ldquo;phonk&rdquo;, &ldquo;lo-fi&rdquo;), or alternative keywords.
                 </p>
               </div>
             )}
-          </section>
-        ) : loadingFeeds ? (
-          /* Initial Home Loading Skeletons */
-          <div className="px-4 md:px-8 py-8 space-y-8">
-            <div className="space-y-4">
-              <div className="h-6 w-48 bg-[#212121] rounded-md animate-pulse" />
-              {renderSkeletons(6)}
+
+            {/* Search Results Grid */}
+            {!isSearching && searchResults.length > 0 && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                  {searchResults.map((song) => {
+                    const isCurrent = currentTrack?.id === song.id;
+                    return (
+                      <div
+                        key={song.id}
+                        onClick={() => playSong(song, searchResults)}
+                        className={`group relative flex items-center p-2.5 rounded-2xl transition-all duration-200 cursor-pointer overflow-hidden ${
+                          isCurrent
+                            ? "bg-[#14141C] text-white shadow-[0_0_15px_rgba(0,255,135,0.2)] border border-[#00FF87]/40"
+                            : "bg-[#101014]/90 hover:bg-[#16161E] text-neutral-300 border border-white/5 hover:border-white/15"
+                        }`}
+                      >
+                        <div className="relative w-13 h-13 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                          <img
+                            src={song.imageUrl || FALLBACK_VINYL}
+                            alt={song.name}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black/55 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                          </div>
+                        </div>
+
+                        <div className="ml-3 min-w-0 flex-1 pr-2">
+                          <h4
+                            className={`text-sm font-semibold truncate ${
+                              isCurrent ? "text-[#00FF87]" : "text-white"
+                            }`}
+                          >
+                            {song.name}
+                          </h4>
+                          <p className="text-xs text-neutral-400 truncate mt-0.5">
+                            {song.primaryArtists}
+                          </p>
+                          <p className="text-[10px] text-neutral-400 truncate">
+                            {song.album || "Single"}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Related Radio Queue generated behind search */}
+                {searchRadioQueue.length > 0 && (
+                  <div className="mt-10">
+                    <ShelfCarousel
+                      title="Related Radio & Trending Mix"
+                      subtitle="CONTINUE THE VIBE"
+                      songs={searchRadioQueue}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        ) : isCategoryActive ? (
+          /* ================================================================ */
+          /* CATEGORY FILTERED VIEW: DYNAMIC MOOD BUNDLE                      */
+          /* ================================================================ */
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[11px] font-bold text-[#00FF87] tracking-wider uppercase">
+                  MOOD EXPLORER
+                </p>
+                <h1 className="text-xl md:text-2xl font-black text-white mt-0.5">
+                  {activeCategory} Radio
+                </h1>
+              </div>
             </div>
-            <div className="space-y-4">
-              <div className="h-6 w-48 bg-[#212121] rounded-md animate-pulse" />
-              {renderSkeletons(6)}
-            </div>
+
+            {loadingCategory ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
+                {Array.from({ length: 9 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center space-x-3 p-3 rounded-2xl bg-[#121216] border border-white/5"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-neutral-800" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-neutral-800 rounded w-3/4" />
+                      <div className="h-3 bg-neutral-800/60 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                {categoryFeed.map((song) => (
+                  <div
+                    key={song.id}
+                    onClick={() => playSong(song, categoryFeed)}
+                    className="group relative flex items-center p-2.5 rounded-2xl bg-[#101014]/90 hover:bg-[#16161E] text-neutral-300 border border-white/5 hover:border-white/15 transition cursor-pointer"
+                  >
+                    <div className="relative w-13 h-13 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                      <img
+                        src={song.imageUrl || FALLBACK_VINYL}
+                        alt={song.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black/55 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                      </div>
+                    </div>
+
+                    <div className="ml-3 min-w-0 flex-1 pr-2">
+                      <h4 className="text-sm font-semibold text-white truncate">
+                        {song.name}
+                      </h4>
+                      <p className="text-xs text-neutral-400 truncate mt-0.5">
+                        {song.primaryArtists}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
-          /* VIEW 3: ADAPTIVE DEFAULT YOUTUBE MUSIC HOME FEED */
-          <div className="space-y-2">
-            {/* 1. Personalized Speed Dial (Adapts to user taste profile & top artists) */}
-            <SpeedDialGrid fallbackSongs={feeds.quickPicks} />
+          /* ================================================================ */
+          /* DEFAULT RHYTHMX HOME FEED:                                       */
+          /* HeroVisualizer -> SpeedDial -> QuickPicks -> Shelves -> Spotlight*/
+          /* ================================================================ */
+          <>
+            {/* 3. Dynamic 3D HeroVisualizer */}
+            <HeroVisualizer
+              featuredTrack={shelves.heroTrending[0] || null}
+              onPlay={(track) => playSong(track, shelves.heroTrending)}
+            />
 
-            {/* 2. "Quick Picks for You" (Derived from user's most played genres & hits) */}
+            {/* 4. Speed Dial (3x3 Grid) */}
+            <SpeedDialGrid
+              songs={shelves.speedDial}
+              fallbackSongs={shelves.heroTrending}
+            />
+
+            {/* 5. Quick Picks List (4-Row Vertical Grid) */}
             <QuickPicksList
-              title="Quick picks for you"
+              title="Quick Picks"
               subtitle="START RADIO FROM A SONG"
-              songs={feeds.quickPicks}
+              songs={shelves.quickPicks}
             />
 
-            {/* 3. Dynamic Top Mood Shelf (Self-Learning Adaptive Placement) */}
-            {topAffinityGenre === "workout" ? (
-              <ShelfCarousel
-                title="🔥 Your Workout Station"
-                subtitle="HIGH ENERGY GYM HYPE &amp; PHONK"
-                songs={feeds.workout}
-                variant="square"
-              />
-            ) : topAffinityGenre === "phonk" ? (
-              <ShelfCarousel
-                title="⚡ High Voltage &amp; Drift"
-                subtitle="BRAZILIAN &amp; DRIFT PHONK"
-                songs={feeds.workout}
-                variant="square"
-              />
-            ) : topAffinityGenre === "chill" ? (
-              <ShelfCarousel
-                title="☕ Midnight Chill &amp; Lo-Fi"
-                subtitle="ACOUSTIC &amp; LATE NIGHT BEATS"
-                songs={feeds.chill}
-                variant="square"
-              />
-            ) : topAffinityGenre === "party" ? (
-              <ShelfCarousel
-                title="🎉 Trending Club &amp; Dance"
-                subtitle="COMMERCIAL EDM &amp; BASS"
-                songs={feeds.party}
-                variant="square"
-              />
-            ) : (
-              <ShelfCarousel
-                title="🔥 Workout &amp; Motivation"
-                subtitle="CARDIO, PUMP &amp; POWER"
-                songs={feeds.workout}
-                variant="square"
-              />
-            )}
-
-            {/* 4. Trending Hits (Hindi, Punjabi & Global Top Charts) */}
+            {/* 6. Trending Global Hits Carousel */}
             <ShelfCarousel
-              title="Trending Global &amp; Indian Hits"
-              subtitle="TOP CHARTS &amp; VIRAL HITS"
-              songs={feeds.trending}
-              variant="square"
+              title="Trending Global Hits"
+              subtitle="TOP CHARTS • LOSSLESS STREAM"
+              songs={shelves.heroTrending}
             />
 
-            {/* 5. Liked Songs Radio (Automatic radio station from liked tracks) */}
-            {likedSongs.length > 0 && (
-              <ShelfCarousel
-                title="Liked Songs Radio"
-                subtitle="YOUR FAVORITES &amp; THUMBS UP"
-                songs={likedSongs}
-                variant="square"
-              />
-            )}
-
-            {/* 6. International Pop & Hip-Hop */}
+            {/* 7. Gym Phonk & Beast Mode Carousel */}
             <ShelfCarousel
-              title="International Pop &amp; Hip-Hop"
-              subtitle="BILLBOARD &amp; GLOBAL BANGERS"
-              songs={feeds.international}
-              variant="square"
+              title="Gym Phonk & Cyber Hype"
+              subtitle="HIGH ENERGY • 320KBPS"
+              songs={shelves.gymPhonk}
             />
 
-            {/* 7. Punjabi Hype & Bollywood Romance */}
+            {/* 8. Midnight Lo-Fi & Soulful Chill Carousel */}
             <ShelfCarousel
-              title="Punjabi Hype &amp; Bollywood Romance"
-              subtitle="DESI VIBES &amp; SOULFUL MELODIES"
-              songs={feeds.punjabiBollywood}
-              variant="square"
+              title="Midnight Chill & Lo-Fi"
+              subtitle="SLOWED & REVERB • FOCUS"
+              songs={shelves.midnightChill}
             />
 
-            {/* 8. Chill & Focus Beats */}
-            <ShelfCarousel
-              title="Chill &amp; Focus Beats"
-              subtitle="DEEP WORK &amp; RELAXATION"
-              songs={feeds.chill}
-              variant="square"
-            />
-
-            {/* 9. Creator Spotlight Banner Honoring Rishabh Singh */}
-            <section className="my-10 px-4 md:px-8">
-              <div className="relative rounded-3xl bg-gradient-to-r from-emerald-950/70 via-[#181818] to-[#121212] border border-emerald-500/25 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-5 flex-1 min-w-0">
-                  <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden ring-4 ring-emerald-500/50 flex-shrink-0 shadow-2xl bg-neutral-900">
+            {/* 9. Creator Spotlight Banner: Rishabh Singh */}
+            <section className="px-4 md:px-8 my-10">
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#121218] via-[#0E0E14] to-[#121218] border border-white/10 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_15px_40px_rgba(0,0,0,0.8)]">
+                <div className="flex items-center space-x-4 sm:space-x-5">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden ring-4 ring-[#00FF87]/70 shadow-[0_0_20px_rgba(0,255,135,0.3)] flex-shrink-0 bg-neutral-900">
                     <img
                       src="/creator.jpg"
                       alt="Rishabh Singh"
                       className="w-full h-full object-cover"
                     />
                   </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-center sm:justify-start space-x-2 mb-1">
-                      <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                        Creator Spotlight
-                      </span>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <div>
+                    <div className="flex items-center space-x-1.5">
+                      <h3 className="text-lg sm:text-xl font-black text-white">
+                        Rishabh Singh
+                      </h3>
+                      <CheckCircle2 className="w-4 h-4 text-[#00FF87]" />
                     </div>
-
-                    <h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-                      Rishabh Singh
-                    </h3>
-                    <p className="text-sm font-medium text-emerald-300/90 mb-2">
-                      Founder &amp; Lead Systems Mobile Architect
+                    <p className="text-xs font-semibold text-[#00FF87] mt-0.5">
+                      Lead Dev &amp; Founder • Systems Mobile Architect
                     </p>
-                    <p className="text-xs md:text-sm text-neutral-300 max-w-xl leading-relaxed">
-                      Architected <strong>SMC Singhs Music Co</strong> to deliver lossless 320kbps audio streaming, instant multi-mirror failover, adaptive user taste personalization, and a fluid YouTube Music experience on mobile WebViews with zero mock placeholders.
+                    <p className="text-xs text-neutral-400 mt-1 max-w-md">
+                      Engineered RhythmX with native MediaSession controls, zero-latency 320kbps failover, and hardware-accelerated 60fps mobile execution.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center space-y-2.5 sm:space-y-0 sm:space-x-3 flex-shrink-0 w-full md:w-auto">
-                  <button
-                    onClick={() => {
-                      if (feeds.quickPicks.length > 0) {
-                        playSong(feeds.quickPicks[0], feeds.quickPicks);
-                      }
-                    }}
-                    className="w-full sm:w-auto px-5 py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-500/25 active:scale-95 cursor-pointer"
-                  >
-                    <Play className="w-4 h-4 fill-black stroke-black" />
-                    <span>Play SMC Originals</span>
-                  </button>
-
-                  <Link
-                    href="https://www.instagram.com/rish4bhsiingh/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto px-5 py-3 rounded-full bg-[#212121] hover:bg-[#282828] text-white border border-white/10 font-semibold text-sm flex items-center justify-center space-x-2 transition active:scale-95"
-                  >
-                    <ExternalLink className="w-4 h-4 text-emerald-400" />
-                    <span>Instagram Profile</span>
-                  </Link>
-                </div>
+                <Link
+                  href="https://www.instagram.com/rish4bhsiingh/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00FF87] to-[#00F0FF] text-black font-extrabold text-xs flex items-center space-x-2 transition shadow-lg shadow-[#00FF87]/20 hover:scale-105 active:scale-95 flex-shrink-0"
+                >
+                  <span>Connect with Rishabh</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
               </div>
             </section>
-          </div>
+          </>
         )}
       </main>
 
-      {/* Global Persistent MiniPlayer */}
+      {/* Global Persistent MiniPlayer & FullPlayerModal */}
       <MiniPlayer />
-
-      {/* Global Persistent FullPlayerModal */}
       <FullPlayerModal />
     </div>
   );

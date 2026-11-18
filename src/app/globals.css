@@ -4,28 +4,29 @@
 
 :root {
   color-scheme: dark;
-  --bg-main: #030303;
-  --surface-main: #212121;
-  --surface-card: #181818;
-  --accent-emerald: #10b981;
-  --accent-crimson: #e11d48;
+  --bg-main: #000000;
+  --surface-main: #121214;
+  --surface-card: #18181b;
+  --accent-lime: #00ff87;
+  --accent-cyan: #00f0ff;
+  --accent-purple: #7928ca;
 }
 
-/* Custom Emerald Selection Styles */
+/* Custom Neon Lime Selection Styles */
 ::selection {
-  background-color: #10b981;
-  color: #030303;
+  background-color: #00ff87;
+  color: #000000;
 }
 
 ::-moz-selection {
-  background-color: #10b981;
-  color: #030303;
+  background-color: #00ff87;
+  color: #000000;
 }
 
 /* Base Body Styles with Mobile Optimization */
 html,
 body {
-  background-color: #030303;
+  background-color: #000000;
   color: #ffffff;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
@@ -46,7 +47,41 @@ body {
   -webkit-transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  will-change: scroll-position, transform;
+  will-change: transform, opacity;
+}
+
+/* Custom Glassmorphism Classes */
+.glass-dock {
+  background: rgba(14, 14, 16, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glow-lime {
+  box-shadow: 0 0 20px rgba(0, 255, 135, 0.25);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+}
+
+.glow-purple {
+  box-shadow: 0 0 24px rgba(121, 40, 202, 0.3);
+}
+
+/* 3D Tactile Card Depth */
+.card-3d {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), #101012;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s cubic-bezier(0.2, 0, 0, 1), border-color 0.25s ease;
+}
+
+.card-3d:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 255, 135, 0.35);
+  box-shadow: 0 14px 40px -10px rgba(0, 255, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
 }
 
 /* Safe Area Inset Padding Helpers for Mobile & Capacitor */
@@ -66,44 +101,23 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
-/* YouTube Music Glassmorphism Surfaces */
-.yt-glass {
-  background: rgba(33, 33, 33, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.yt-surface {
-  background-color: #212121;
-}
-
-.yt-card {
-  background-color: #181818;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-}
-
-.yt-card:hover {
-  background-color: #212121;
-}
-
-/* Custom Sleek Scrollbar */
+/* Sleek Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #030303;
+  background: #000000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #262626;
+  background: #27272a;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #10b981;
+  background: #00ff87;
 }
 
 /* Utility to hide scrollbars in touch carousels & chip bars */
