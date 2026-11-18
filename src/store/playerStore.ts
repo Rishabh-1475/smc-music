@@ -131,6 +131,13 @@ export interface TasteProfile {
   recentlyPlayed: Song[];
 }
 
+export interface UserPersonalData {
+  recentlyPlayed: Song[];
+  likedSongs: Song[];
+  playFrequency: Record<string, { song: Song; count: number }>;
+  recentSearches: string[];
+}
+
 export interface PlayerStore {
   // State
   currentTrack: Song | null;
@@ -150,6 +157,12 @@ export interface PlayerStore {
   userTasteProfile: TasteProfile;
   activeMood: CategoryMood | string;
   autoplay: boolean;
+
+  // Personal Activity Arrays (Persisted under 'rhythmx_user_data')
+  recentlyPlayed: Song[];
+  likedSongs: Song[];
+  playFrequency: Record<string, { song: Song; count: number }>;
+  recentSearches: string[];
 
   // Actions
   playSong: (song: Song, context?: Song[]) => void;
@@ -175,6 +188,14 @@ export interface PlayerStore {
   getTopArtists: () => string[];
   getPersonalizedSpeedDial: (pool?: Song[]) => Song[];
 
+  // User Shelves Activity Selectors & Actions
+  addToRecentlyPlayed: (song: Song) => void;
+  toggleLikeSong: (song: Song) => void;
+  recordSearchQuery: (query: string) => void;
+  clearRecentSearches: () => void;
+  removeRecentSearch: (query: string) => void;
+  getFrequentlyPlayed: () => Song[];
+
   [key: string]: any;
 }
 
@@ -194,10 +215,41 @@ const DEFAULT_TASTE_PROFILE: TasteProfile = {
   recentlyPlayed: [],
 };
 
+const DEFAULT_USER_DATA: UserPersonalData = {
+  recentlyPlayed: [],
+  likedSongs: [],
+  playFrequency: {},
+  recentSearches: [],
+};
+
 export const usePlayerStore = create<PlayerStore>((set, get) => {
-  const initialLiked = loadStorage<Record<string, boolean>>("rhythmx_liked_songs", {});
+  // Load persisted user personal data under 'rhythmx_user_data'
+  const initialUserData = loadStorage<UserPersonalData>(
+    "rhythmx_user_data",
+    DEFAULT_USER_DATA
+  );
+
+  // Backward compatibility loads
+  const legacyLiked = loadStorage<Record<string, boolean>>("rhythmx_liked_songs", {});
   const initialDisliked = loadStorage<Record<string, boolean>>("rhythmx_disliked_songs", {});
   const initialTaste = loadStorage<TasteProfile>("rhythmx_taste_profile", DEFAULT_TASTE_PROFILE);
+
+  // Merge likedSongIds from both likedSongs array and legacy storage
+  const initialLikedIds: Record<string, boolean> = { ...legacyLiked };
+  for (const s of initialUserData.likedSongs || []) {
+    if (s?.id) initialLikedIds[s.id] = true;
+  }
+
+  const persistUserData = (partial: Partial<UserPersonalData>) => {
+    const current: UserPersonalData = {
+      recentlyPlayed: get().recentlyPlayed,
+      likedSongs: get().likedSongs,
+      playFrequency: get().playFrequency,
+      recentSearches: get().recentSearches,
+      ...partial,
+    };
+    saveStorage("rhythmx_user_data", current);
+  };
 
   // Android MediaSession Synchronization Handler
   const syncMediaSession = (track: Song | null, playing: boolean) => {
@@ -343,11 +395,29 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     activeTab: "up_next",
     isShuffled: false,
     repeatMode: "off",
-    likedSongIds: initialLiked,
+    likedSongIds: initialLikedIds,
     dislikedSongIds: initialDisliked,
     userTasteProfile: initialTaste,
     activeMood: "All",
     autoplay: true,
+
+    // Personal activity arrays
+    recentlyPlayed: initialUserData.recentlyPlayed || [],
+    likedSongs: initialUserData.likedSongs || [],
+    playFrequency: initialUserData.playFrequency || {},
+    recentSearches: initialUserData.recentSearches || [],
+
+    addToRecentlyPlayed: (song: Song) => {
+      if (!song || !song.id) return;
+      const state = get();
+      const updated = [
+        song,
+        ...state.recentlyPlayed.filter((s) => s.id !== song.id),
+      ].slice(0, 25);
+
+      set({ recentlyPlayed: updated });
+      persistUserData({ recentlyPlayed: updated });
+    },
 
     playSong: (song: Song, context?: Song[]) => {
       if (!song || !song.audioUrl) return;
@@ -361,6 +431,23 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         newQueue = [song, ...newQueue];
       }
 
+      // 1. Update recentlyPlayed (Max 25)
+      const updatedRecentlyPlayed = [
+        song,
+        ...state.recentlyPlayed.filter((s) => s.id !== song.id),
+      ].slice(0, 25);
+
+      // 2. Update playFrequency
+      const currentFrequency = { ...state.playFrequency };
+      const currentCount = (currentFrequency[song.id]?.count || 0) + 1;
+      currentFrequency[song.id] = { song, count: currentCount };
+
+      // Persist in 'rhythmx_user_data'
+      persistUserData({
+        recentlyPlayed: updatedRecentlyPlayed,
+        playFrequency: currentFrequency,
+      });
+
       // Update Taste Profile: +2 artist affinity, +3 genre affinity
       const artist = (song.primaryArtists || "").toLowerCase().trim();
       const taste = { ...state.userTasteProfile };
@@ -373,12 +460,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         taste.genreWeights[g] = (taste.genreWeights[g] || 0) + 3;
       }
 
-      // Push to recently played (deduplicated)
-      taste.recentlyPlayed = [
-        song,
-        ...taste.recentlyPlayed.filter((s) => s.id !== song.id),
-      ].slice(0, 30);
-
+      taste.recentlyPlayed = updatedRecentlyPlayed.slice(0, 30);
       saveStorage("rhythmx_taste_profile", taste);
 
       set({
@@ -387,6 +469,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         originalQueue: newQueue,
         isPlaying: true,
         userTasteProfile: taste,
+        recentlyPlayed: updatedRecentlyPlayed,
+        playFrequency: currentFrequency,
       });
 
       if (globalAudio) {
@@ -557,55 +641,113 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     },
 
     toggleLike: (songOrId: Song | string) => {
+      const state = get();
       const song =
         typeof songOrId === "string"
-          ? get().queue.find((s) => s.id === songOrId) || get().currentTrack
+          ? state.queue.find((s) => s.id === songOrId) ||
+            state.likedSongs.find((s) => s.id === songOrId) ||
+            state.recentlyPlayed.find((s) => s.id === songOrId) ||
+            state.currentTrack
           : songOrId;
+
       if (!song) return;
 
-      set((state) => {
-        const liked = { ...state.likedSongIds };
-        const disliked = { ...state.dislikedSongIds };
-        const isCurrentlyLiked = Boolean(liked[song.id]);
+      const likedIds = { ...state.likedSongIds };
+      const dislikedIds = { ...state.dislikedSongIds };
+      let updatedLikedSongs = [...state.likedSongs];
 
-        if (isCurrentlyLiked) {
-          delete liked[song.id];
-        } else {
-          liked[song.id] = true;
-          delete disliked[song.id];
+      const isCurrentlyLiked = Boolean(likedIds[song.id]);
 
-          // Boost taste affinity (+5)
-          const taste = { ...state.userTasteProfile };
-          const artist = (song.primaryArtists || "").toLowerCase().trim();
-          if (artist) {
-            taste.artistWeights[artist] = (taste.artistWeights[artist] || 0) + 5;
-          }
-          const genres = detectGenres(song);
-          for (const g of genres) {
-            taste.genreWeights[g] = (taste.genreWeights[g] || 0) + 5;
-          }
-          saveStorage("rhythmx_taste_profile", taste);
+      if (isCurrentlyLiked) {
+        delete likedIds[song.id];
+        updatedLikedSongs = updatedLikedSongs.filter((s) => s.id !== song.id);
+      } else {
+        likedIds[song.id] = true;
+        delete dislikedIds[song.id];
+        updatedLikedSongs = [
+          song,
+          ...updatedLikedSongs.filter((s) => s.id !== song.id),
+        ];
+
+        // Boost taste affinity (+5)
+        const taste = { ...state.userTasteProfile };
+        const artist = (song.primaryArtists || "").toLowerCase().trim();
+        if (artist) {
+          taste.artistWeights[artist] = (taste.artistWeights[artist] || 0) + 5;
         }
+        const genres = detectGenres(song);
+        for (const g of genres) {
+          taste.genreWeights[g] = (taste.genreWeights[g] || 0) + 5;
+        }
+        saveStorage("rhythmx_taste_profile", taste);
+      }
 
-        saveStorage("rhythmx_liked_songs", liked);
-        saveStorage("rhythmx_disliked_songs", disliked);
+      persistUserData({ likedSongs: updatedLikedSongs });
+      saveStorage("rhythmx_liked_songs", likedIds);
+      saveStorage("rhythmx_disliked_songs", dislikedIds);
 
-        return { likedSongIds: liked, dislikedSongIds: disliked };
+      set({
+        likedSongIds: likedIds,
+        dislikedSongIds: dislikedIds,
+        likedSongs: updatedLikedSongs,
       });
     },
 
+    toggleLikeSong: (song: Song) => {
+      get().toggleLike(song);
+    },
+
+    recordSearchQuery: (query: string) => {
+      const trimmed = query.trim();
+      if (!trimmed) return;
+      const state = get();
+      const updated = [
+        trimmed,
+        ...state.recentSearches.filter(
+          (q) => q.toLowerCase() !== trimmed.toLowerCase()
+        ),
+      ].slice(0, 10);
+
+      set({ recentSearches: updated });
+      persistUserData({ recentSearches: updated });
+    },
+
+    clearRecentSearches: () => {
+      set({ recentSearches: [] });
+      persistUserData({ recentSearches: [] });
+    },
+
+    removeRecentSearch: (query: string) => {
+      const state = get();
+      const updated = state.recentSearches.filter(
+        (q) => q.toLowerCase() !== query.toLowerCase()
+      );
+      set({ recentSearches: updated });
+      persistUserData({ recentSearches: updated });
+    },
+
+    getFrequentlyPlayed: () => {
+      const freq = get().playFrequency;
+      return Object.values(freq)
+        .sort((a, b) => b.count - a.count)
+        .map((item) => item.song)
+        .slice(0, 10);
+    },
+
     toggleDislike: (songOrId: Song | string) => {
+      const state = get();
       const song =
         typeof songOrId === "string"
-          ? get().queue.find((s) => s.id === songOrId) || get().currentTrack
+          ? state.queue.find((s) => s.id === songOrId) || state.currentTrack
           : songOrId;
       if (!song) return;
 
-      const state = get();
       const disliked = { ...state.dislikedSongIds };
       const liked = { ...state.likedSongIds };
       disliked[song.id] = true;
       delete liked[song.id];
+
+      const updatedLikedSongs = state.likedSongs.filter((s) => s.id !== song.id);
 
       // Penalize artist & genre affinity (-5)
       const taste = { ...state.userTasteProfile };
@@ -623,6 +765,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
       saveStorage("rhythmx_taste_profile", taste);
       saveStorage("rhythmx_disliked_songs", disliked);
       saveStorage("rhythmx_liked_songs", liked);
+      persistUserData({ likedSongs: updatedLikedSongs });
 
       // Remove from queue
       const updatedQueue = state.queue.filter((s) => s.id !== song.id);
@@ -635,6 +778,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
       set({
         dislikedSongIds: disliked,
         likedSongIds: liked,
+        likedSongs: updatedLikedSongs,
         queue: updatedQueue,
         originalQueue: updatedQueue,
       });
@@ -692,7 +836,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
 
     getPersonalizedSpeedDial: (pool?: Song[]) => {
       const state = get();
-      const songs = pool && pool.length > 0 ? pool : state.userTasteProfile.recentlyPlayed;
+      const songs =
+        pool && pool.length > 0 ? pool : state.userTasteProfile.recentlyPlayed;
       if (!songs || songs.length === 0) return [];
 
       const weights = state.userTasteProfile.artistWeights;

@@ -17,6 +17,7 @@ import {
 import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
 import HeroVisualizer from "@/components/HeroVisualizer";
+import UserShelves from "@/components/UserShelves";
 import QuickPicksList from "@/components/QuickPicksList";
 import ShelfCarousel from "@/components/ShelfCarousel";
 import MiniPlayer from "@/components/MiniPlayer";
@@ -43,7 +44,8 @@ export default function Home() {
   const [loadingCategory, setLoadingCategory] = useState(false);
 
   const searchReqIdRef = useRef<number>(0);
-  const { playSong, currentTrack, likedSongIds } = usePlayerStore();
+  const { playSong, currentTrack, likedSongIds, likedSongs, recordSearchQuery } =
+    usePlayerStore();
 
   // RhythmX Home Shelves
   const [shelves, setShelves] = useState<{
@@ -128,6 +130,9 @@ export default function Home() {
     const currentReqId = ++searchReqIdRef.current;
 
     const handler = setTimeout(async () => {
+      // Record non-empty search query in playerStore
+      recordSearchQuery(trimmed);
+
       try {
         const { results, radioQueue } = await searchSongsWithRadio(trimmed);
         if (currentReqId === searchReqIdRef.current) {
@@ -148,22 +153,26 @@ export default function Home() {
     }, 300);
 
     return () => clearTimeout(handler);
-  }, [searchQuery]);
+  }, [searchQuery, recordSearchQuery]);
 
   const isSearchActive = searchQuery.trim().length > 0;
   const isFavoritesActive = activeCategory.toLowerCase() === "favorites";
   const isCategoryActive =
     activeCategory && activeCategory !== "All" && !isFavoritesActive;
 
-  // Filter favorite songs from user taste profile and loaded shelves
+  // Derive favorite songs from stored likedSongs, falling back to loaded tracks with likedSongIds
   const allKnownSongs = [
+    ...(likedSongs || []),
     ...(shelves.heroTrending || []),
     ...(shelves.speedDial || []),
     ...(shelves.quickPicks || []),
     ...(shelves.gymPhonk || []),
     ...(shelves.midnightChill || []),
   ];
-  const favoriteSongs = allKnownSongs.filter((s) => Boolean(likedSongIds[s.id]));
+  const favoriteSongs = allKnownSongs.filter(
+    (s, idx, arr) =>
+      Boolean(likedSongIds[s.id]) && arr.findIndex((x) => x.id === s.id) === idx
+  );
 
   return (
     <div className="min-h-screen bg-[#000000] text-white flex flex-col selection:bg-[#00FF87] selection:text-black">
@@ -432,7 +441,7 @@ export default function Home() {
         ) : (
           /* ================================================================ */
           /* DEFAULT RHYTHMX HOME FEED:                                       */
-          /* HeroVisualizer -> QuickPicks (with SpeedDial) -> Shelves -> Card */
+          /* HeroVisualizer -> UserShelves -> QuickPicks -> Shelves -> Card   */
           /* ================================================================ */
           <>
             {/* 3. 3D Floating Hero Visualizer Showcase */}
@@ -441,7 +450,12 @@ export default function Home() {
               onPlay={(track) => playSong(track, shelves.heroTrending)}
             />
 
-            {/* 4. Speed Dial Stations + Quick Picks Track Rows */}
+            {/* 4. Dedicated Horizontally Scrollable Personal Activity Sections */}
+            <UserShelves
+              onSelectSearchQuery={(query) => setSearchQuery(query)}
+            />
+
+            {/* 5. Speed Dial Stations + Quick Picks Track Rows */}
             <QuickPicksList
               title="Quick Picks"
               subtitle="START RADIO FROM A SONG"
@@ -449,28 +463,28 @@ export default function Home() {
               speedDialSongs={shelves.speedDial}
             />
 
-            {/* 5. Trending Global Hits Carousel */}
+            {/* 6. Trending Global Hits Carousel */}
             <ShelfCarousel
               title="Trending Global Hits"
               subtitle="TOP CHARTS • LOSSLESS STREAM"
               songs={shelves.heroTrending}
             />
 
-            {/* 6. Gym Phonk & Cyber Hype Carousel */}
+            {/* 7. Gym Phonk & Cyber Hype Carousel */}
             <ShelfCarousel
               title="Gym Phonk & Cyber Hype"
               subtitle="HIGH ENERGY • 320KBPS"
               songs={shelves.gymPhonk}
             />
 
-            {/* 7. Midnight Lo-Fi & Soulful Chill Carousel */}
+            {/* 8. Midnight Lo-Fi & Soulful Chill Carousel */}
             <ShelfCarousel
               title="Midnight Chill & Lo-Fi"
               subtitle="SLOWED & REVERB • FOCUS"
               songs={shelves.midnightChill}
             />
 
-            {/* 8. Creator Spotlight Showcase Banner: Rishabh Singh */}
+            {/* 9. Creator Spotlight Showcase Banner: Rishabh Singh */}
             <section className="px-4 md:px-8 my-10">
               <div className="relative glass-card overflow-hidden p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_15px_40px_rgba(0,0,0,0.85)]">
                 <div className="flex items-center space-x-4 sm:space-x-5">
