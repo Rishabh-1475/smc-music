@@ -13,15 +13,60 @@ declare global {
  * Bound to window.__smc_audio to prevent garbage collection in Mobile WebViews.
  */
 let globalAudio: HTMLAudioElement | null = null;
+let wakeLockSentinel: any = null;
+
+const requestWakeLock = async () => {
+  if (typeof window !== "undefined" && "wakeLock" in navigator) {
+    try {
+      wakeLockSentinel = await (navigator as any).wakeLock.request("screen");
+    } catch {
+      // WakeLock optional or denied
+    }
+  }
+};
+
+const releaseWakeLock = () => {
+  if (wakeLockSentinel) {
+    wakeLockSentinel.release().catch(() => {});
+    wakeLockSentinel = null;
+  }
+};
 
 if (typeof window !== "undefined") {
   if (!window.__smc_audio) {
     const audio = new Audio();
     audio.preload = "auto";
     audio.crossOrigin = "anonymous";
+    (audio as any).playsInline = true;
     window.__smc_audio = audio;
   }
   globalAudio = window.__smc_audio;
+
+  // Prevent mobile WebViews and browsers from auto-pausing audio when backgrounded
+  window.addEventListener(
+    "visibilitychange",
+    (e) => {
+      // Do not allow visibilitychange to pause background audio
+      e.stopImmediatePropagation();
+    },
+    true
+  );
+
+  window.addEventListener(
+    "blur",
+    (e) => {
+      e.stopImmediatePropagation();
+    },
+    true
+  );
+
+  window.addEventListener(
+    "pagehide",
+    (e) => {
+      e.stopImmediatePropagation();
+    },
+    true
+  );
 }
 
 const CLEAN_VINYL_COVER =
@@ -142,7 +187,10 @@ const getInitialTasteProfile = (): UserTasteProfile => {
 };
 
 export const usePlayerStore = create<PlayerState>((set, get) => {
-  // Sync MediaSession API
+  /**
+   * Overhauled MediaSession Bridge:
+   * Synchronizes metadata, artwork sizes, and native Android lock screen / notification shade controls.
+   */
   const syncMediaSession = (track: Song, isPlayingState = true) => {
     if (typeof window === "undefined" || !("mediaSession" in navigator)) return;
 
@@ -150,38 +198,77 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     const albumTitle = track.album || "SMC Music";
 
     try {
+      // 1. Full high-res artwork array (96x96 to 512x512)
       navigator.mediaSession.metadata = new MediaMetadata({
         title: track.name || track.title || "Track",
         artist: track.primaryArtists || "Singhs Music Co",
         album: albumTitle,
         artwork: [
           { src: artworkUrl, sizes: "96x96", type: "image/jpeg" },
+          { src: artworkUrl, sizes: "128x128", type: "image/jpeg" },
           { src: artworkUrl, sizes: "192x192", type: "image/jpeg" },
+          { src: artworkUrl, sizes: "256x256", type: "image/jpeg" },
+          { src: artworkUrl, sizes: "384x384", type: "image/jpeg" },
           { src: artworkUrl, sizes: "512x512", type: "image/jpeg" },
         ],
       });
 
+      // 2. Playback state
       navigator.mediaSession.playbackState = isPlayingState ? "playing" : "paused";
 
+      // 3. Register native action handlers for lockscreen / notification center
       navigator.mediaSession.setActionHandler("play", () => {
         get().togglePlay();
       });
+
       navigator.mediaSession.setActionHandler("pause", () => {
         get().togglePlay();
       });
-      navigator.mediaSession.setActionHandler("nexttrack", () => {
-        get().playNext();
-      });
+
       navigator.mediaSession.setActionHandler("previoustrack", () => {
         get().playPrev();
       });
+
+      navigator.mediaSession.setActionHandler("nexttrack", () => {
+        get().playNext();
+      });
+
       navigator.mediaSession.setActionHandler("seekto", (details) => {
         if (details.seekTime !== undefined && globalAudio) {
-          globalAudio.currentTime = details.seekTime;
-          const dur = globalAudio.duration || 0;
-          const prog = dur > 0 ? (details.seekTime / dur) * 100 : 0;
-          set({ currentTime: details.seekTime, progress: prog });
+          const dur = globalAudio.duration || get().duration || 0;
+          if (dur > 0) {
+            get().seekTo((details.seekTime / dur) * 100);
+          } else {
+            globalAudio.currentTime = details.seekTime;
+            set({ currentTime: details.seekTime });
+          }
         }
+      });
+
+      navigator.mediaSession.setActionHandler("seekbackward", (details) => {
+        if (globalAudio) {
+          const skip = details.seekOffset || 10;
+          const target = Math.max(0, globalAudio.currentTime - skip);
+          const dur = globalAudio.duration || get().duration || 0;
+          if (dur > 0) {
+            get().seekTo((target / dur) * 100);
+          }
+        }
+      });
+
+      navigator.mediaSession.setActionHandler("seekforward", (details) => {
+        if (globalAudio) {
+          const skip = details.seekOffset || 10;
+          const dur = globalAudio.duration || get().duration || 0;
+          const target = Math.min(dur, globalAudio.currentTime + skip);
+          if (dur > 0) {
+            get().seekTo((target / dur) * 100);
+          }
+        }
+      });
+
+      navigator.mediaSession.setActionHandler("stop", () => {
+        get().togglePlay();
       });
     } catch {
       // Suppress MediaSession errors
@@ -195,6 +282,25 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       const dur = globalAudio?.duration || 0;
       const prog = dur > 0 ? (cur / dur) * 100 : 0;
       set({ currentTime: cur, duration: dur, progress: prog });
+
+      // Live position state update for Android notification seekbar
+      if (
+        typeof window !== "undefined" &&
+        "mediaSession" in navigator &&
+        "setPositionState" in navigator.mediaSession
+      ) {
+        try {
+          if (dur > 0 && cur <= dur) {
+            navigator.mediaSession.setPositionState({
+              duration: Math.max(0, dur),
+              playbackRate: globalAudio.playbackRate || 1,
+              position: Math.max(0, cur),
+            });
+          }
+        } catch {
+          // Ignore position update failure
+        }
+      }
     };
 
     globalAudio.onended = () => {
@@ -212,6 +318,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         get().playNext();
       } else {
         set({ isPlaying: false });
+        if (typeof window !== "undefined" && "mediaSession" in navigator) {
+          navigator.mediaSession.playbackState = "paused";
+        }
+        releaseWakeLock();
       }
     };
 
@@ -220,6 +330,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       if (typeof window !== "undefined" && "mediaSession" in navigator) {
         navigator.mediaSession.playbackState = "none";
       }
+      releaseWakeLock();
     };
   }
 
@@ -261,6 +372,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         get().playSong(playableQueue[0], playableQueue);
       } else if (repeatMode === "off") {
         set({ isPlaying: false });
+        if (typeof window !== "undefined" && "mediaSession" in navigator) {
+          navigator.mediaSession.playbackState = "paused";
+        }
+        releaseWakeLock();
       }
     }
   };
@@ -369,7 +484,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
 
       const updatedSong: Song = {
         ...song,
-        playCount: (song.playCount || 0) + 1,
+        playCount: (Number(song.playCount) || 0) + 1,
         isLiked: Boolean(get().likedSongIds[song.id]),
         isDisliked: false,
       };
@@ -396,12 +511,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
             .then(() => {
               set({ isPlaying: true });
               syncMediaSession(updatedSong, true);
+              requestWakeLock();
             })
             .catch(() => {
               set({ isPlaying: false });
               if (typeof window !== "undefined" && "mediaSession" in navigator) {
                 navigator.mediaSession.playbackState = "paused";
               }
+              releaseWakeLock();
             });
         }
       }
@@ -440,6 +557,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
           if (typeof window !== "undefined" && "mediaSession" in navigator) {
             navigator.mediaSession.playbackState = "paused";
           }
+          releaseWakeLock();
         } else {
           const playPromise = globalAudio.play();
           if (playPromise !== undefined) {
@@ -449,9 +567,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
                 if (typeof window !== "undefined" && "mediaSession" in navigator) {
                   navigator.mediaSession.playbackState = "playing";
                 }
+                requestWakeLock();
               })
               .catch(() => {
                 set({ isPlaying: false });
+                releaseWakeLock();
               });
           }
         }
@@ -471,6 +591,23 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       );
       globalAudio.currentTime = target;
       set({ currentTime: target, progress: percent });
+
+      // Immediate position update to MediaSession
+      if (
+        typeof window !== "undefined" &&
+        "mediaSession" in navigator &&
+        "setPositionState" in navigator.mediaSession
+      ) {
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: globalAudio.duration,
+            playbackRate: globalAudio.playbackRate || 1,
+            position: target,
+          });
+        } catch {
+          // Ignore
+        }
+      }
     },
 
     setVolume: (level: number) => {
