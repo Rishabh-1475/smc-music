@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Sparkles,
-  Music,
   ExternalLink,
   Play,
   CheckCircle2,
@@ -13,12 +12,13 @@ import {
   Flame,
   Zap,
   Heart,
+  Disc3,
+  Cpu,
 } from "lucide-react";
 import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
 import HeroVisualizer from "@/components/HeroVisualizer";
 import UserShelves from "@/components/UserShelves";
-import QuickPicksList from "@/components/QuickPicksList";
 import ShelfCarousel from "@/components/ShelfCarousel";
 import MiniPlayer from "@/components/MiniPlayer";
 import FullPlayerModal from "@/components/FullPlayerModal";
@@ -47,7 +47,7 @@ export default function Home() {
   const { playSong, currentTrack, likedSongIds, likedSongs, recordSearchQuery } =
     usePlayerStore();
 
-  // RhythmX Home Shelves
+  // RhythmX Titanium-Void Home Shelves
   const [shelves, setShelves] = useState<{
     heroTrending: Song[];
     speedDial: Song[];
@@ -76,7 +76,7 @@ export default function Home() {
           setShelves(data);
         }
       } catch (err) {
-        console.error("Failed to load RhythmX home shelves:", err);
+        console.error("Failed to load RhythmX Titanium-Void shelves:", err);
       } finally {
         if (active) setLoadingShelves(false);
       }
@@ -97,7 +97,6 @@ export default function Home() {
       return;
     }
 
-    // Special handling for Favorites filter
     if (category.toLowerCase() === "favorites") {
       setLoadingCategory(false);
       return;
@@ -115,7 +114,7 @@ export default function Home() {
     }
   };
 
-  // 300ms Debounced Search Engine with Cancellation & Radio Queue Generation
+  // 250ms Debounced Fast Search Engine to Prevent UI Thread Lockups
   useEffect(() => {
     const trimmed = searchQuery.trim();
 
@@ -130,7 +129,6 @@ export default function Home() {
     const currentReqId = ++searchReqIdRef.current;
 
     const handler = setTimeout(async () => {
-      // Record non-empty search query in playerStore
       recordSearchQuery(trimmed);
 
       try {
@@ -150,7 +148,7 @@ export default function Home() {
           setIsSearching(false);
         }
       }
-    }, 300);
+    }, 250);
 
     return () => clearTimeout(handler);
   }, [searchQuery, recordSearchQuery]);
@@ -160,11 +158,10 @@ export default function Home() {
   const isCategoryActive =
     activeCategory && activeCategory !== "All" && !isFavoritesActive;
 
-  // Derive favorite songs from stored likedSongs, falling back to loaded tracks with likedSongIds
+  // Saved favorites
   const allKnownSongs = [
     ...(likedSongs || []),
     ...(shelves.heroTrending || []),
-    ...(shelves.speedDial || []),
     ...(shelves.quickPicks || []),
     ...(shelves.gymPhonk || []),
     ...(shelves.midnightChill || []),
@@ -175,15 +172,15 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-[#000000] text-white flex flex-col selection:bg-[#00FF87] selection:text-black">
-      {/* 1. Header with RhythmX Glowing Logo, Frosted Search Pill & Creator Avatar */}
+    <div className="min-h-screen bg-[#050507] text-white flex flex-col selection:bg-[#00FF87] selection:text-black">
+      {/* 1. Header & Sonic Search Deck */}
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         isSearching={isSearching}
       />
 
-      {/* 2. 3D Tactile Category Chips Bar */}
+      {/* 2. Tactile Mood & Subgenre Pills */}
       {!isSearchActive && (
         <CategoryChips
           activeCategory={activeCategory}
@@ -192,35 +189,35 @@ export default function Home() {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 pb-32">
+      <main className="flex-1 pb-36">
         {/* ================================================================ */}
-        {/* SEARCH ACTIVE VIEW: STRICT SEARCH RESULTS GRID (NO HOME FALLBACK) */}
+        {/* SEARCH ACTIVE VIEW: HIGH-VELOCITY RESULTS GRID                   */}
         {/* ================================================================ */}
         {isSearchActive ? (
-          <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 gpu-layer">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[11px] font-bold text-[#00FF87] tracking-wider uppercase">
-                  GLOBAL CATALOG SEARCH
+                <p className="text-[10px] font-mono font-bold text-[#00FF87] tracking-widest uppercase">
+                  GLOBAL SONIC REGISTRY
                 </p>
-                <h1 className="text-xl md:text-2xl font-black text-white mt-0.5">
+                <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">
                   Results for &ldquo;{searchQuery}&rdquo;
                 </h1>
               </div>
               {searchResults.length > 0 && (
-                <span className="text-xs font-mono text-neutral-400">
-                  {searchResults.length} tracks found
+                <span className="text-xs font-mono text-[#8F90A6]">
+                  {searchResults.length} indexed tracks
                 </span>
               )}
             </div>
 
             {/* Skeleton Pulse Loader */}
             {isSearching && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 animate-pulse">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center space-x-3.5 p-3 rounded-2xl glass-card"
+                    className="flex items-center space-x-3.5 p-3 rounded-2xl rhythmx-glass"
                   >
                     <div className="w-14 h-14 rounded-xl bg-neutral-800 flex-shrink-0" />
                     <div className="flex-1 space-y-2">
@@ -234,13 +231,13 @@ export default function Home() {
 
             {/* Empty Search State */}
             {!isSearching && searchResults.length === 0 && (
-              <div className="text-center py-20 flex flex-col items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,255,135,0.2)]">
-                  <SearchX className="w-8 h-8 text-neutral-400" />
+              <div className="text-center py-20 flex flex-col items-center justify-center rhythmx-glass rounded-3xl p-8 max-w-md mx-auto my-10">
+                <div className="w-16 h-16 rounded-full bg-[#121217] border border-white/10 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,255,135,0.2)]">
+                  <SearchX className="w-8 h-8 text-[#00FF87]" />
                 </div>
-                <h3 className="text-lg font-bold text-white">No tracks found</h3>
-                <p className="text-xs text-neutral-400 max-w-sm mt-1">
-                  Try searching by artist name, genre (&ldquo;phonk&rdquo;, &ldquo;gym&rdquo;, &ldquo;lo-fi&rdquo;), or alternative keywords.
+                <h3 className="text-lg font-black text-white">No tracks located</h3>
+                <p className="text-xs text-[#8F90A6] font-medium mt-1">
+                  Try broader artist keywords, genre queries like &ldquo;phonk&rdquo; or hot tags above.
                 </p>
               </div>
             )}
@@ -255,9 +252,9 @@ export default function Home() {
                       <div
                         key={song.id}
                         onClick={() => playSong(song, searchResults)}
-                        className={`group relative glass-card p-3 flex items-center cursor-pointer overflow-hidden ${
+                        className={`group relative rhythmx-glass p-3 flex items-center cursor-pointer rounded-2xl transition-all duration-200 ${
                           isCurrent
-                            ? "border-[#00FF87]/50 shadow-[0_0_20px_rgba(0,255,135,0.25)]"
+                            ? "border-[#00FF87] shadow-[0_0_20px_rgba(0,255,135,0.3)] bg-[#121217]"
                             : ""
                         }`}
                       >
@@ -277,16 +274,16 @@ export default function Home() {
 
                         <div className="ml-3.5 min-w-0 flex-1 pr-2">
                           <h4
-                            className={`text-sm font-semibold truncate ${
+                            className={`text-sm font-bold truncate leading-tight ${
                               isCurrent ? "text-[#00FF87]" : "text-white"
                             }`}
                           >
                             {song.name}
                           </h4>
-                          <p className="text-xs text-neutral-400 truncate mt-0.5">
+                          <p className="text-xs text-[#8F90A6] truncate mt-0.5 font-medium">
                             {song.primaryArtists}
                           </p>
-                          <p className="text-[10px] text-neutral-400 truncate">
+                          <p className="text-[10px] text-neutral-400 font-mono truncate">
                             {song.album || "Single"}
                           </p>
                         </div>
@@ -295,12 +292,12 @@ export default function Home() {
                   })}
                 </div>
 
-                {/* Related Radio Queue generated behind search */}
+                {/* Related Radio Queue */}
                 {searchRadioQueue.length > 0 && (
                   <div className="mt-10">
                     <ShelfCarousel
-                      title="Related Radio & Trending Mix"
-                      subtitle="CONTINUE THE VIBE"
+                      title="Sonic Continuum & Related Radio"
+                      subtitle="AUTO-STREAMING QUEUE"
                       songs={searchRadioQueue}
                     />
                   </div>
@@ -310,31 +307,31 @@ export default function Home() {
           </div>
         ) : isFavoritesActive ? (
           /* ================================================================ */
-          /* FAVORITES VIEW: USER'S LIKED TRACKS                              */
+          /* VAULT FAVOURITES VIEW                                            */
           /* ================================================================ */
-          <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 gpu-layer">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[11px] font-bold text-[#00FF87] tracking-wider uppercase">
-                  SAVED COLLECTION
+                <p className="text-[10px] font-mono font-bold text-[#00FF87] tracking-widest uppercase">
+                  PERSISTENT VAULT
                 </p>
-                <h1 className="text-xl md:text-2xl font-black text-white mt-0.5">
-                  Your Favorites
+                <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">
+                  Vault Favourites
                 </h1>
               </div>
-              <span className="text-xs font-mono text-neutral-400">
-                {favoriteSongs.length} saved tracks
+              <span className="text-xs font-mono text-[#8F90A6]">
+                {favoriteSongs.length} saved songs
               </span>
             </div>
 
             {favoriteSongs.length === 0 ? (
-              <div className="text-center py-20 flex flex-col items-center justify-center glass-card p-8">
-                <div className="w-16 h-16 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,255,135,0.2)]">
+              <div className="text-center py-20 flex flex-col items-center justify-center rhythmx-glass rounded-3xl p-8 max-w-md mx-auto my-10">
+                <div className="w-16 h-16 rounded-full bg-[#121217] border border-white/10 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,255,135,0.2)]">
                   <Heart className="w-8 h-8 text-[#00FF87]" />
                 </div>
-                <h3 className="text-lg font-bold text-white">No favorites yet</h3>
-                <p className="text-xs text-neutral-400 max-w-sm mt-1">
-                  Tap the heart or thumbs-up icon on any track to save it to your personal favorites station.
+                <h3 className="text-lg font-black text-white">Vault is empty</h3>
+                <p className="text-xs text-[#8F90A6] font-medium mt-1">
+                  Tap the heart icon on any track to store it permanently in your Titanium Vault.
                 </p>
               </div>
             ) : (
@@ -343,7 +340,7 @@ export default function Home() {
                   <div
                     key={song.id}
                     onClick={() => playSong(song, favoriteSongs)}
-                    className="group relative glass-card p-3 flex items-center cursor-pointer"
+                    className="group relative rhythmx-glass p-3 flex items-center cursor-pointer rounded-2xl"
                   >
                     <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
                       <img
@@ -360,10 +357,10 @@ export default function Home() {
                     </div>
 
                     <div className="ml-3.5 min-w-0 flex-1 pr-2">
-                      <h4 className="text-sm font-semibold text-white truncate">
+                      <h4 className="text-sm font-bold text-white truncate leading-tight">
                         {song.name}
                       </h4>
-                      <p className="text-xs text-neutral-400 truncate mt-0.5">
+                      <p className="text-xs text-[#8F90A6] truncate mt-0.5 font-medium">
                         {song.primaryArtists}
                       </p>
                     </div>
@@ -376,13 +373,13 @@ export default function Home() {
           /* ================================================================ */
           /* CATEGORY FILTERED VIEW: DYNAMIC MOOD BUNDLE                      */
           /* ================================================================ */
-          <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 gpu-layer">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[11px] font-bold text-[#00FF87] tracking-wider uppercase">
-                  MOOD EXPLORER
+                <p className="text-[10px] font-mono font-bold text-[#00FF87] tracking-widest uppercase">
+                  SUBGENRE SECTOR
                 </p>
-                <h1 className="text-xl md:text-2xl font-black text-white mt-0.5">
+                <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">
                   {activeCategory} Radio
                 </h1>
               </div>
@@ -393,7 +390,7 @@ export default function Home() {
                 {Array.from({ length: 9 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center space-x-3.5 p-3 rounded-2xl glass-card"
+                    className="flex items-center space-x-3.5 p-3 rounded-2xl rhythmx-glass"
                   >
                     <div className="w-14 h-14 rounded-xl bg-neutral-800" />
                     <div className="flex-1 space-y-2">
@@ -409,7 +406,7 @@ export default function Home() {
                   <div
                     key={song.id}
                     onClick={() => playSong(song, categoryFeed)}
-                    className="group relative glass-card p-3 flex items-center cursor-pointer"
+                    className="group relative rhythmx-glass p-3 flex items-center cursor-pointer rounded-2xl"
                   >
                     <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
                       <img
@@ -426,10 +423,10 @@ export default function Home() {
                     </div>
 
                     <div className="ml-3.5 min-w-0 flex-1 pr-2">
-                      <h4 className="text-sm font-semibold text-white truncate">
+                      <h4 className="text-sm font-bold text-white truncate leading-tight">
                         {song.name}
                       </h4>
-                      <p className="text-xs text-neutral-400 truncate mt-0.5">
+                      <p className="text-xs text-[#8F90A6] truncate mt-0.5 font-medium">
                         {song.primaryArtists}
                       </p>
                     </div>
@@ -440,55 +437,47 @@ export default function Home() {
           </div>
         ) : (
           /* ================================================================ */
-          /* DEFAULT RHYTHMX HOME FEED:                                       */
-          /* HeroVisualizer -> UserShelves -> QuickPicks -> Shelves -> Card   */
+          /* TITANIUM-VOID HOME EXPERIENCE:                                    */
+          /* HeroVisualizer -> Personal Activity Decks -> Curated Shelves     */
           /* ================================================================ */
           <>
-            {/* 3. 3D Floating Hero Visualizer Showcase */}
+            {/* 3. The Kinetic Sonic Centerpiece (Asymmetric 3D Vinyl Showcase) */}
             <HeroVisualizer
               featuredTrack={shelves.heroTrending[0] || null}
               onPlay={(track) => playSong(track, shelves.heroTrending)}
             />
 
-            {/* 4. Dedicated Horizontally Scrollable Personal Activity Sections */}
+            {/* 4. Persistent Personal Activity Decks (Heavy Rotation, Vault, Rewind) */}
             <UserShelves
               onSelectSearchQuery={(query) => setSearchQuery(query)}
             />
 
-            {/* 5. Speed Dial Stations + Quick Picks Track Rows */}
-            <QuickPicksList
-              title="Quick Picks"
-              subtitle="START RADIO FROM A SONG"
-              songs={shelves.quickPicks}
-              speedDialSongs={shelves.speedDial}
-            />
-
-            {/* 6. Trending Global Hits Carousel */}
+            {/* 5. Trending Global Velocity Carousel */}
             <ShelfCarousel
-              title="Trending Global Hits"
-              subtitle="TOP CHARTS • LOSSLESS STREAM"
+              title="Global Velocity Trends"
+              subtitle="LOSSLESS 320 KBPS CHARTS"
               songs={shelves.heroTrending}
             />
 
-            {/* 7. Gym Phonk & Cyber Hype Carousel */}
+            {/* 6. Cyber Phonk & Bass Carousel */}
             <ShelfCarousel
-              title="Gym Phonk & Cyber Hype"
-              subtitle="HIGH ENERGY • 320KBPS"
+              title="Cyber Phonk & Bassline Drift"
+              subtitle="HIGH-BPM ENERGY"
               songs={shelves.gymPhonk}
             />
 
-            {/* 8. Midnight Lo-Fi & Soulful Chill Carousel */}
+            {/* 7. Midnight Lo-Fi Sanctuary Carousel */}
             <ShelfCarousel
-              title="Midnight Chill & Lo-Fi"
-              subtitle="SLOWED & REVERB • FOCUS"
+              title="Midnight Lo-Fi Sanctuary"
+              subtitle="SLOWED & REVERB CHILL"
               songs={shelves.midnightChill}
             />
 
-            {/* 9. Creator Spotlight Showcase Banner: Rishabh Singh */}
-            <section className="px-4 md:px-8 my-10">
-              <div className="relative glass-card overflow-hidden p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_15px_40px_rgba(0,0,0,0.85)]">
+            {/* 8. Titanium Architecture & Creator Spotlight */}
+            <section className="px-3 sm:px-6 md:px-8 my-10 gpu-layer">
+              <div className="relative rhythmx-glass rounded-3xl overflow-hidden p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_15px_40px_rgba(0,0,0,0.9)]">
                 <div className="flex items-center space-x-4 sm:space-x-5">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden ring-4 ring-[#00FF87]/80 shadow-[0_0_25px_rgba(0,255,135,0.4)] flex-shrink-0 bg-neutral-900">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden ring-2 ring-[#00FF87] shadow-[0_0_20px_rgba(0,255,135,0.4)] flex-shrink-0 bg-neutral-900">
                     <img
                       src="/creator.jpg"
                       alt="Rishabh Singh"
@@ -502,11 +491,11 @@ export default function Home() {
                       </h3>
                       <CheckCircle2 className="w-4 h-4 text-[#00FF87]" />
                     </div>
-                    <p className="text-xs font-semibold text-[#00FF87] mt-0.5">
-                      Lead Dev &amp; Founder • Systems Mobile Architect
+                    <p className="text-xs font-mono font-bold text-[#00FF87] mt-0.5">
+                      Systems Mobile Architect • Founder
                     </p>
-                    <p className="text-xs text-neutral-400 mt-1 max-w-md">
-                      Engineered RhythmX with native MediaSession controls, zero-latency 320kbps failover, and hardware-accelerated 60fps mobile execution.
+                    <p className="text-xs text-[#8F90A6] font-medium mt-1 max-w-md">
+                      Pioneered the RhythmX Titanium-Void engine: locked 60fps GPU acceleration, native Android MediaSession integration, and lossless 320kbps streams.
                     </p>
                   </div>
                 </div>
@@ -515,9 +504,9 @@ export default function Home() {
                   href="https://www.instagram.com/rish4bhsiingh/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-full bg-gradient-to-r from-[#00FF87] to-[#10B981] text-black font-extrabold text-xs flex items-center space-x-2 transition shadow-lg shadow-[#00FF87]/25 hover:scale-105 active:scale-95 flex-shrink-0"
+                  className="px-6 py-3 rounded-full bg-gradient-to-r from-[#00FF87] to-[#10B981] text-black font-black text-xs flex items-center space-x-2 transition shadow-lg shadow-[#00FF87]/25 hover:scale-105 active:scale-95 flex-shrink-0"
                 >
-                  <span>Connect with Rishabh</span>
+                  <span>CONNECT ON INSTAGRAM</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -526,7 +515,7 @@ export default function Home() {
         )}
       </main>
 
-      {/* Global Persistent MiniPlayer & FullPlayerModal */}
+      {/* Global Persistent Floating Dock Player & FullPlayerModal */}
       <MiniPlayer />
       <FullPlayerModal />
     </div>

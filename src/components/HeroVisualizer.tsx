@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { Play, Pause, Sparkles, Volume2, Flame, Disc } from "lucide-react";
+import React from "react";
+import { Play, Pause, Sparkles, Volume2, Disc, Radio } from "lucide-react";
 import { Song } from "@/types/music";
 import { usePlayerStore } from "@/store/playerStore";
 
@@ -20,7 +20,8 @@ export default function HeroVisualizer({
   const { currentTrack, isPlaying, togglePlay, playSong } = usePlayerStore();
 
   const activeTrack = currentTrack || featuredTrack;
-  const isCurrentActive = currentTrack && activeTrack && currentTrack.id === activeTrack.id;
+  const isCurrentActive =
+    Boolean(currentTrack && activeTrack && currentTrack.id === activeTrack.id);
   const trackIsPlaying = isCurrentActive && isPlaying;
 
   const handleAction = () => {
@@ -36,85 +37,82 @@ export default function HeroVisualizer({
     }
   };
 
-  // 36-bar dynamic equalizer heights for SVG visualizer
-  const soundwavePoints = useMemo(() => {
-    return Array.from({ length: 40 }).map((_, i) => {
-      const envelope = Math.sin((i / 40) * Math.PI);
-      const minH = 8;
-      const maxH = 52;
-      const height = Math.round(minH + envelope * (maxH - minH));
-      return {
-        id: i,
-        baseH: height,
-      };
-    });
-  }, []);
-
   if (!activeTrack) return null;
 
   return (
-    <section className="relative px-4 md:px-8 my-6">
-      {/* 3D Floating Showcase Centerpiece */}
-      <div className="relative glass-card hero-glow overflow-hidden p-6 md:p-8 backdrop-blur-2xl">
-        {/* Holographic Ambient Glow Mesh */}
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-[#00FF87]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-[#7928CA]/20 rounded-full blur-3xl pointer-events-none" />
+    <section className="relative px-3 sm:px-6 md:px-8 my-5 gpu-layer">
+      {/* Asymmetric Magazine-Style Horizontal Showcase Card */}
+      <div className="relative rhythmx-glass rounded-3xl overflow-hidden p-5 sm:p-7 md:p-9">
+        {/* Soft Radial Ambient Background Glow */}
+        <div
+          className={`absolute -right-20 -top-20 w-80 h-80 rounded-full blur-3xl pointer-events-none transition-opacity duration-1000 ${
+            trackIsPlaying ? "bg-[#00FF87]/15 opacity-100" : "bg-[#7928CA]/15 opacity-60"
+          }`}
+        />
+        <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-[#121217]/80 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10">
-          {/* Centered 3D Floating Showcase Card with Rounded-3xl Album Cover & Tilt */}
-          <div className="relative group w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-3xl overflow-hidden flex-shrink-0 shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-white/15 bg-neutral-900 transition-all duration-500 hover:scale-[1.03] hover:rotate-1">
-            <img
-              src={activeTrack.imageUrl || FALLBACK_VINYL}
-              alt={activeTrack.name}
-              className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${
-                trackIsPlaying ? "scale-105" : ""
+          {/* Left Side: 3D Vinyl Disc Art that Smoothly Rotates ONLY when Audio is Actively Playing */}
+          <div className="relative group w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 flex-shrink-0 flex items-center justify-center">
+            {/* Outer Vinyl Disc Body with Realistic Metallic Grooves */}
+            <div
+              className={`relative w-full h-full rounded-full metallic-grooves border-2 border-neutral-700/60 shadow-[0_15px_40px_rgba(0,0,0,0.95)] flex items-center justify-center ${
+                trackIsPlaying ? "animate-vinyl" : ""
               }`}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
-              }}
-            />
+            >
+              {/* Center Record Label (Album Artwork) */}
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-[#00FF87]/40 shadow-inner">
+                <img
+                  src={activeTrack.imageUrl || FALLBACK_VINYL}
+                  alt={activeTrack.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
+                  }}
+                />
+                {/* Spindle Hole */}
+                <div className="absolute inset-0 m-auto w-4 h-4 rounded-full bg-[#050507] border-2 border-white/60 shadow-lg" />
+              </div>
+            </div>
 
-            {/* Holographic Edge Sheen */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-transparent to-white/20 pointer-events-none" />
-
-            {/* Prominent One-Tap Play/Pause Button Overlay */}
+            {/* Tap-to-play center hover overlay */}
             <button
               onClick={handleAction}
-              className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-black/60 backdrop-blur-md border border-[#00FF87]/60 flex items-center justify-center text-white transition-all duration-300 cursor-pointer hover:scale-110 shadow-[0_0_25px_rgba(0,255,135,0.5)] group-hover:opacity-100 opacity-90"
-              aria-label={trackIsPlaying ? "Pause Track" : "Play Track"}
+              className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-black/70 border border-[#00FF87]/80 flex items-center justify-center text-white cursor-pointer transition-all duration-300 hover:scale-110 shadow-[0_0_20px_rgba(0,255,135,0.5)] z-20"
+              aria-label={trackIsPlaying ? "Pause Track" : "Stream Track"}
             >
               {trackIsPlaying ? (
-                <Pause className="w-7 h-7 fill-[#00FF87] text-[#00FF87]" />
+                <Pause className="w-6 h-6 fill-[#00FF87] text-[#00FF87]" />
               ) : (
-                <Play className="w-7 h-7 fill-[#00FF87] text-[#00FF87] ml-1" />
+                <Play className="w-6 h-6 fill-[#00FF87] text-[#00FF87] ml-0.5" />
               )}
             </button>
           </div>
 
-          {/* Track Details & High-Fidelity Badge */}
+          {/* Right Side: Oversized Modern Display Typography & Stream Now Action */}
           <div className="flex-1 text-center md:text-left min-w-0">
-            {/* High Fidelity 320 KBPS Badge */}
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#00FF87]/10 border border-[#00FF87]/30 text-[#00FF87] text-xs font-bold tracking-wider uppercase mb-3.5 shadow-[0_0_12px_rgba(0,255,135,0.25)]">
+            {/* Lossless 320 KBPS Badge */}
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#00FF87]/10 border border-[#00FF87]/30 text-[#00FF87] text-xs font-mono font-bold tracking-wider uppercase mb-3">
               <Sparkles className="w-3.5 h-3.5 fill-[#00FF87]" />
-              <span>High Fidelity 320 KBPS</span>
+              <span>LOSSLESS 320 KBPS • TITANIUM-VOID</span>
             </div>
 
-            {/* Bold Display Font Title */}
-            <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-white tracking-tight leading-tight truncate">
+            {/* Oversized Modern Display Typography */}
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight truncate">
               {activeTrack.name}
             </h1>
-            <p className="text-base sm:text-lg font-semibold text-neutral-300 mt-1.5 truncate">
+            <p className="text-base sm:text-lg font-bold text-[#8F90A6] mt-1.5 truncate">
               {activeTrack.primaryArtists}
             </p>
-            <p className="text-xs text-neutral-400 mt-1 truncate">
-              {activeTrack.album || "Single"} • {activeTrack.year || "2026"}
+            <p className="text-xs text-neutral-400 font-mono mt-1 truncate">
+              {activeTrack.album || "Single"} • High-Fidelity Audio
             </p>
 
-            {/* Action Buttons */}
+            {/* Bold One-Tap Kinetic "STREAM NOW" Pill Button */}
             <div className="mt-6 flex flex-wrap items-center justify-center md:justify-start gap-3.5">
               <button
                 onClick={handleAction}
-                className="px-7 py-3 rounded-full bg-gradient-to-r from-[#00FF87] to-[#10B981] hover:opacity-95 text-black font-extrabold text-sm flex items-center space-x-2.5 transition shadow-[0_0_22px_rgba(0,255,135,0.45)] active:scale-95 cursor-pointer"
+                className="px-8 py-3 rounded-full bg-gradient-to-r from-[#00FF87] to-[#10B981] hover:opacity-95 text-black font-black text-sm tracking-wide flex items-center space-x-2.5 transition shadow-[0_0_25px_rgba(0,255,135,0.45)] active:scale-95 cursor-pointer"
               >
                 {trackIsPlaying ? (
                   <>
@@ -123,43 +121,17 @@ export default function HeroVisualizer({
                   </>
                 ) : (
                   <>
-                    <Play className="w-4 h-4 fill-black text-black" />
-                    <span>PLAY NOW</span>
+                    <Play className="w-4 h-4 fill-black text-black ml-0.5" />
+                    <span>STREAM NOW</span>
                   </>
                 )}
               </button>
 
-              <div className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-neutral-300">
+              <div className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-full bg-[#121217] border border-white/10 text-xs font-mono font-semibold text-[#8F90A6]">
                 <Volume2 className="w-4 h-4 text-[#00FF87]" />
-                <span>Lossless 320kbps</span>
+                <span>320kbps Uncompressed</span>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Interactive Animated SVG Soundwave Equalizer Bar pulsing with Neon Lime & Electric Purple */}
-        <div className="mt-7 pt-5 border-t border-white/10">
-          <div className="flex items-center justify-between gap-1.5 h-14 px-2 overflow-hidden">
-            {soundwavePoints.map((point) => {
-              const dynamicHeight = trackIsPlaying
-                ? Math.min(54, Math.max(8, point.baseH + (point.id % 3 === 0 ? 12 : -8)))
-                : 6;
-
-              return (
-                <div
-                  key={point.id}
-                  className="flex-1 rounded-full transition-all duration-300"
-                  style={{
-                    height: `${dynamicHeight}px`,
-                    background:
-                      "linear-gradient(to top, #00FF87 0%, #00F0FF 50%, #7928CA 100%)",
-                    boxShadow: trackIsPlaying
-                      ? "0 0 8px rgba(0, 255, 135, 0.4)"
-                      : "none",
-                  }}
-                />
-              );
-            })}
           </div>
         </div>
       </div>

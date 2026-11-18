@@ -3,6 +3,8 @@
   "appName": "RhythmX",
   "webDir": "out",
   "android": {
-    "allowMixedContent": true
+    "allowMixedContent": true,
+    "webContentsDebuggingEnabled": false,
+    "backgroundColor": "#050507"
   }
 }

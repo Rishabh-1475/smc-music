@@ -4,38 +4,36 @@
 
 :root {
   color-scheme: dark;
-  --bg-main: #000000;
-  --surface-main: #121216;
-  --surface-card: #18181f;
-  --accent-lime: #00ff87;
-  --accent-emerald: #10b981;
-  --accent-cyan: #00f0ff;
-  --accent-purple: #7928ca;
+  --void-pitch: #050507;
+  --carbon-metal: #121217;
+  --emerald-kinetic: #00ff87;
+  --electric-violet: #7928ca;
+  --muted-mono: #8f90a6;
 }
 
-/* Custom Neon Lime Selection Styles */
+/* Zero-lag Global Tap Highlights */
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+/* Selection Highlight */
 ::selection {
   background-color: #00ff87;
-  color: #000000;
+  color: #050507;
 }
 
 ::-moz-selection {
   background-color: #00ff87;
-  color: #000000;
+  color: #050507;
 }
 
-/* Base Body Styles with Subtle Ambient Radial Mesh Gradients */
+/* Base Body Styles - Solid Titanium-Void with minimal non-lagging radial highlight */
 html,
 body {
-  background-color: #000000;
-  background-image: 
-    radial-gradient(circle at 15% 15%, rgba(0, 255, 135, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 85% 65%, rgba(121, 40, 202, 0.08) 0%, transparent 45%),
-    radial-gradient(circle at 50% 90%, rgba(0, 240, 255, 0.05) 0%, transparent 40%);
-  background-attachment: fixed;
+  background-color: #050507;
   color: #ffffff;
   overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   user-select: none;
   -webkit-user-select: none;
@@ -43,77 +41,59 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hardware-accelerated CSS for 60fps lag-free mobile performance */
-.gpu-accelerated,
-.scroll-smooth,
-.overflow-x-auto,
-.overflow-y-auto {
+/* GPU Layer Promotion & Zero-Lag Momentum Scrolling */
+.smooth-scroll {
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
   transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+.gpu-layer {
+  transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
   will-change: transform, opacity;
 }
 
-/* 3D Glass Card Design */
-.glass-card {
-  background: rgba(18, 18, 22, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+/* Titanium-Void Glass Surfaces (High Performance, No Multi-Layered Heavy Blur Lag) */
+.rhythmx-glass {
+  background: linear-gradient(135deg, rgba(20, 20, 26, 0.85) 0%, rgba(10, 10, 14, 0.95) 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+.rhythmx-glass:hover {
+  border-color: rgba(0, 255, 135, 0.35);
+  box-shadow: 0 14px 35px -10px rgba(0, 255, 135, 0.15), 0 0 15px rgba(121, 40, 202, 0.12);
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(20, 20, 26, 0.85) 0%, rgba(10, 10, 14, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.8);
   border-radius: 18px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
 }
 
 .glass-card:hover {
-  transform: translateY(-4px) scale(1.01);
+  transform: translateY(-3px);
   border-color: rgba(0, 255, 135, 0.35);
-  box-shadow: 0 16px 40px 0 rgba(0, 255, 135, 0.15), 0 0 20px rgba(121, 40, 202, 0.15);
 }
 
-/* Hero 3D Glow Filter */
-.hero-glow {
-  filter: drop-shadow(0px 10px 30px rgba(0, 255, 135, 0.25)) drop-shadow(0px -10px 30px rgba(121, 40, 202, 0.2));
+/* Realistic Metallic Grooves for 3D Vinyl */
+.metallic-grooves {
+  background: repeating-radial-gradient(
+    circle at center,
+    #111116 0px,
+    #181822 2px,
+    #0d0d12 4px
+  );
 }
 
-/* Custom Glassmorphism Classes */
-.glass-dock {
-  background: rgba(14, 14, 18, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glow-lime {
-  box-shadow: 0 0 20px rgba(0, 255, 135, 0.25);
-}
-
-.glow-cyan {
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
-}
-
-.glow-purple {
-  box-shadow: 0 0 24px rgba(121, 40, 202, 0.3);
-}
-
-/* 3D Tactile Card Depth */
-.card-3d {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), #101014;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
-  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s cubic-bezier(0.2, 0, 0, 1), border-color 0.25s ease;
-}
-
-.card-3d:hover {
-  transform: translateY(-2px);
-  border-color: rgba(0, 255, 135, 0.35);
-  box-shadow: 0 14px 40px -10px rgba(0, 255, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-}
-
-/* Slow vinyl rotation */
-@keyframes spin-slow {
+/* Smooth Hardware-Accelerated Vinyl Rotation */
+@keyframes vinyl-spin {
   from {
     transform: rotate(0deg);
   }
@@ -122,11 +102,12 @@ body {
   }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 10s linear infinite;
+.animate-vinyl {
+  animation: vinyl-spin 9s linear infinite;
+  will-change: transform;
 }
 
-/* Safe Area Inset Padding Helpers for Mobile & Capacitor */
+/* Safe Area Inset Padding Helpers for Mobile WebViews */
 .pb-safe {
   padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
 }
@@ -143,18 +124,18 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
-/* Sleek Scrollbars */
+/* Sleek Minimalist Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: #050507;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #1c1c24;
   border-radius: 9999px;
 }
 
@@ -162,7 +143,7 @@ body {
   background: #00ff87;
 }
 
-/* Utility to hide scrollbars in touch carousels & chip bars */
+/* Utility to hide scrollbars in touch carousels */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
