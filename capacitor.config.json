@@ -3,7 +3,9 @@
   "appName": "SMC Singhs Music Co",
   "webDir": "out",
   "server": {
-    "cleartext": true
+    "url": "https://YOUR-APP.vercel.app",
+    "cleartext": true,
+    "androidScheme": "https"
   },
   "android": {
     "allowMixedContent": true
