@@ -12,11 +12,11 @@ import {
   Radio,
   Flame,
   Zap,
+  Heart,
 } from "lucide-react";
 import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
 import HeroVisualizer from "@/components/HeroVisualizer";
-import SpeedDialGrid from "@/components/SpeedDialGrid";
 import QuickPicksList from "@/components/QuickPicksList";
 import ShelfCarousel from "@/components/ShelfCarousel";
 import MiniPlayer from "@/components/MiniPlayer";
@@ -43,7 +43,7 @@ export default function Home() {
   const [loadingCategory, setLoadingCategory] = useState(false);
 
   const searchReqIdRef = useRef<number>(0);
-  const { playSong, currentTrack } = usePlayerStore();
+  const { playSong, currentTrack, likedSongIds } = usePlayerStore();
 
   // RhythmX Home Shelves
   const [shelves, setShelves] = useState<{
@@ -91,6 +91,12 @@ export default function Home() {
     setActiveCategory(category);
     if (!category || category === "All") {
       setCategoryFeed([]);
+      setLoadingCategory(false);
+      return;
+    }
+
+    // Special handling for Favorites filter
+    if (category.toLowerCase() === "favorites") {
       setLoadingCategory(false);
       return;
     }
@@ -145,18 +151,30 @@ export default function Home() {
   }, [searchQuery]);
 
   const isSearchActive = searchQuery.trim().length > 0;
-  const isCategoryActive = activeCategory && activeCategory !== "All";
+  const isFavoritesActive = activeCategory.toLowerCase() === "favorites";
+  const isCategoryActive =
+    activeCategory && activeCategory !== "All" && !isFavoritesActive;
+
+  // Filter favorite songs from user taste profile and loaded shelves
+  const allKnownSongs = [
+    ...(shelves.heroTrending || []),
+    ...(shelves.speedDial || []),
+    ...(shelves.quickPicks || []),
+    ...(shelves.gymPhonk || []),
+    ...(shelves.midnightChill || []),
+  ];
+  const favoriteSongs = allKnownSongs.filter((s) => Boolean(likedSongIds[s.id]));
 
   return (
     <div className="min-h-screen bg-[#000000] text-white flex flex-col selection:bg-[#00FF87] selection:text-black">
-      {/* 1. Header with RhythmX Equalizer Branding & Search Pill */}
+      {/* 1. Header with RhythmX Glowing Logo, Frosted Search Pill & Creator Avatar */}
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         isSearching={isSearching}
       />
 
-      {/* 2. 3D Floating Category Chips Bar */}
+      {/* 2. 3D Tactile Category Chips Bar */}
       {!isSearchActive && (
         <CategoryChips
           activeCategory={activeCategory}
@@ -193,7 +211,7 @@ export default function Home() {
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center space-x-3 p-3 rounded-2xl bg-[#121216] border border-white/5"
+                    className="flex items-center space-x-3.5 p-3 rounded-2xl glass-card"
                   >
                     <div className="w-14 h-14 rounded-xl bg-neutral-800 flex-shrink-0" />
                     <div className="flex-1 space-y-2">
@@ -208,12 +226,12 @@ export default function Home() {
             {/* Empty Search State */}
             {!isSearching && searchResults.length === 0 && (
               <div className="text-center py-20 flex flex-col items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,255,135,0.2)]">
                   <SearchX className="w-8 h-8 text-neutral-400" />
                 </div>
                 <h3 className="text-lg font-bold text-white">No tracks found</h3>
                 <p className="text-xs text-neutral-400 max-w-sm mt-1">
-                  Try searching by artist name, genre (e.g. &ldquo;phonk&rdquo;, &ldquo;lo-fi&rdquo;), or alternative keywords.
+                  Try searching by artist name, genre (&ldquo;phonk&rdquo;, &ldquo;gym&rdquo;, &ldquo;lo-fi&rdquo;), or alternative keywords.
                 </p>
               </div>
             )}
@@ -228,13 +246,13 @@ export default function Home() {
                       <div
                         key={song.id}
                         onClick={() => playSong(song, searchResults)}
-                        className={`group relative flex items-center p-2.5 rounded-2xl transition-all duration-200 cursor-pointer overflow-hidden ${
+                        className={`group relative glass-card p-3 flex items-center cursor-pointer overflow-hidden ${
                           isCurrent
-                            ? "bg-[#14141C] text-white shadow-[0_0_15px_rgba(0,255,135,0.2)] border border-[#00FF87]/40"
-                            : "bg-[#101014]/90 hover:bg-[#16161E] text-neutral-300 border border-white/5 hover:border-white/15"
+                            ? "border-[#00FF87]/50 shadow-[0_0_20px_rgba(0,255,135,0.25)]"
+                            : ""
                         }`}
                       >
-                        <div className="relative w-13 h-13 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                        <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
                           <img
                             src={song.imageUrl || FALLBACK_VINYL}
                             alt={song.name}
@@ -243,12 +261,12 @@ export default function Home() {
                               (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
                             }}
                           />
-                          <div className="absolute inset-0 bg-black/55 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <Play className="w-5 h-5 fill-white text-white ml-0.5" />
                           </div>
                         </div>
 
-                        <div className="ml-3 min-w-0 flex-1 pr-2">
+                        <div className="ml-3.5 min-w-0 flex-1 pr-2">
                           <h4
                             className={`text-sm font-semibold truncate ${
                               isCurrent ? "text-[#00FF87]" : "text-white"
@@ -281,6 +299,70 @@ export default function Home() {
               </>
             )}
           </div>
+        ) : isFavoritesActive ? (
+          /* ================================================================ */
+          /* FAVORITES VIEW: USER'S LIKED TRACKS                              */
+          /* ================================================================ */
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[11px] font-bold text-[#00FF87] tracking-wider uppercase">
+                  SAVED COLLECTION
+                </p>
+                <h1 className="text-xl md:text-2xl font-black text-white mt-0.5">
+                  Your Favorites
+                </h1>
+              </div>
+              <span className="text-xs font-mono text-neutral-400">
+                {favoriteSongs.length} saved tracks
+              </span>
+            </div>
+
+            {favoriteSongs.length === 0 ? (
+              <div className="text-center py-20 flex flex-col items-center justify-center glass-card p-8">
+                <div className="w-16 h-16 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,255,135,0.2)]">
+                  <Heart className="w-8 h-8 text-[#00FF87]" />
+                </div>
+                <h3 className="text-lg font-bold text-white">No favorites yet</h3>
+                <p className="text-xs text-neutral-400 max-w-sm mt-1">
+                  Tap the heart or thumbs-up icon on any track to save it to your personal favorites station.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                {favoriteSongs.map((song) => (
+                  <div
+                    key={song.id}
+                    onClick={() => playSong(song, favoriteSongs)}
+                    className="group relative glass-card p-3 flex items-center cursor-pointer"
+                  >
+                    <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                      <img
+                        src={song.imageUrl || FALLBACK_VINYL}
+                        alt={song.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                      </div>
+                    </div>
+
+                    <div className="ml-3.5 min-w-0 flex-1 pr-2">
+                      <h4 className="text-sm font-semibold text-white truncate">
+                        {song.name}
+                      </h4>
+                      <p className="text-xs text-neutral-400 truncate mt-0.5">
+                        {song.primaryArtists}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         ) : isCategoryActive ? (
           /* ================================================================ */
           /* CATEGORY FILTERED VIEW: DYNAMIC MOOD BUNDLE                      */
@@ -302,7 +384,7 @@ export default function Home() {
                 {Array.from({ length: 9 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center space-x-3 p-3 rounded-2xl bg-[#121216] border border-white/5"
+                    className="flex items-center space-x-3.5 p-3 rounded-2xl glass-card"
                   >
                     <div className="w-14 h-14 rounded-xl bg-neutral-800" />
                     <div className="flex-1 space-y-2">
@@ -318,9 +400,9 @@ export default function Home() {
                   <div
                     key={song.id}
                     onClick={() => playSong(song, categoryFeed)}
-                    className="group relative flex items-center p-2.5 rounded-2xl bg-[#101014]/90 hover:bg-[#16161E] text-neutral-300 border border-white/5 hover:border-white/15 transition cursor-pointer"
+                    className="group relative glass-card p-3 flex items-center cursor-pointer"
                   >
-                    <div className="relative w-13 h-13 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                    <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
                       <img
                         src={song.imageUrl || FALLBACK_VINYL}
                         alt={song.name}
@@ -329,12 +411,12 @@ export default function Home() {
                           (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
                         }}
                       />
-                      <div className="absolute inset-0 bg-black/55 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Play className="w-5 h-5 fill-white text-white ml-0.5" />
                       </div>
                     </div>
 
-                    <div className="ml-3 min-w-0 flex-1 pr-2">
+                    <div className="ml-3.5 min-w-0 flex-1 pr-2">
                       <h4 className="text-sm font-semibold text-white truncate">
                         {song.name}
                       </h4>
@@ -350,54 +432,49 @@ export default function Home() {
         ) : (
           /* ================================================================ */
           /* DEFAULT RHYTHMX HOME FEED:                                       */
-          /* HeroVisualizer -> SpeedDial -> QuickPicks -> Shelves -> Spotlight*/
+          /* HeroVisualizer -> QuickPicks (with SpeedDial) -> Shelves -> Card */
           /* ================================================================ */
           <>
-            {/* 3. Dynamic 3D HeroVisualizer */}
+            {/* 3. 3D Floating Hero Visualizer Showcase */}
             <HeroVisualizer
               featuredTrack={shelves.heroTrending[0] || null}
               onPlay={(track) => playSong(track, shelves.heroTrending)}
             />
 
-            {/* 4. Speed Dial (3x3 Grid) */}
-            <SpeedDialGrid
-              songs={shelves.speedDial}
-              fallbackSongs={shelves.heroTrending}
-            />
-
-            {/* 5. Quick Picks List (4-Row Vertical Grid) */}
+            {/* 4. Speed Dial Stations + Quick Picks Track Rows */}
             <QuickPicksList
               title="Quick Picks"
               subtitle="START RADIO FROM A SONG"
               songs={shelves.quickPicks}
+              speedDialSongs={shelves.speedDial}
             />
 
-            {/* 6. Trending Global Hits Carousel */}
+            {/* 5. Trending Global Hits Carousel */}
             <ShelfCarousel
               title="Trending Global Hits"
               subtitle="TOP CHARTS • LOSSLESS STREAM"
               songs={shelves.heroTrending}
             />
 
-            {/* 7. Gym Phonk & Beast Mode Carousel */}
+            {/* 6. Gym Phonk & Cyber Hype Carousel */}
             <ShelfCarousel
               title="Gym Phonk & Cyber Hype"
               subtitle="HIGH ENERGY • 320KBPS"
               songs={shelves.gymPhonk}
             />
 
-            {/* 8. Midnight Lo-Fi & Soulful Chill Carousel */}
+            {/* 7. Midnight Lo-Fi & Soulful Chill Carousel */}
             <ShelfCarousel
               title="Midnight Chill & Lo-Fi"
               subtitle="SLOWED & REVERB • FOCUS"
               songs={shelves.midnightChill}
             />
 
-            {/* 9. Creator Spotlight Banner: Rishabh Singh */}
+            {/* 8. Creator Spotlight Showcase Banner: Rishabh Singh */}
             <section className="px-4 md:px-8 my-10">
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#121218] via-[#0E0E14] to-[#121218] border border-white/10 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_15px_40px_rgba(0,0,0,0.8)]">
+              <div className="relative glass-card overflow-hidden p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_15px_40px_rgba(0,0,0,0.85)]">
                 <div className="flex items-center space-x-4 sm:space-x-5">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden ring-4 ring-[#00FF87]/70 shadow-[0_0_20px_rgba(0,255,135,0.3)] flex-shrink-0 bg-neutral-900">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden ring-4 ring-[#00FF87]/80 shadow-[0_0_25px_rgba(0,255,135,0.4)] flex-shrink-0 bg-neutral-900">
                     <img
                       src="/creator.jpg"
                       alt="Rishabh Singh"
@@ -405,7 +482,7 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <div className="flex items-center space-x-1.5">
+                    <div className="flex items-center space-x-2">
                       <h3 className="text-lg sm:text-xl font-black text-white">
                         Rishabh Singh
                       </h3>
@@ -424,7 +501,7 @@ export default function Home() {
                   href="https://www.instagram.com/rish4bhsiingh/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00FF87] to-[#00F0FF] text-black font-extrabold text-xs flex items-center space-x-2 transition shadow-lg shadow-[#00FF87]/20 hover:scale-105 active:scale-95 flex-shrink-0"
+                  className="px-6 py-3 rounded-full bg-gradient-to-r from-[#00FF87] to-[#10B981] text-black font-extrabold text-xs flex items-center space-x-2 transition shadow-lg shadow-[#00FF87]/25 hover:scale-105 active:scale-95 flex-shrink-0"
                 >
                   <span>Connect with Rishabh</span>
                   <ExternalLink className="w-3.5 h-3.5" />

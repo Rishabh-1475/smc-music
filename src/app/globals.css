@@ -5,9 +5,10 @@
 :root {
   color-scheme: dark;
   --bg-main: #000000;
-  --surface-main: #121214;
-  --surface-card: #18181b;
+  --surface-main: #121216;
+  --surface-card: #18181f;
   --accent-lime: #00ff87;
+  --accent-emerald: #10b981;
   --accent-cyan: #00f0ff;
   --accent-purple: #7928ca;
 }
@@ -23,10 +24,15 @@
   color: #000000;
 }
 
-/* Base Body Styles with Mobile Optimization */
+/* Base Body Styles with Subtle Ambient Radial Mesh Gradients */
 html,
 body {
   background-color: #000000;
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(0, 255, 135, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 65%, rgba(121, 40, 202, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(0, 240, 255, 0.05) 0%, transparent 40%);
+  background-attachment: fixed;
   color: #ffffff;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
@@ -50,9 +56,31 @@ body {
   will-change: transform, opacity;
 }
 
+/* 3D Glass Card Design */
+.glass-card {
+  background: rgba(18, 18, 22, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+  border-radius: 18px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(0, 255, 135, 0.35);
+  box-shadow: 0 16px 40px 0 rgba(0, 255, 135, 0.15), 0 0 20px rgba(121, 40, 202, 0.15);
+}
+
+/* Hero 3D Glow Filter */
+.hero-glow {
+  filter: drop-shadow(0px 10px 30px rgba(0, 255, 135, 0.25)) drop-shadow(0px -10px 30px rgba(121, 40, 202, 0.2));
+}
+
 /* Custom Glassmorphism Classes */
 .glass-dock {
-  background: rgba(14, 14, 16, 0.75);
+  background: rgba(14, 14, 18, 0.75);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -72,7 +100,7 @@ body {
 
 /* 3D Tactile Card Depth */
 .card-3d {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), #101012;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), #101014;
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
   transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s cubic-bezier(0.2, 0, 0, 1), border-color 0.25s ease;
@@ -82,6 +110,20 @@ body {
   transform: translateY(-2px);
   border-color: rgba(0, 255, 135, 0.35);
   box-shadow: 0 14px 40px -10px rgba(0, 255, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Slow vinyl rotation */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 10s linear infinite;
 }
 
 /* Safe Area Inset Padding Helpers for Mobile & Capacitor */
