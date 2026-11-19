@@ -47,7 +47,7 @@ export default function Home() {
   const { playSong, currentTrack, likedSongIds, likedSongs, recordSearchQuery } =
     usePlayerStore();
 
-  // RhythmX Titanium-Void Home Shelves
+  // RhythmX Crimson-Void Home Shelves
   const [shelves, setShelves] = useState<{
     heroTrending: Song[];
     speedDial: Song[];
@@ -76,7 +76,7 @@ export default function Home() {
           setShelves(data);
         }
       } catch (err) {
-        console.error("Failed to load RhythmX Titanium-Void shelves:", err);
+        console.error("Failed to load RhythmX Crimson-Void shelves:", err);
       } finally {
         if (active) setLoadingShelves(false);
       }
@@ -172,8 +172,11 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-[#050507] text-white flex flex-col selection:bg-[#00FF87] selection:text-black">
-      {/* 1. Header & Sonic Search Deck */}
+    <div className="min-h-screen bg-[#08080A] text-[#F0F0F2] flex flex-col selection:bg-[#E10600] selection:text-white relative">
+      {/* Subtle Burgundy Ambient Background Light */}
+      <div className="fixed top-0 right-1/4 w-96 h-96 bg-[#4A0000]/10 rounded-full blur-[120px] pointer-events-none -z-10" />
+
+      {/* 1. Header & Command Search Deck */}
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -197,16 +200,16 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 gpu-layer">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[10px] font-mono font-bold text-[#00FF87] tracking-widest uppercase">
-                  GLOBAL SONIC REGISTRY
+                <p className="text-[10px] font-mono font-bold text-[#E10600] tracking-widest uppercase">
+                  CATALOG SEARCH RESULTS
                 </p>
                 <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">
                   Results for &ldquo;{searchQuery}&rdquo;
                 </h1>
               </div>
               {searchResults.length > 0 && (
-                <span className="text-xs font-mono text-[#8F90A6]">
-                  {searchResults.length} indexed tracks
+                <span className="text-xs font-mono text-[#8A8A93]">
+                  {searchResults.length} tracks found
                 </span>
               )}
             </div>
@@ -217,9 +220,9 @@ export default function Home() {
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center space-x-3.5 p-3 rounded-2xl rhythmx-glass"
+                    className="flex items-center space-x-3.5 p-3 rounded-xl m-card bg-[#111116]"
                   >
-                    <div className="w-14 h-14 rounded-xl bg-neutral-800 flex-shrink-0" />
+                    <div className="w-14 h-14 rounded-lg bg-neutral-800 flex-shrink-0" />
                     <div className="flex-1 space-y-2">
                       <div className="h-4 bg-neutral-800 rounded w-3/4" />
                       <div className="h-3 bg-neutral-800/60 rounded w-1/2" />
@@ -231,13 +234,13 @@ export default function Home() {
 
             {/* Empty Search State */}
             {!isSearching && searchResults.length === 0 && (
-              <div className="text-center py-20 flex flex-col items-center justify-center rhythmx-glass rounded-3xl p-8 max-w-md mx-auto my-10">
-                <div className="w-16 h-16 rounded-full bg-[#121217] border border-white/10 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,255,135,0.2)]">
-                  <SearchX className="w-8 h-8 text-[#00FF87]" />
+              <div className="text-center py-20 flex flex-col items-center justify-center m-card bg-[#111116] rounded-2xl p-8 max-w-md mx-auto my-10">
+                <div className="w-16 h-16 rounded-full bg-[#16161C] border border-white/10 flex items-center justify-center mb-4">
+                  <SearchX className="w-8 h-8 text-[#E10600]" />
                 </div>
                 <h3 className="text-lg font-black text-white">No tracks located</h3>
-                <p className="text-xs text-[#8F90A6] font-medium mt-1">
-                  Try broader artist keywords, genre queries like &ldquo;phonk&rdquo; or hot tags above.
+                <p className="text-xs text-[#8A8A93] font-medium mt-1">
+                  Try searching for artist names, titles, or genres like &ldquo;phonk&rdquo; or &ldquo;punjabi&rdquo;.
                 </p>
               </div>
             )}
@@ -252,13 +255,13 @@ export default function Home() {
                       <div
                         key={song.id}
                         onClick={() => playSong(song, searchResults)}
-                        className={`group relative rhythmx-glass p-3 flex items-center cursor-pointer rounded-2xl transition-all duration-200 ${
+                        className={`group relative m-card p-3 flex items-center cursor-pointer rounded-xl transition-all duration-200 ${
                           isCurrent
-                            ? "border-[#00FF87] shadow-[0_0_20px_rgba(0,255,135,0.3)] bg-[#121217]"
+                            ? "border-[#E10600] shadow-[0_4px_20px_rgba(225,6,0,0.35)] bg-[#16161C]"
                             : ""
                         }`}
                       >
-                        <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                        <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-[#08080A] shadow">
                           <img
                             src={song.imageUrl || FALLBACK_VINYL}
                             alt={song.name}
@@ -275,15 +278,15 @@ export default function Home() {
                         <div className="ml-3.5 min-w-0 flex-1 pr-2">
                           <h4
                             className={`text-sm font-bold truncate leading-tight ${
-                              isCurrent ? "text-[#00FF87]" : "text-white"
+                              isCurrent ? "text-[#E10600]" : "text-white"
                             }`}
                           >
                             {song.name}
                           </h4>
-                          <p className="text-xs text-[#8F90A6] truncate mt-0.5 font-medium">
+                          <p className="text-xs text-[#8A8A93] truncate mt-0.5 font-medium">
                             {song.primaryArtists}
                           </p>
-                          <p className="text-[10px] text-neutral-400 font-mono truncate">
+                          <p className="text-[10px] text-neutral-500 font-mono truncate">
                             {song.album || "Single"}
                           </p>
                         </div>
@@ -296,8 +299,8 @@ export default function Home() {
                 {searchRadioQueue.length > 0 && (
                   <div className="mt-10">
                     <ShelfCarousel
-                      title="Sonic Continuum & Related Radio"
-                      subtitle="AUTO-STREAMING QUEUE"
+                      title="Related Radio Stream"
+                      subtitle="CONTINUOUS AUTOPLAY QUEUE"
                       songs={searchRadioQueue}
                     />
                   </div>
@@ -312,26 +315,26 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 gpu-layer">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[10px] font-mono font-bold text-[#00FF87] tracking-widest uppercase">
-                  PERSISTENT VAULT
+                <p className="text-[10px] font-mono font-bold text-[#E10600] tracking-widest uppercase">
+                  OFFLINE VAULT
                 </p>
                 <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">
                   Vault Favourites
                 </h1>
               </div>
-              <span className="text-xs font-mono text-[#8F90A6]">
+              <span className="text-xs font-mono text-[#8A8A93]">
                 {favoriteSongs.length} saved songs
               </span>
             </div>
 
             {favoriteSongs.length === 0 ? (
-              <div className="text-center py-20 flex flex-col items-center justify-center rhythmx-glass rounded-3xl p-8 max-w-md mx-auto my-10">
-                <div className="w-16 h-16 rounded-full bg-[#121217] border border-white/10 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,255,135,0.2)]">
-                  <Heart className="w-8 h-8 text-[#00FF87]" />
+              <div className="text-center py-20 flex flex-col items-center justify-center m-card bg-[#111116] rounded-2xl p-8 max-w-md mx-auto my-10">
+                <div className="w-16 h-16 rounded-full bg-[#16161C] border border-white/10 flex items-center justify-center mb-4">
+                  <Heart className="w-8 h-8 text-[#E10600]" />
                 </div>
                 <h3 className="text-lg font-black text-white">Vault is empty</h3>
-                <p className="text-xs text-[#8F90A6] font-medium mt-1">
-                  Tap the heart icon on any track to store it permanently in your Titanium Vault.
+                <p className="text-xs text-[#8A8A93] font-medium mt-1">
+                  Tap the heart icon on any song to store it in your Crimson Vault.
                 </p>
               </div>
             ) : (
@@ -340,9 +343,9 @@ export default function Home() {
                   <div
                     key={song.id}
                     onClick={() => playSong(song, favoriteSongs)}
-                    className="group relative rhythmx-glass p-3 flex items-center cursor-pointer rounded-2xl"
+                    className="group relative m-card bg-[#111116] p-3 flex items-center cursor-pointer rounded-xl"
                   >
-                    <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                    <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-[#08080A] shadow">
                       <img
                         src={song.imageUrl || FALLBACK_VINYL}
                         alt={song.name}
@@ -360,7 +363,7 @@ export default function Home() {
                       <h4 className="text-sm font-bold text-white truncate leading-tight">
                         {song.name}
                       </h4>
-                      <p className="text-xs text-[#8F90A6] truncate mt-0.5 font-medium">
+                      <p className="text-xs text-[#8A8A93] truncate mt-0.5 font-medium">
                         {song.primaryArtists}
                       </p>
                     </div>
@@ -376,7 +379,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 gpu-layer">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[10px] font-mono font-bold text-[#00FF87] tracking-widest uppercase">
+                <p className="text-[10px] font-mono font-bold text-[#E10600] tracking-widest uppercase">
                   SUBGENRE SECTOR
                 </p>
                 <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">
@@ -390,9 +393,9 @@ export default function Home() {
                 {Array.from({ length: 9 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center space-x-3.5 p-3 rounded-2xl rhythmx-glass"
+                    className="flex items-center space-x-3.5 p-3 rounded-xl m-card bg-[#111116]"
                   >
-                    <div className="w-14 h-14 rounded-xl bg-neutral-800" />
+                    <div className="w-14 h-14 rounded-lg bg-neutral-800" />
                     <div className="flex-1 space-y-2">
                       <div className="h-4 bg-neutral-800 rounded w-3/4" />
                       <div className="h-3 bg-neutral-800/60 rounded w-1/2" />
@@ -406,9 +409,9 @@ export default function Home() {
                   <div
                     key={song.id}
                     onClick={() => playSong(song, categoryFeed)}
-                    className="group relative rhythmx-glass p-3 flex items-center cursor-pointer rounded-2xl"
+                    className="group relative m-card bg-[#111116] p-3 flex items-center cursor-pointer rounded-xl"
                   >
-                    <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                    <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-[#08080A] shadow">
                       <img
                         src={song.imageUrl || FALLBACK_VINYL}
                         alt={song.name}
@@ -426,7 +429,7 @@ export default function Home() {
                       <h4 className="text-sm font-bold text-white truncate leading-tight">
                         {song.name}
                       </h4>
-                      <p className="text-xs text-[#8F90A6] truncate mt-0.5 font-medium">
+                      <p className="text-xs text-[#8A8A93] truncate mt-0.5 font-medium">
                         {song.primaryArtists}
                       </p>
                     </div>
@@ -437,11 +440,11 @@ export default function Home() {
           </div>
         ) : (
           /* ================================================================ */
-          /* TITANIUM-VOID HOME EXPERIENCE:                                    */
+          /* BMW M-PERFORMANCE CRIMSON-VOID HOME EXPERIENCE                   */
           /* HeroVisualizer -> Personal Activity Decks -> Curated Shelves     */
           /* ================================================================ */
           <>
-            {/* 3. The Kinetic Sonic Centerpiece (Asymmetric 3D Vinyl Showcase) */}
+            {/* 3. The BMW M-Performance Track Showcase */}
             <HeroVisualizer
               featuredTrack={shelves.heroTrending[0] || null}
               onPlay={(track) => playSong(track, shelves.heroTrending)}
@@ -452,7 +455,7 @@ export default function Home() {
               onSelectSearchQuery={(query) => setSearchQuery(query)}
             />
 
-            {/* 5. Trending Global Velocity Carousel */}
+            {/* 5. Trending Global Hits Carousel */}
             <ShelfCarousel
               title="Global Velocity Trends"
               subtitle="LOSSLESS 320 KBPS CHARTS"
@@ -473,11 +476,11 @@ export default function Home() {
               songs={shelves.midnightChill}
             />
 
-            {/* 8. Titanium Architecture & Creator Spotlight */}
+            {/* 8. BMW Architecture & Creator Spotlight */}
             <section className="px-3 sm:px-6 md:px-8 my-10 gpu-layer">
-              <div className="relative rhythmx-glass rounded-3xl overflow-hidden p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_15px_40px_rgba(0,0,0,0.9)]">
+              <div className="relative m-card bg-[#111116] rounded-2xl overflow-hidden p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_12px_40px_rgba(0,0,0,0.85)]">
                 <div className="flex items-center space-x-4 sm:space-x-5">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden ring-2 ring-[#00FF87] shadow-[0_0_20px_rgba(0,255,135,0.4)] flex-shrink-0 bg-neutral-900">
+                  <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-xl overflow-hidden border-2 border-[#E10600] shadow-[0_0_16px_rgba(225,6,0,0.35)] flex-shrink-0 bg-neutral-900">
                     <img
                       src="/creator.jpg"
                       alt="Rishabh Singh"
@@ -489,13 +492,13 @@ export default function Home() {
                       <h3 className="text-lg sm:text-xl font-black text-white">
                         Rishabh Singh
                       </h3>
-                      <CheckCircle2 className="w-4 h-4 text-[#00FF87]" />
+                      <CheckCircle2 className="w-4 h-4 text-[#E10600]" />
                     </div>
-                    <p className="text-xs font-mono font-bold text-[#00FF87] mt-0.5">
+                    <p className="text-xs font-mono font-bold text-[#E10600] mt-0.5">
                       Systems Mobile Architect • Founder
                     </p>
-                    <p className="text-xs text-[#8F90A6] font-medium mt-1 max-w-md">
-                      Pioneered the RhythmX Titanium-Void engine: locked 60fps GPU acceleration, native Android MediaSession integration, and lossless 320kbps streams.
+                    <p className="text-xs text-[#8A8A93] font-medium mt-1 max-w-md">
+                      Pioneered the RhythmX Crimson-Void engine: locked 60fps GPU acceleration, resilient HTML5 audio singletons, and native Android MediaSession integration.
                     </p>
                   </div>
                 </div>
@@ -504,7 +507,7 @@ export default function Home() {
                   href="https://www.instagram.com/rish4bhsiingh/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-full bg-gradient-to-r from-[#00FF87] to-[#10B981] text-black font-black text-xs flex items-center space-x-2 transition shadow-lg shadow-[#00FF87]/25 hover:scale-105 active:scale-95 flex-shrink-0"
+                  className="px-6 py-3 rounded-xl bg-[#E10600] hover:bg-[#C20500] text-white font-bold text-xs flex items-center space-x-2 transition shadow-md shadow-[#E10600]/25 active:scale-95 flex-shrink-0"
                 >
                   <span>CONNECT ON INSTAGRAM</span>
                   <ExternalLink className="w-3.5 h-3.5" />

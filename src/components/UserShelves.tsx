@@ -7,7 +7,6 @@ import {
   RotateCcw,
   Play,
   Pause,
-  Sparkles,
   Search,
   X,
   Trash2,
@@ -55,8 +54,8 @@ export default function UserShelves({ onSelectSearchQuery }: UserShelvesProps) {
       {frequentlyPlayed.length > 0 && (
         <section className="px-3 sm:px-6 md:px-8">
           <div className="flex items-center space-x-2.5 mb-3.5">
-            <div className="w-7 h-7 rounded-lg bg-[#00FF87]/15 border border-[#00FF87]/30 flex items-center justify-center">
-              <Flame className="w-4 h-4 text-[#00FF87] fill-[#00FF87]" />
+            <div className="w-6 h-6 rounded-md bg-[#16161C] border border-white/[0.08] flex items-center justify-center text-[#E10600]">
+              <Flame className="w-3.5 h-3.5 fill-[#E10600]" />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-black tracking-wider uppercase text-white">
@@ -66,7 +65,7 @@ export default function UserShelves({ onSelectSearchQuery }: UserShelvesProps) {
           </div>
 
           <div
-            className="flex gap-3.5 overflow-x-auto no-scrollbar py-1 smooth-scroll"
+            className="flex gap-4 overflow-x-auto no-scrollbar py-1 smooth-scroll"
             style={{
               scrollSnapType: "x mandatory",
             }}
@@ -83,61 +82,61 @@ export default function UserShelves({ onSelectSearchQuery }: UserShelvesProps) {
                     if (isCurrent) togglePlay();
                     else playSong(song, frequentlyPlayed);
                   }}
-                  className={`group relative flex-shrink-0 w-[140px] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 border ${
+                  className={`group relative flex-shrink-0 w-[140px] rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border select-none ${
                     isCurrent
-                      ? "border-[#00FF87] shadow-[0_0_20px_rgba(0,255,135,0.4)]"
-                      : "border-white/10 hover:border-white/25"
+                      ? "border-[#E10600] shadow-[0_4px_20px_rgba(225,6,0,0.35)]"
+                      : "border-white/[0.08] hover:border-white/20"
                   }`}
                   style={{
                     scrollSnapAlign: "start",
                   }}
                 >
                   {/* Full-bleed 140x140 Album Art */}
-                  <div className="relative w-[140px] h-[140px] bg-neutral-900 overflow-hidden">
+                  <div className="relative w-[140px] h-[140px] bg-[#08080A] overflow-hidden">
                     <img
                       src={song.imageUrl || FALLBACK_VINYL}
                       alt={song.name}
                       loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
                       }}
                     />
 
                     {/* Plays Count Badge */}
-                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-sm border border-white/10 text-[10px] font-mono font-bold text-[#00FF87]">
+                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-sm border border-white/10 text-[10px] font-mono font-bold text-[#E10600]">
                       {count} {count === 1 ? "Play" : "Plays"}
                     </div>
 
                     {/* Subtle bottom gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050507] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#08080A] via-transparent to-transparent" />
 
-                    {/* 1-Tap Play Glyph that pops on touch */}
+                    {/* Crimson 1-Tap Play Button */}
                     <div
-                      className={`absolute bottom-2 right-2 w-9 h-9 rounded-full bg-gradient-to-r from-[#00FF87] to-[#10B981] flex items-center justify-center text-black shadow-lg transition-transform duration-200 ${
+                      className={`absolute bottom-2 right-2 w-9 h-9 rounded-full bg-[#E10600] flex items-center justify-center text-white shadow-md transition-transform duration-200 active:scale-90 ${
                         isCardPlaying
                           ? "scale-100 opacity-100"
                           : "opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
                       }`}
                     >
                       {isCardPlaying ? (
-                        <Pause className="w-4 h-4 fill-black text-black" />
+                        <Pause className="w-4 h-4 fill-white text-white" />
                       ) : (
-                        <Play className="w-4 h-4 fill-black text-black ml-0.5" />
+                        <Play className="w-4 h-4 fill-white text-white ml-0.5" />
                       )}
                     </div>
                   </div>
 
-                  {/* Clean Title & Artist under image */}
-                  <div className="p-2.5 bg-[#121217]">
+                  {/* Clean Title & Artist */}
+                  <div className="p-2.5 bg-[#111116]">
                     <h4
                       className={`text-xs font-bold truncate leading-tight ${
-                        isCurrent ? "text-[#00FF87]" : "text-white"
+                        isCurrent ? "text-[#E10600]" : "text-white"
                       }`}
                     >
                       {song.name}
                     </h4>
-                    <p className="text-[11px] text-[#8F90A6] truncate mt-0.5 font-medium">
+                    <p className="text-[11px] text-[#8A8A93] truncate mt-0.5 font-medium">
                       {song.primaryArtists}
                     </p>
                   </div>
@@ -154,21 +153,21 @@ export default function UserShelves({ onSelectSearchQuery }: UserShelvesProps) {
       {likedSongs.length > 0 && (
         <section className="px-3 sm:px-6 md:px-8">
           <div className="flex items-center space-x-2.5 mb-3.5">
-            <div className="w-7 h-7 rounded-lg bg-red-500/15 border border-red-500/30 flex items-center justify-center">
-              <Heart className="w-4 h-4 text-red-500 fill-red-500" />
+            <div className="w-6 h-6 rounded-md bg-[#16161C] border border-white/[0.08] flex items-center justify-center text-[#E10600]">
+              <Heart className="w-3.5 h-3.5 fill-[#E10600]" />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-black tracking-wider uppercase text-white">
                 Vault Favourites
               </h2>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-[#121217] border border-white/10 text-[11px] font-mono text-[#8F90A6]">
+            <span className="px-2 py-0.5 rounded-full bg-[#16161C] border border-white/10 text-[11px] font-mono text-[#8A8A93]">
               {likedSongs.length}
             </span>
           </div>
 
           <div
-            className="flex gap-3.5 overflow-x-auto no-scrollbar py-1 smooth-scroll"
+            className="flex gap-4 overflow-x-auto no-scrollbar py-1 smooth-scroll"
             style={{
               scrollSnapType: "x mandatory",
             }}
@@ -184,52 +183,52 @@ export default function UserShelves({ onSelectSearchQuery }: UserShelvesProps) {
                     if (isCurrent) togglePlay();
                     else playSong(song, likedSongs);
                   }}
-                  className={`group relative flex-shrink-0 w-[140px] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 border ${
+                  className={`group relative flex-shrink-0 w-[140px] rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border select-none ${
                     isCurrent
-                      ? "border-[#00FF87] shadow-[0_0_20px_rgba(0,255,135,0.4)]"
-                      : "border-white/10 hover:border-white/25"
+                      ? "border-[#E10600] shadow-[0_4px_20px_rgba(225,6,0,0.35)]"
+                      : "border-white/[0.08] hover:border-white/20"
                   }`}
                   style={{
                     scrollSnapAlign: "start",
                   }}
                 >
-                  <div className="relative w-[140px] h-[140px] bg-neutral-900 overflow-hidden">
+                  <div className="relative w-[140px] h-[140px] bg-[#08080A] overflow-hidden">
                     <img
                       src={song.imageUrl || FALLBACK_VINYL}
                       alt={song.name}
                       loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
                       }}
                     />
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050507] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#08080A] via-transparent to-transparent" />
 
                     <div
-                      className={`absolute bottom-2 right-2 w-9 h-9 rounded-full bg-gradient-to-r from-[#00FF87] to-[#10B981] flex items-center justify-center text-black shadow-lg transition-transform duration-200 ${
+                      className={`absolute bottom-2 right-2 w-9 h-9 rounded-full bg-[#E10600] flex items-center justify-center text-white shadow-md transition-transform duration-200 active:scale-90 ${
                         isCardPlaying
                           ? "scale-100 opacity-100"
                           : "opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
                       }`}
                     >
                       {isCardPlaying ? (
-                        <Pause className="w-4 h-4 fill-black text-black" />
+                        <Pause className="w-4 h-4 fill-white text-white" />
                       ) : (
-                        <Play className="w-4 h-4 fill-black text-black ml-0.5" />
+                        <Play className="w-4 h-4 fill-white text-white ml-0.5" />
                       )}
                     </div>
                   </div>
 
-                  <div className="p-2.5 bg-[#121217]">
+                  <div className="p-2.5 bg-[#111116]">
                     <h4
                       className={`text-xs font-bold truncate leading-tight ${
-                        isCurrent ? "text-[#00FF87]" : "text-white"
+                        isCurrent ? "text-[#E10600]" : "text-white"
                       }`}
                     >
                       {song.name}
                     </h4>
-                    <p className="text-[11px] text-[#8F90A6] truncate mt-0.5 font-medium">
+                    <p className="text-[11px] text-[#8A8A93] truncate mt-0.5 font-medium">
                       {song.primaryArtists}
                     </p>
                   </div>
@@ -246,8 +245,8 @@ export default function UserShelves({ onSelectSearchQuery }: UserShelvesProps) {
       {recentlyPlayed.length > 0 && (
         <section className="px-3 sm:px-6 md:px-8">
           <div className="flex items-center space-x-2.5 mb-3.5">
-            <div className="w-7 h-7 rounded-lg bg-[#7928CA]/15 border border-[#7928CA]/30 flex items-center justify-center">
-              <RotateCcw className="w-4 h-4 text-[#7928CA]" />
+            <div className="w-6 h-6 rounded-md bg-[#16161C] border border-white/[0.08] flex items-center justify-center text-[#8A8A93]">
+              <RotateCcw className="w-3.5 h-3.5" />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-black tracking-wider uppercase text-white">
@@ -257,7 +256,7 @@ export default function UserShelves({ onSelectSearchQuery }: UserShelvesProps) {
           </div>
 
           <div
-            className="flex gap-3.5 overflow-x-auto no-scrollbar py-1 smooth-scroll"
+            className="flex gap-4 overflow-x-auto no-scrollbar py-1 smooth-scroll"
             style={{
               scrollSnapType: "x mandatory",
             }}
@@ -273,52 +272,52 @@ export default function UserShelves({ onSelectSearchQuery }: UserShelvesProps) {
                     if (isCurrent) togglePlay();
                     else playSong(song, recentlyPlayed);
                   }}
-                  className={`group relative flex-shrink-0 w-[140px] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 border ${
+                  className={`group relative flex-shrink-0 w-[140px] rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border select-none ${
                     isCurrent
-                      ? "border-[#00FF87] shadow-[0_0_20px_rgba(0,255,135,0.4)]"
-                      : "border-white/10 hover:border-white/25"
+                      ? "border-[#E10600] shadow-[0_4px_20px_rgba(225,6,0,0.35)]"
+                      : "border-white/[0.08] hover:border-white/20"
                   }`}
                   style={{
                     scrollSnapAlign: "start",
                   }}
                 >
-                  <div className="relative w-[140px] h-[140px] bg-neutral-900 overflow-hidden">
+                  <div className="relative w-[140px] h-[140px] bg-[#08080A] overflow-hidden">
                     <img
                       src={song.imageUrl || FALLBACK_VINYL}
                       alt={song.name}
                       loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
                       }}
                     />
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050507] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#08080A] via-transparent to-transparent" />
 
                     <div
-                      className={`absolute bottom-2 right-2 w-9 h-9 rounded-full bg-gradient-to-r from-[#00FF87] to-[#10B981] flex items-center justify-center text-black shadow-lg transition-transform duration-200 ${
+                      className={`absolute bottom-2 right-2 w-9 h-9 rounded-full bg-[#E10600] flex items-center justify-center text-white shadow-md transition-transform duration-200 active:scale-90 ${
                         isCardPlaying
                           ? "scale-100 opacity-100"
                           : "opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
                       }`}
                     >
                       {isCardPlaying ? (
-                        <Pause className="w-4 h-4 fill-black text-black" />
+                        <Pause className="w-4 h-4 fill-white text-white" />
                       ) : (
-                        <Play className="w-4 h-4 fill-black text-black ml-0.5" />
+                        <Play className="w-4 h-4 fill-white text-white ml-0.5" />
                       )}
                     </div>
                   </div>
 
-                  <div className="p-2.5 bg-[#121217]">
+                  <div className="p-2.5 bg-[#111116]">
                     <h4
                       className={`text-xs font-bold truncate leading-tight ${
-                        isCurrent ? "text-[#00FF87]" : "text-white"
+                        isCurrent ? "text-[#E10600]" : "text-white"
                       }`}
                     >
                       {song.name}
                     </h4>
-                    <p className="text-[11px] text-[#8F90A6] truncate mt-0.5 font-medium">
+                    <p className="text-[11px] text-[#8A8A93] truncate mt-0.5 font-medium">
                       {song.primaryArtists}
                     </p>
                   </div>
@@ -336,14 +335,14 @@ export default function UserShelves({ onSelectSearchQuery }: UserShelvesProps) {
         <section className="px-3 sm:px-6 md:px-8">
           <div className="flex items-center justify-between mb-2.5">
             <div className="flex items-center space-x-2">
-              <Search className="w-3.5 h-3.5 text-[#00FF87]" />
-              <h3 className="text-xs font-mono font-bold tracking-wider uppercase text-[#8F90A6]">
+              <Search className="w-3.5 h-3.5 text-[#E10600]" />
+              <h3 className="text-xs font-mono font-bold tracking-wider uppercase text-[#8A8A93]">
                 Recent Searches
               </h3>
             </div>
             <button
               onClick={clearRecentSearches}
-              className="text-[11px] font-mono text-neutral-400 hover:text-red-400 transition flex items-center space-x-1 cursor-pointer"
+              className="text-[11px] font-mono text-neutral-400 hover:text-[#E10600] transition flex items-center space-x-1 cursor-pointer"
             >
               <Trash2 className="w-3 h-3" />
               <span>Clear</span>
@@ -354,7 +353,7 @@ export default function UserShelves({ onSelectSearchQuery }: UserShelvesProps) {
             {recentSearches.map((term, idx) => (
               <div
                 key={`search-${idx}-${term}`}
-                className="group flex items-center bg-[#121217] hover:bg-[#181822] border border-white/10 hover:border-[#00FF87]/40 rounded-full pl-3 pr-1.5 py-1 text-xs text-[#8F90A6] hover:text-white transition cursor-pointer flex-shrink-0"
+                className="group flex items-center bg-[#111116] hover:bg-[#16161C] border border-white/[0.08] hover:border-[#E10600]/40 rounded-full pl-3 pr-1.5 py-1 text-xs text-[#8A8A93] hover:text-white transition cursor-pointer flex-shrink-0"
               >
                 <button
                   onClick={() => onSelectSearchQuery && onSelectSearchQuery(term)}

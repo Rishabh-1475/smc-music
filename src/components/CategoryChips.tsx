@@ -36,7 +36,7 @@ export default function CategoryChips({
   return (
     <nav
       aria-label="RhythmX Category Filters"
-      className="w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center space-x-3 py-3 px-4 md:px-8 bg-black/60 backdrop-blur-xl sticky top-[65px] z-20 border-b border-white/5"
+      className="w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center space-x-2.5 py-3 px-4 md:px-8 bg-[#08080A]/95 backdrop-blur-xl sticky top-[65px] z-20 border-b border-white/[0.06]"
     >
       {CATEGORY_CHIPS.map((chip) => {
         const isSelected =
@@ -48,10 +48,10 @@ export default function CategoryChips({
           <button
             key={chip.key}
             onClick={() => handleSelect(chip)}
-            className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-300 cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
               isSelected
-                ? "bg-gradient-to-r from-[#00FF87] to-[#10B981] text-black font-semibold shadow-[0_0_18px_rgba(0,255,135,0.4)] scale-[1.03]"
-                : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/5 hover:border-white/15"
+                ? "bg-[#E10600] text-white font-bold shadow-md shadow-[#E10600]/30 scale-[1.02]"
+                : "bg-[#121216] text-[#8A8A93] hover:text-white border border-white/[0.08] hover:border-white/20"
             }`}
           >
             {chip.label}

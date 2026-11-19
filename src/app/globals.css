@@ -4,11 +4,12 @@
 
 :root {
   color-scheme: dark;
-  --void-pitch: #050507;
-  --carbon-metal: #121217;
-  --emerald-kinetic: #00ff87;
-  --electric-violet: #7928ca;
-  --muted-mono: #8f90a6;
+  --carbon-base: #08080a;
+  --slate-charcoal: #121216;
+  --crimson-red: #e10600;
+  --burgundy-deep: #4a0000;
+  --text-primary: #f0f0f2;
+  --text-muted: #8a8a93;
 }
 
 /* Zero-lag Global Tap Highlights */
@@ -19,20 +20,20 @@
 
 /* Selection Highlight */
 ::selection {
-  background-color: #00ff87;
-  color: #050507;
+  background-color: #e10600;
+  color: #ffffff;
 }
 
 ::-moz-selection {
-  background-color: #00ff87;
-  color: #050507;
+  background-color: #e10600;
+  color: #ffffff;
 }
 
-/* Base Body Styles - Solid Titanium-Void with minimal non-lagging radial highlight */
+/* Base Body Styles - Deep Carbon Obsidian with subtle burgundy ambient undertones */
 html,
 body {
-  background-color: #050507;
-  color: #ffffff;
+  background-color: #08080a;
+  color: #f0f0f2;
   overflow-x: hidden;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   user-select: none;
@@ -56,55 +57,57 @@ body {
   will-change: transform, opacity;
 }
 
-/* Titanium-Void Glass Surfaces (High Performance, No Multi-Layered Heavy Blur Lag) */
+/* BMW M-Performance Crimson-Void Card Classes */
+.m-card {
+  background: #111116;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.m-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.m-card:active {
+  transform: scale(0.98);
+  border-color: #e10600;
+}
+
+.crimson-pill {
+  background: #e10600;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Refined Dark Luxury Glass Card Surfaces */
 .rhythmx-glass {
-  background: linear-gradient(135deg, rgba(20, 20, 26, 0.85) 0%, rgba(10, 10, 14, 0.95) 100%);
+  background: linear-gradient(145deg, #121217 0%, #0b0b0e 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.85);
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .rhythmx-glass:hover {
-  border-color: rgba(0, 255, 135, 0.35);
-  box-shadow: 0 14px 35px -10px rgba(0, 255, 135, 0.15), 0 0 15px rgba(121, 40, 202, 0.12);
+  border-color: rgba(225, 6, 0, 0.4);
 }
 
 .glass-card {
-  background: linear-gradient(135deg, rgba(20, 20, 26, 0.85) 0%, rgba(10, 10, 14, 0.95) 100%);
+  background: #111116;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.8);
-  border-radius: 18px;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.8);
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .glass-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(0, 255, 135, 0.35);
+  border-color: rgba(225, 6, 0, 0.4);
 }
 
-/* Realistic Metallic Grooves for 3D Vinyl */
-.metallic-grooves {
-  background: repeating-radial-gradient(
-    circle at center,
-    #111116 0px,
-    #181822 2px,
-    #0d0d12 4px
-  );
-}
-
-/* Smooth Hardware-Accelerated Vinyl Rotation */
-@keyframes vinyl-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-vinyl {
-  animation: vinyl-spin 9s linear infinite;
-  will-change: transform;
+.glass-card:active {
+  transform: scale(0.98);
+  border-color: #e10600;
 }
 
 /* Safe Area Inset Padding Helpers for Mobile WebViews */
@@ -124,32 +127,29 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
-/* Sleek Minimalist Scrollbars */
+/* Custom Scrollbar for Crimson-Void */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #050507;
+  background: #08080a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1c1c24;
-  border-radius: 9999px;
+  background: #202028;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00ff87;
+  background: #e10600;
 }
 
-/* Utility to hide scrollbars in touch carousels */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
 }

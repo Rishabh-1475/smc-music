@@ -24,117 +24,120 @@ export default function MiniPlayer() {
   if (!currentTrack || isPlayerOpen) return null;
 
   const isLiked = Boolean(likedSongIds[currentTrack.id]);
-  const isTitleLong = (currentTrack.name || "").length > 24;
 
   return (
     <div className="fixed bottom-3 left-0 right-0 z-40 px-3 sm:px-6 pointer-events-none gpu-layer">
-      {/* Suspended Pill Dock Floating 12px Above the Bottom Screen Margin */}
+      {/* Precision Floating Dock Anchored 12px Above Bottom Safe Area */}
       <div
         onClick={() => togglePlayerOpen(true)}
         role="button"
         tabIndex={0}
         aria-label="Open Full-Screen Player"
-        className="pointer-events-auto max-w-4xl mx-auto relative rhythmx-glass rounded-full border border-white/15 px-3.5 sm:px-5 py-2.5 shadow-[0_15px_40px_rgba(0,0,0,0.95)] cursor-pointer select-none transition-all duration-300 hover:border-[#00FF87]/50 overflow-hidden"
+        className="pointer-events-auto max-w-4xl mx-auto relative bg-[#131318] rounded-2xl sm:rounded-full border border-white/[0.08] px-3.5 sm:px-5 py-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.95)] cursor-pointer select-none transition-all duration-200 hover:border-[#E10600]/40 overflow-hidden"
       >
-        {/* Top Hairline Progress Scrubber */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-neutral-900">
+        {/* Razor-Thin 2px Crimson Progress Line along the Very Top Edge */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/[0.05]">
           <div
-            className="h-full bg-gradient-to-r from-[#00FF87] via-[#00F0FF] to-[#7928CA] transition-all duration-150 shadow-[0_0_10px_#00FF87]"
+            className="h-full bg-[#E10600] transition-all duration-150"
             style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
           />
         </div>
 
         <div className="flex items-center justify-between gap-3 sm:gap-4">
-          {/* Track Thumbnail with Animated Glowing Ring */}
+          {/* High-Res Album Thumbnail + Typography */}
           <div className="flex items-center space-x-3 min-w-0 flex-1">
-            <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden p-[2px] bg-gradient-to-tr from-[#00FF87] via-[#00F0FF] to-[#7928CA] shadow-[0_0_12px_rgba(0,255,135,0.4)] flex-shrink-0">
-              <div className="w-full h-full rounded-full overflow-hidden bg-neutral-950">
-                <img
-                  src={currentTrack.imageUrl || FALLBACK_VINYL}
-                  alt={currentTrack.name}
-                  className={`w-full h-full object-cover ${
-                    isPlaying ? "animate-vinyl" : ""
-                  }`}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
-                  }}
-                />
-              </div>
+            <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 bg-[#08080A]">
+              <img
+                src={currentTrack.imageUrl || FALLBACK_VINYL}
+                alt={currentTrack.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
+                }}
+              />
             </div>
 
-            {/* Marquee Track Title + Secondary Artist Tag */}
+            {/* Title & Artist */}
             <div className="min-w-0 flex-1 overflow-hidden">
-              <div className="overflow-hidden whitespace-nowrap">
-                <h5
-                  className={`text-sm font-black text-white leading-tight ${
-                    isTitleLong ? "hover:animate-marquee" : ""
-                  }`}
-                >
-                  {currentTrack.name}
-                </h5>
-              </div>
-              <p className="text-xs text-[#8F90A6] truncate mt-0.5 font-medium">
+              <h5 className="text-sm font-bold text-white truncate leading-tight">
+                {currentTrack.name}
+              </h5>
+              <p className="text-xs text-[#8A8A93] truncate mt-0.5 font-medium">
                 {currentTrack.primaryArtists}
               </p>
             </div>
           </div>
 
-          {/* Large Responsive Tactile Buttons */}
+          {/* Crisp Playback Controls */}
           <div className="flex items-center space-x-1 sm:space-x-2.5 flex-shrink-0">
-            {/* Previous */}
+            {/* Previous Track */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 playPrev();
               }}
-              className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition hidden sm:inline-flex cursor-pointer"
+              className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-white/[0.06] transition hidden sm:inline-flex cursor-pointer"
               aria-label="Previous Track"
             >
               <SkipBack className="w-4 h-4" />
             </button>
 
-            {/* Play/Pause Circle Button in #00FF87 */}
+            {/* Play/Pause Button in Solid Crimson Red (#E10600) */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 togglePlay();
               }}
-              className="w-10 h-10 rounded-full bg-gradient-to-r from-[#00FF87] to-[#10B981] text-black flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-[0_0_18px_rgba(0,255,135,0.45)] cursor-pointer"
+              className="w-10 h-10 rounded-full bg-[#E10600] hover:bg-[#C20500] text-white flex items-center justify-center transition shadow-md shadow-[#E10600]/30 active:scale-95 cursor-pointer"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
-                <Pause className="w-5 h-5 fill-black text-black" />
+                <Pause className="w-4 h-4 fill-white text-white" />
               ) : (
-                <Play className="w-5 h-5 fill-black text-black ml-0.5" />
+                <Play className="w-4 h-4 fill-white text-white ml-0.5" />
               )}
             </button>
 
-            {/* Skip Next */}
+            {/* Skip Next Track */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 playNext();
               }}
-              className="p-2 rounded-full text-neutral-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
               aria-label="Next Track"
             >
               <SkipForward className="w-4 h-4" />
             </button>
 
-            {/* Like Heart */}
+            {/* Like Heart Button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 toggleLike(currentTrack);
               }}
-              className={`p-2 rounded-full hover:bg-white/10 transition cursor-pointer ${
-                isLiked ? "text-[#00FF87]" : "text-neutral-400 hover:text-white"
+              className={`p-2 rounded-full hover:bg-white/[0.06] transition cursor-pointer ${
+                isLiked ? "text-[#E10600]" : "text-neutral-400 hover:text-white"
               }`}
               aria-label={isLiked ? "Unlike Track" : "Like Track"}
             >
               <Heart
-                className={`w-5 h-5 ${isLiked ? "fill-[#00FF87] stroke-[#00FF87]" : ""}`}
+                className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                  isLiked ? "fill-[#E10600] stroke-[#E10600]" : ""
+                }`}
               />
+            </button>
+
+            {/* Expand Drawer Chevron */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlayerOpen(true);
+              }}
+              className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-white/[0.06] transition hidden md:inline-flex cursor-pointer"
+              aria-label="Expand Player"
+            >
+              <ChevronUp className="w-4 h-4" />
             </button>
           </div>
         </div>
