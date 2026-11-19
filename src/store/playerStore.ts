@@ -76,14 +76,36 @@ if (typeof window !== "undefined") {
 const CLEAN_VINYL_COVER =
   "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
 
-// LocalStorage helpers
+/**
+ * Sanitize song object before storing to prevent circular references,
+ * large payloads, or DOM references causing WebView memory pressure or quota crashes.
+ */
+const sanitizeSong = (s: Song): Song => {
+  if (!s) return s;
+  return {
+    id: String(s.id || ""),
+    name: String(s.name || s.title || ""),
+    title: String(s.title || s.name || ""),
+    album: String(s.album || ""),
+    primaryArtists: String(s.primaryArtists || ""),
+    duration: s.duration || 0,
+    imageUrl: String(s.imageUrl || CLEAN_VINYL_COVER),
+    audioUrl: String(s.audioUrl || ""),
+    year: s.year ? String(s.year) : "",
+    isLiked: Boolean(s.isLiked),
+  };
+};
+
+/**
+ * Resilient localStorage helpers with quota protection
+ */
 const loadStorage = <T>(key: string, defaultValue: T): T => {
   if (typeof window !== "undefined") {
     try {
       const item = localStorage.getItem(key);
       if (item) return JSON.parse(item);
     } catch {
-      // Fall through
+      // Return default
     }
   }
   return defaultValue;
@@ -93,11 +115,62 @@ const saveStorage = (key: string, value: any) => {
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      // Fall through
+    } catch (err) {
+      console.warn("localStorage quota warning, attempting cache prune:", err);
+      try {
+        // Prune non-critical cache if quota hit
+        localStorage.removeItem("rhythmx_taste_profile");
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch {
+        // Silent fallback
+      }
     }
   }
 };
+
+/**
+ * Extracts or derives alternate stream quality (160kbps or 96kbps)
+ * for seamless fallback if the primary 320kbps URL fails or times out.
+ */
+function getAlternateStream(song: Song | null, quality: "160" | "96"): string | null {
+  if (!song) return null;
+
+  // 1. Check if song has explicit downloadUrl array
+  const dlList =
+    song.downloadUrl ||
+    song.downloadUrls ||
+    (song as any).more_info?.downloadUrl ||
+    (song as any).download_url;
+
+  if (Array.isArray(dlList) && dlList.length > 0) {
+    const qStr = quality === "160" ? "160" : "96";
+    const found = dlList.find(
+      (u: any) =>
+        (typeof u === "string" && u.includes(`_${qStr}.`)) ||
+        u?.quality?.includes(qStr) ||
+        u?.bitrate?.includes(qStr) ||
+        u?.url?.includes(`_${qStr}.`) ||
+        u?.link?.includes(`_${qStr}.`)
+    );
+    if (found) {
+      const u = typeof found === "string" ? found : found.url || found.link;
+      if (u && typeof u === "string") return u;
+    }
+  }
+
+  // 2. Derive bitrate URL replacement for JioSaavn CDN formats
+  const url = song.audioUrl;
+  if (url && typeof url === "string") {
+    if (quality === "160") {
+      if (url.includes("_320.")) return url.replace(/_320\./g, "_160.");
+    } else if (quality === "96") {
+      if (url.includes("_320.")) return url.replace(/_320\./g, "_96.");
+      if (url.includes("_160.")) return url.replace(/_160\./g, "_96.");
+    }
+  }
+
+  return null;
+}
 
 // Genre & Mood detection helper
 const detectGenres = (song: Song): string[] => {
@@ -142,15 +215,19 @@ export interface UserPersonalData {
 }
 
 export interface PlayerStore {
-  // State
+  // State Interface
   currentTrack: Song | null;
   queue: Song[];
   originalQueue: Song[];
+  history: Song[];
   isPlaying: boolean;
+  isLoading: boolean;
   currentTime: number;
   duration: number;
   progress: number;
   volume: number;
+  autoplayEnabled: boolean;
+  autoplay: boolean;
   isPlayerOpen: boolean;
   activeTab: "up_next" | "lyrics" | "related";
   isShuffled: boolean;
@@ -159,9 +236,8 @@ export interface PlayerStore {
   dislikedSongIds: Record<string, boolean>;
   userTasteProfile: TasteProfile;
   activeMood: CategoryMood | string;
-  autoplay: boolean;
 
-  // Personal Activity Arrays (Persisted under 'rhythmx_user_data')
+  // Personal Activity Arrays (strictly capped at 50 for memory protection)
   recentlyPlayed: Song[];
   likedSongs: Song[];
   playFrequency: Record<string, { song: Song; count: number }>;
@@ -187,11 +263,12 @@ export interface PlayerStore {
   clearQueue: () => void;
   setActiveMood: (mood: CategoryMood | string) => void;
   toggleAutoplay: () => void;
+  setAutoplayEnabled: (enabled: boolean) => void;
   getTopAffinityGenre: () => string | null;
   getTopArtists: () => string[];
   getPersonalizedSpeedDial: (pool?: Song[]) => Song[];
 
-  // User Shelves Activity Selectors & Actions
+  // User Activity Selectors & Actions
   addToRecentlyPlayed: (song: Song) => void;
   toggleLikeSong: (song: Song) => void;
   recordSearchQuery: (query: string) => void;
@@ -226,11 +303,18 @@ const DEFAULT_USER_DATA: UserPersonalData = {
 };
 
 export const usePlayerStore = create<PlayerStore>((set, get) => {
-  // Load persisted user personal data under 'rhythmx_user_data'
-  const initialUserData = loadStorage<UserPersonalData>(
+  // Load persisted user personal data under 'rhythmx_user_data' with 50-cap sanitization
+  const rawUserData = loadStorage<UserPersonalData>(
     "rhythmx_user_data",
     DEFAULT_USER_DATA
   );
+
+  const initialUserData: UserPersonalData = {
+    recentlyPlayed: (rawUserData.recentlyPlayed || []).map(sanitizeSong).slice(0, 50),
+    likedSongs: (rawUserData.likedSongs || []).map(sanitizeSong).slice(0, 50),
+    playFrequency: rawUserData.playFrequency || {},
+    recentSearches: (rawUserData.recentSearches || []).slice(0, 10),
+  };
 
   // Backward compatibility loads
   const legacyLiked = loadStorage<Record<string, boolean>>("rhythmx_liked_songs", {});
@@ -243,20 +327,26 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     if (s?.id) initialLikedIds[s.id] = true;
   }
 
+  // Persistent storage saver strictly capped at 50 items
   const persistUserData = (partial: Partial<UserPersonalData>) => {
     const current: UserPersonalData = {
-      recentlyPlayed: get().recentlyPlayed,
-      likedSongs: get().likedSongs,
-      playFrequency: get().playFrequency,
-      recentSearches: get().recentSearches,
-      ...partial,
+      recentlyPlayed: (partial.recentlyPlayed || get().recentlyPlayed || [])
+        .map(sanitizeSong)
+        .slice(0, 50),
+      likedSongs: (partial.likedSongs || get().likedSongs || [])
+        .map(sanitizeSong)
+        .slice(0, 50),
+      playFrequency: partial.playFrequency || get().playFrequency || {},
+      recentSearches: (partial.recentSearches || get().recentSearches || []).slice(0, 10),
     };
     saveStorage("rhythmx_user_data", current);
   };
 
   /**
-   * Full Android MediaSession Integration
-   * Mounts native controls, high-res artwork, and notification shade seeking
+   * ANDROID MEDIASESSION & LOCKSCREEN CONTROLS
+   * Updates metadata on EVERY song change:
+   * Title, Artist, Album, and multi-size artwork icons (96x96 to 512x512).
+   * Registers play, pause, previoustrack, nexttrack, seekto, seekbackward, seekforward.
    */
   const syncMediaSession = (track: Song | null, playing: boolean) => {
     if (typeof window === "undefined" || !("mediaSession" in navigator)) return;
@@ -278,6 +368,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         { src: hiresArtwork, sizes: "128x128", type: "image/jpeg" },
         { src: hiresArtwork, sizes: "192x192", type: "image/jpeg" },
         { src: hiresArtwork, sizes: "256x256", type: "image/jpeg" },
+        { src: hiresArtwork, sizes: "384x384", type: "image/jpeg" },
         { src: hiresArtwork, sizes: "512x512", type: "image/jpeg" },
       ],
     });
@@ -300,8 +391,18 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         get().playNext();
       });
       navigator.mediaSession.setActionHandler("seekto", (details) => {
-        if (details.seekTime && globalAudio?.duration) {
+        if (details.seekTime != null && globalAudio?.duration) {
           globalAudio.currentTime = details.seekTime;
+        }
+      });
+      navigator.mediaSession.setActionHandler("seekbackward", (details) => {
+        const skip = details.seekOffset || 10;
+        if (globalAudio) globalAudio.currentTime = Math.max(0, globalAudio.currentTime - skip);
+      });
+      navigator.mediaSession.setActionHandler("seekforward", (details) => {
+        const skip = details.seekOffset || 10;
+        if (globalAudio && globalAudio.duration) {
+          globalAudio.currentTime = Math.min(globalAudio.duration, globalAudio.currentTime + skip);
         }
       });
     } catch {
@@ -309,7 +410,116 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     }
   };
 
-  // Wire HTML5 Audio element events
+  /**
+   * AUDIO SINGLETON & NETWORK RESILIENCE STATE
+   */
+  let currentFallbackStage: 0 | 1 | 2 = 0; // 0: 320kbps, 1: 160kbps, 2: 96kbps
+  let stallTimeoutId: any = null;
+  let isAutoplayFetching = false;
+
+  /**
+   * Seamless Fallback: if 320kbps fails or times out, immediately
+   * falls back to 160kbps, then 96kbps, before advancing to next song.
+   */
+  const tryFallbackStream = () => {
+    const currentSong = get().currentTrack;
+    if (!currentSong || !globalAudio) {
+      get().playNext();
+      return;
+    }
+
+    if (currentFallbackStage === 0) {
+      currentFallbackStage = 1;
+      const fallback160 = getAlternateStream(currentSong, "160");
+      if (fallback160 && fallback160 !== globalAudio.src) {
+        console.warn("320kbps stream failed/stalled. Stepping down to 160kbps:", fallback160);
+        const lastPos = globalAudio.currentTime || 0;
+        globalAudio.src = fallback160;
+        globalAudio.currentTime = lastPos;
+        globalAudio.load();
+        globalAudio.play().catch((err) => {
+          console.warn("160kbps playback error:", err);
+          tryFallbackStream();
+        });
+        return;
+      }
+    }
+
+    if (currentFallbackStage === 1) {
+      currentFallbackStage = 2;
+      const fallback96 = getAlternateStream(currentSong, "96");
+      if (fallback96 && fallback96 !== globalAudio.src) {
+        console.warn("160kbps stream failed/stalled. Stepping down to 96kbps:", fallback96);
+        const lastPos = globalAudio.currentTime || 0;
+        globalAudio.src = fallback96;
+        globalAudio.currentTime = lastPos;
+        globalAudio.load();
+        globalAudio.play().catch((err) => {
+          console.warn("96kbps playback error:", err);
+          tryFallbackStream();
+        });
+        return;
+      }
+    }
+
+    // All fallback qualities exhausted; advance to next track
+    console.warn("All stream qualities failed for track. Advancing to next track.");
+    currentFallbackStage = 0;
+    get().playNext();
+  };
+
+  /**
+   * Background Endless Autoplay Queue Top-Up
+   * When queue has <= 2 songs left, automatically fetch 15-20 similar songs
+   * without interrupting active playback.
+   */
+  const checkAndTopUpQueue = async (track: Song | null) => {
+    if (!track || isAutoplayFetching) return;
+    const state = get();
+    if (!state.autoplayEnabled && !state.autoplay) return;
+
+    const currentIdx = state.queue.findIndex((s) => s.id === track.id);
+    const remainingCount =
+      currentIdx >= 0 ? state.queue.length - 1 - currentIdx : state.queue.length;
+
+    if (remainingCount <= 2) {
+      isAutoplayFetching = true;
+      try {
+        const freshTracks = await getDynamicAutoplayQueue(track);
+        if (freshTracks && freshTracks.length > 0) {
+          const latestState = get();
+          const latestQueue = latestState.queue;
+          const currentIds = new Set(latestQueue.map((s) => s.id));
+          const historyIds = new Set(latestState.history.map((s) => s.id));
+          const dislikedIds = latestState.dislikedSongIds;
+
+          const candidateBatch = freshTracks
+            .filter((t) => {
+              if (!t || !t.id || !t.audioUrl) return false;
+              if (t.id === track.id) return false;
+              if (currentIds.has(t.id)) return false;
+              if (historyIds.has(t.id)) return false;
+              if (dislikedIds[t.id]) return false;
+              return true;
+            })
+            .slice(0, 20);
+
+          if (candidateBatch.length > 0) {
+            const updated = [...latestQueue, ...candidateBatch];
+            set({ queue: updated, originalQueue: updated });
+          }
+        }
+      } catch (err) {
+        console.warn("Background autoplay top-up error:", err);
+      } finally {
+        isAutoplayFetching = false;
+      }
+    }
+  };
+
+  /**
+   * Wire HTML5 Audio element event listeners
+   */
   if (globalAudio) {
     globalAudio.ontimeupdate = () => {
       const cur = globalAudio?.currentTime || 0;
@@ -338,16 +548,47 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
       }
     };
 
-    globalAudio.onended = () => {
-      const state = get();
-      if (state.repeatMode === "one") {
-        if (globalAudio) {
-          globalAudio.currentTime = 0;
-          globalAudio.play().catch(() => {});
+    // Buffer resilience: handle waiting
+    globalAudio.onwaiting = () => {
+      set({ isLoading: true });
+      if (stallTimeoutId) clearTimeout(stallTimeoutId);
+      stallTimeoutId = setTimeout(() => {
+        if (globalAudio && (globalAudio.paused || globalAudio.readyState < 3)) {
+          console.warn("Audio buffer waiting > 3500ms; attempting smooth recovery...");
+          globalAudio.play().catch(() => {
+            tryFallbackStream();
+          });
         }
-      } else {
-        state.playNext();
+      }, 3500);
+    };
+
+    // Buffer resilience: handle stalled
+    globalAudio.onstalled = () => {
+      set({ isLoading: true });
+      if (stallTimeoutId) clearTimeout(stallTimeoutId);
+      stallTimeoutId = setTimeout(() => {
+        if (globalAudio && (globalAudio.paused || globalAudio.readyState < 3)) {
+          console.warn("Audio network stalled > 4000ms; attempting fallback stream...");
+          tryFallbackStream();
+        }
+      }, 4000);
+    };
+
+    globalAudio.oncanplay = () => {
+      set({ isLoading: false });
+    };
+
+    globalAudio.onplaying = () => {
+      if (stallTimeoutId) {
+        clearTimeout(stallTimeoutId);
+        stallTimeoutId = null;
       }
+      set({ isPlaying: true, isLoading: false });
+      requestWakeLock();
+      if (typeof window !== "undefined" && "mediaSession" in navigator) {
+        navigator.mediaSession.playbackState = "playing";
+      }
+      syncMediaSession(get().currentTrack, true);
     };
 
     globalAudio.onplay = () => {
@@ -368,9 +609,23 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
       syncMediaSession(get().currentTrack, false);
     };
 
-    globalAudio.onerror = () => {
-      console.warn("Audio playback error encountered. Advancing to next track.");
-      get().playNext();
+    // Resilient ended listener
+    globalAudio.onended = () => {
+      const state = get();
+      if (state.repeatMode === "one") {
+        if (globalAudio) {
+          globalAudio.currentTime = 0;
+          globalAudio.play().catch(() => {});
+        }
+      } else {
+        state.playNext();
+      }
+    };
+
+    // Resilient error listener
+    globalAudio.onerror = (e) => {
+      console.warn("Audio playback error encountered. Triggering fallback stream...", e);
+      tryFallbackStream();
     };
   }
 
@@ -378,11 +633,15 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     currentTrack: null,
     queue: [],
     originalQueue: [],
+    history: [],
     isPlaying: false,
+    isLoading: false,
     currentTime: 0,
     duration: 0,
     progress: 0,
     volume: 1,
+    autoplayEnabled: true,
+    autoplay: true,
     isPlayerOpen: false,
     activeTab: "up_next",
     isShuffled: false,
@@ -391,9 +650,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     dislikedSongIds: initialDisliked,
     userTasteProfile: initialTaste,
     activeMood: "All",
-    autoplay: true,
 
-    // Personal activity arrays
+    // Personal activity arrays (strictly capped at 50)
     recentlyPlayed: initialUserData.recentlyPlayed || [],
     likedSongs: initialUserData.likedSongs || [],
     playFrequency: initialUserData.playFrequency || {},
@@ -402,10 +660,11 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     addToRecentlyPlayed: (song: Song) => {
       if (!song || !song.id) return;
       const state = get();
+      const sanitized = sanitizeSong(song);
       const updated = [
-        song,
+        sanitized,
         ...state.recentlyPlayed.filter((s) => s.id !== song.id),
-      ].slice(0, 25);
+      ].slice(0, 50);
 
       set({ recentlyPlayed: updated });
       persistUserData({ recentlyPlayed: updated });
@@ -423,21 +682,41 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         newQueue = [song, ...newQueue];
       }
 
-      // 1. Update recentlyPlayed (Max 25)
-      const updatedRecentlyPlayed = [
-        song,
-        ...state.recentlyPlayed.filter((s) => s.id !== song.id),
-      ].slice(0, 25);
+      const sanitized = sanitizeSong(song);
 
-      // 2. Update playFrequency
+      // Record in history
+      const prevTrack = state.currentTrack;
+      let updatedHistory = state.history;
+      if (prevTrack && prevTrack.id !== song.id) {
+        updatedHistory = [
+          sanitizeSong(prevTrack),
+          ...state.history.filter((s) => s.id !== prevTrack.id),
+        ].slice(0, 50);
+      }
+
+      // 1. Update recentlyPlayed (Max 50)
+      const updatedRecentlyPlayed = [
+        sanitized,
+        ...state.recentlyPlayed.filter((s) => s.id !== song.id),
+      ].slice(0, 50);
+
+      // 2. Update playFrequency (Pruned to top 50)
       const currentFrequency = { ...state.playFrequency };
       const currentCount = (currentFrequency[song.id]?.count || 0) + 1;
-      currentFrequency[song.id] = { song, count: currentCount };
+      currentFrequency[song.id] = { song: sanitized, count: currentCount };
+
+      const prunedFrequency: Record<string, { song: Song; count: number }> = {};
+      Object.entries(currentFrequency)
+        .sort(([, a], [, b]) => b.count - a.count)
+        .slice(0, 50)
+        .forEach(([k, v]) => {
+          prunedFrequency[k] = v;
+        });
 
       // Persist in 'rhythmx_user_data'
       persistUserData({
         recentlyPlayed: updatedRecentlyPlayed,
-        playFrequency: currentFrequency,
+        playFrequency: prunedFrequency,
       });
 
       // Update Taste Profile: +2 artist affinity, +3 genre affinity
@@ -452,17 +731,22 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         taste.genreWeights[g] = (taste.genreWeights[g] || 0) + 3;
       }
 
-      taste.recentlyPlayed = updatedRecentlyPlayed.slice(0, 30);
+      taste.recentlyPlayed = updatedRecentlyPlayed.slice(0, 25);
       saveStorage("rhythmx_taste_profile", taste);
+
+      // Reset fallback quality stage for new track
+      currentFallbackStage = 0;
 
       set({
         currentTrack: song,
         queue: newQueue,
         originalQueue: newQueue,
+        history: updatedHistory,
         isPlaying: true,
+        isLoading: true,
         userTasteProfile: taste,
         recentlyPlayed: updatedRecentlyPlayed,
-        playFrequency: currentFrequency,
+        playFrequency: prunedFrequency,
       });
 
       if (globalAudio) {
@@ -474,27 +758,13 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
             syncMediaSession(song, true);
           })
           .catch((err) => {
-            console.error("Playback start error:", err);
+            console.warn("Playback initial start warning:", err);
+            tryFallbackStream();
           });
       }
 
-      // Dynamically load contextual radio behind single tracks if queue is small
-      if (newQueue.length <= 1) {
-        getDynamicAutoplayQueue(song).then((radioTracks) => {
-          if (radioTracks.length > 0) {
-            const currentQueue = get().queue;
-            const updated = [
-              ...currentQueue,
-              ...radioTracks.filter(
-                (rt) =>
-                  !currentQueue.some((q) => q.id === rt.id) &&
-                  !get().dislikedSongIds[rt.id]
-              ),
-            ];
-            set({ queue: updated, originalQueue: updated });
-          }
-        });
-      }
+      // Check and top up queue in background if <= 2 songs left
+      checkAndTopUpQueue(song);
     },
 
     togglePlay: () => {
@@ -525,27 +795,42 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         : -1;
 
       let nextIndex = currentIndex + 1;
+
+      // Handle queue exhaustion with Endless Autoplay
       if (nextIndex >= queue.length) {
         if (repeatMode === "all") {
           nextIndex = 0;
-        } else if (state.autoplay && currentTrack) {
-          // Endless radio autoplay: fetch dynamic queue matching current track
-          getDynamicAutoplayQueue(currentTrack).then((nextTracks) => {
-            if (nextTracks.length > 0) {
-              const freshQueue = [
-                ...queue,
-                ...nextTracks.filter((t) => !queue.some((q) => q.id === t.id)),
-              ];
-              set({ queue: freshQueue, originalQueue: freshQueue });
-              state.playSong(freshQueue[currentIndex + 1] || nextTracks[0], freshQueue);
-            } else {
-              set({ isPlaying: false });
+        } else if ((state.autoplayEnabled || state.autoplay) && currentTrack) {
+          set({ isLoading: true });
+          getDynamicAutoplayQueue(currentTrack)
+            .then((freshTracks) => {
+              const latestQueue = get().queue;
+              const currentIds = new Set(latestQueue.map((s) => s.id));
+              const candidateBatch = freshTracks.filter(
+                (t) =>
+                  t &&
+                  t.id &&
+                  t.audioUrl &&
+                  !currentIds.has(t.id) &&
+                  !get().dislikedSongIds[t.id]
+              );
+
+              if (candidateBatch.length > 0) {
+                const updatedQueue = [...latestQueue, ...candidateBatch];
+                set({ queue: updatedQueue, originalQueue: updatedQueue });
+                state.playSong(candidateBatch[0], updatedQueue);
+              } else {
+                set({ isPlaying: false, isLoading: false });
+                if (globalAudio) globalAudio.pause();
+              }
+            })
+            .catch(() => {
+              set({ isPlaying: false, isLoading: false });
               if (globalAudio) globalAudio.pause();
-            }
-          });
+            });
           return;
         } else {
-          set({ isPlaying: false });
+          set({ isPlaying: false, isLoading: false });
           if (globalAudio) globalAudio.pause();
           return;
         }
@@ -564,7 +849,17 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         return;
       }
 
-      const { queue, currentTrack } = state;
+      const { queue, currentTrack, history } = state;
+
+      // Pop previous song from history if available
+      if (history.length > 0) {
+        const lastPlayed = history[0];
+        const newHistory = history.slice(1);
+        set({ history: newHistory });
+        state.playSong(lastPlayed);
+        return;
+      }
+
       if (!queue.length) return;
 
       const currentIndex = currentTrack
@@ -658,6 +953,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
 
       if (!song) return;
 
+      const sanitized = sanitizeSong(song);
       const likedIds = { ...state.likedSongIds };
       const dislikedIds = { ...state.dislikedSongIds };
       let updatedLikedSongs = [...state.likedSongs];
@@ -671,9 +967,9 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         likedIds[song.id] = true;
         delete dislikedIds[song.id];
         updatedLikedSongs = [
-          song,
+          sanitized,
           ...updatedLikedSongs.filter((s) => s.id !== song.id),
-        ];
+        ].slice(0, 50); // Strict max 50 items
 
         // Boost taste affinity (+5)
         const taste = { ...state.userTasteProfile };
@@ -816,7 +1112,14 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     },
 
     toggleAutoplay: () => {
-      set((state) => ({ autoplay: !state.autoplay }));
+      set((state) => {
+        const next = !state.autoplayEnabled;
+        return { autoplay: next, autoplayEnabled: next };
+      });
+    },
+
+    setAutoplayEnabled: (enabled: boolean) => {
+      set({ autoplay: enabled, autoplayEnabled: enabled });
     },
 
     getTopAffinityGenre: () => {
