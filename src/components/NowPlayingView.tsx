@@ -4,42 +4,24 @@ import { ChevronDown, Bookmark, Heart, Play, Pause, SkipBack, SkipForward, Shuff
 import { usePlayerStore } from '@/store/playerStore';
 
 interface Props {
-  onClose?: () => void;
+  onClose: () => void;
 }
 
 export const NowPlayingView: React.FC<Props> = ({ onClose }) => {
-  const {
-    currentTrack,
-    isPlaying,
-    togglePlay,
-    playNext,
-    playPrev,
-    toggleLike,
-    likedSongs,
-    currentTime,
-    duration,
-    seek,
-    togglePlayerOpen
-  } = usePlayerStore();
-
-  const handleClose = () => {
-    if (onClose) onClose();
-    else togglePlayerOpen(false);
-  };
+  const { currentTrack, isPlaying, togglePlay, playNext, playPrev, toggleLike, likedSongs, currentTime, duration, seek } = usePlayerStore();
 
   if (!currentTrack) return null;
 
   const isLiked = likedSongs?.some((s) => s.id === currentTrack.id);
 
   const formatTime = (secs: number) => {
-    if (isNaN(secs) || secs < 0) return '0:00';
     const m = Math.floor(secs / 60);
     const s = Math.floor(secs % 60);
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#08080A] flex flex-col justify-between max-w-[430px] mx-auto overflow-hidden select-none">
+    <div className="fixed inset-0 z-50 bg-[#08080A] flex flex-col justify-between max-w-[430px] mx-auto overflow-hidden">
       {/* DYNAMIC AMBIENT BACKDROP: Uses current track artwork with high blur */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-30 blur-3xl scale-125 pointer-events-none transition-all duration-700"
@@ -49,7 +31,7 @@ export const NowPlayingView: React.FC<Props> = ({ onClose }) => {
 
       {/* Header */}
       <div className="relative z-10 flex items-center justify-between px-6 pt-10 pb-4">
-        <button onClick={handleClose} className="p-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 transition cursor-pointer">
+        <button onClick={onClose} className="p-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 transition cursor-pointer">
           <ChevronDown className="w-5 h-5" />
         </button>
         <span className="text-[11px] font-bold tracking-widest text-white/80 uppercase">Now Playing</span>
@@ -84,7 +66,7 @@ export const NowPlayingView: React.FC<Props> = ({ onClose }) => {
             type="range"
             min={0}
             max={duration || 100}
-            value={currentTime || 0}
+            value={currentTime}
             onChange={(e) => seek(Number(e.target.value))}
             className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#CCFF00]"
           />
