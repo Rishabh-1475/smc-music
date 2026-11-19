@@ -24,13 +24,13 @@ export default function Header({
 }: HeaderProps) {
   const { userName } = useUserStore();
   const { likedSongs } = usePlayerStore();
-  const [showSearchDrawer, setShowSearchDrawer] = useState(false);
+  const [showSearchInput, setShowSearchInput] = useState(false);
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLocalQuery(searchQuery);
-    if (searchQuery) setShowSearchDrawer(true);
+    if (searchQuery) setShowSearchInput(true);
   }, [searchQuery]);
 
   const updateQuery = (value: string) => {
@@ -40,7 +40,7 @@ export default function Header({
   };
 
   const handleToggleSearch = () => {
-    setShowSearchDrawer((prev) => {
+    setShowSearchInput((prev) => {
       const next = !prev;
       if (next) {
         setTimeout(() => searchInputRef.current?.focus(), 100);
@@ -51,68 +51,61 @@ export default function Header({
     });
   };
 
-  const displayName = userName?.trim() || "Guest";
+  const displayName = userName?.trim() || "Samantha";
   const favoritesCount = likedSongs?.length || 0;
 
   return (
-    <header className="sticky top-0 z-30 w-full bg-[#0A0A0C]/95 backdrop-blur-xl border-b border-white/[0.06] px-4 sm:px-6 md:px-8 py-3.5 flex flex-col gap-3">
-      {/* Top Bar: Reference 1 Layout */}
-      <div className="flex items-center justify-between gap-3">
-        {/* Left: Circular Avatar with Soft Ring + Clean Greeting */}
+    <header className="relative w-full bg-[#0A0A0C] px-4 pt-6 pb-2 flex flex-col gap-2 select-none overflow-hidden">
+      {/* Ambient background glow matching Reference mockups */}
+      <div className="absolute top-0 left-0 right-0 h-36 bg-gradient-to-b from-purple-800/25 via-pink-900/15 to-transparent pointer-events-none blur-3xl" />
+
+      {/* Top Utility Row: Avatar on Left, Search & Heart on Right */}
+      <div className="relative z-10 flex items-center justify-between">
+        {/* Left Side: Circular 42px avatar with subtle ring */}
         <div
           onClick={onOpenProfile}
-          className="flex items-center space-x-3 cursor-pointer group select-none"
+          className="relative w-[42px] h-[42px] rounded-full overflow-hidden border border-white/10 ring-2 ring-white/10 hover:ring-[#D4FF00] transition-all bg-neutral-900 flex-shrink-0 shadow-md cursor-pointer group"
           title="View profile"
         >
-          {/* Circular Avatar */}
-          <div className="relative w-11 h-11 rounded-full overflow-hidden border border-white/10 ring-2 ring-[#D2FF1F]/30 group-hover:ring-[#D2FF1F] transition-all bg-neutral-900 flex-shrink-0">
-            <img
-              src="/creator.jpg"
-              alt={displayName}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src =
-                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80";
-              }}
-            />
-          </div>
-
-          {/* Clean Greeting */}
-          <div className="flex flex-col">
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight group-hover:text-[#D2FF1F] transition-colors">
-              Hi, {displayName}
-            </h1>
-            <span className="text-[11px] font-mono text-neutral-400 leading-none mt-0.5">
-              Ready to explore
-            </span>
-          </div>
+          <img
+            src="/creator.jpg"
+            alt={displayName}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src =
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80";
+            }}
+          />
         </div>
 
-        {/* Right: Minimalist Circular Action Buttons */}
+        {/* Right Side: Two clean circular 38px frosted buttons */}
         <div className="flex items-center space-x-2.5">
-          {/* Search Toggle Icon */}
+          {/* Search Icon Button (38px) */}
           <button
             onClick={handleToggleSearch}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
-              showSearchDrawer || searchQuery
-                ? "bg-[#D2FF1F] text-black border-[#D2FF1F] shadow-lg shadow-[#D2FF1F]/20"
-                : "bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white border-white/10"
+            className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+              showSearchInput || searchQuery
+                ? "bg-[#D4FF00] text-black border-[#D4FF00] shadow-md shadow-[#D4FF00]/25"
+                : "bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border-white/10"
             }`}
-            aria-label="Toggle search drawer"
+            aria-label="Toggle Search"
           >
             <Search className="w-4 h-4" />
           </button>
 
-          {/* Heart / Favorites Button */}
+          {/* Liked Heart Icon Button (38px) */}
           <button
             onClick={onOpenFavorites}
-            className="relative w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-[#D2FF1F] border border-white/10 flex items-center justify-center transition-all cursor-pointer"
-            aria-label="Open Favorites"
-            title="Favorites"
+            className="relative w-[38px] h-[38px] rounded-full bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer"
+            aria-label="Favorites"
           >
-            <Heart className={`w-4 h-4 ${favoritesCount > 0 ? "fill-[#D2FF1F] text-[#D2FF1F]" : ""}`} />
+            <Heart
+              className={`w-4 h-4 ${
+                favoritesCount > 0 ? "fill-[#D4FF00] text-[#D4FF00]" : ""
+              }`}
+            />
             {favoritesCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#D2FF1F] text-black text-[9px] font-black flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#D4FF00] text-black text-[8px] font-black flex items-center justify-center">
                 {favoritesCount > 9 ? "9+" : favoritesCount}
               </span>
             )}
@@ -120,15 +113,22 @@ export default function Header({
         </div>
       </div>
 
-      {/* Floating / Expandable Search Drawer */}
-      {showSearchDrawer && (
-        <div className="w-full animate-in slide-in-from-top-2 duration-200 pt-1">
-          <div className="relative w-full rounded-2xl bg-[#14141B] border border-white/15 focus-within:border-[#D2FF1F] focus-within:ring-1 focus-within:ring-[#D2FF1F] shadow-xl transition-all">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+      {/* Prominent Greeting Headline matching Reference 1 & Reference 3 */}
+      <div className="relative z-10 pt-1">
+        <h1 className="text-2xl font-bold tracking-tight text-white">
+          Hi, {displayName}
+        </h1>
+      </div>
+
+      {/* Expandable Search Input Row */}
+      {showSearchInput && (
+        <div className="relative z-10 w-full animate-in slide-in-from-top-1 duration-150 pt-1">
+          <div className="relative w-full rounded-2xl bg-[#14141A] border border-white/10 focus-within:border-[#D4FF00] shadow-lg transition-all">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
               {isSearching ? (
-                <Loader2 className="w-4 h-4 text-[#D2FF1F] animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 text-[#D4FF00] animate-spin" />
               ) : (
-                <Search className="w-4 h-4 text-neutral-400" />
+                <Search className="w-3.5 h-3.5 text-gray-400" />
               )}
             </div>
 
@@ -137,17 +137,17 @@ export default function Header({
               type="text"
               value={localQuery}
               onChange={(e) => updateQuery(e.target.value)}
-              placeholder="Search tracks, phonk, artists, albums..."
-              className="w-full pl-11 pr-10 py-3 bg-transparent text-white placeholder-neutral-500 text-sm rounded-2xl focus:outline-none"
+              placeholder="Search artists, tracks, phonk..."
+              className="w-full pl-9 pr-9 py-2.5 bg-transparent text-white placeholder-gray-500 text-xs rounded-2xl focus:outline-none"
             />
 
             {localQuery.length > 0 && (
               <button
                 onClick={() => updateQuery("")}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-400 hover:text-white transition cursor-pointer"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition cursor-pointer"
                 aria-label="Clear search"
               >
-                <X className="w-4 h-4 hover:text-[#D2FF1F]" />
+                <X className="w-3.5 h-3.5 hover:text-[#D4FF00]" />
               </button>
             )}
           </div>

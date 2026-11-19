@@ -25,19 +25,19 @@ export default function MiniPlayer() {
   const isLiked = Boolean(likedSongIds[currentTrack.id]);
 
   return (
-    <div className="fixed bottom-[74px] left-3 right-3 z-40 max-w-md mx-auto pointer-events-none gpu-layer">
-      {/* Suspended Pill Dock Floating Directly Above Bottom Nav */}
+    <div className="fixed bottom-[74px] left-0 right-0 max-w-[430px] mx-auto px-4 z-40 pointer-events-none gpu-layer">
+      {/* Floating Pill Dock anchored inside the 430px mobile container */}
       <div
         onClick={() => togglePlayerOpen(true)}
         role="button"
         tabIndex={0}
         aria-label="Open Now Playing"
-        className="pointer-events-auto w-full relative bg-[#14141B]/95 backdrop-blur-2xl rounded-2xl border border-white/[0.08] px-3.5 py-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.95)] cursor-pointer select-none transition-all duration-200 hover:border-[#D2FF1F]/40 overflow-hidden"
+        className="pointer-events-auto w-full relative bg-[#14141B]/95 backdrop-blur-2xl rounded-2xl border border-white/10 px-3.5 py-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.95)] cursor-pointer select-none transition-all duration-200 hover:border-[#D4FF00]/40 overflow-hidden"
       >
         {/* Hairline Lime Progress Line */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/[0.05]">
           <div
-            className="h-full bg-[#D2FF1F] transition-all duration-150"
+            className="h-full bg-[#D4FF00] transition-all duration-150"
             style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
           />
         </div>
@@ -45,7 +45,7 @@ export default function MiniPlayer() {
         <div className="flex items-center justify-between gap-3">
           {/* Thumbnail + Details */}
           <div className="flex items-center space-x-3 min-w-0 flex-1">
-            <div className="relative w-11 h-11 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 bg-neutral-900 shadow">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 flex-shrink-0 bg-neutral-900 shadow">
               <img
                 src={currentTrack.imageUrl || FALLBACK_VINYL}
                 alt={currentTrack.name}
@@ -57,28 +57,28 @@ export default function MiniPlayer() {
             </div>
 
             <div className="min-w-0 flex-1 overflow-hidden">
-              <h5 className="text-xs sm:text-sm font-bold text-white truncate leading-tight">
+              <h5 className="text-xs font-bold text-white truncate leading-tight">
                 {currentTrack.name}
               </h5>
-              <p className="text-[11px] text-neutral-400 truncate mt-0.5 font-medium">
+              <p className="text-[10px] text-gray-400 truncate mt-0.5 font-medium">
                 {currentTrack.primaryArtists}
               </p>
             </div>
           </div>
 
           {/* Controls: Like, Play/Pause, Skip */}
-          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+          <div className="flex items-center space-x-1.5 flex-shrink-0">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 toggleLike(currentTrack);
               }}
-              className={`p-2 rounded-full hover:bg-white/10 transition cursor-pointer ${
-                isLiked ? "text-[#D2FF1F]" : "text-neutral-400 hover:text-white"
+              className={`p-1.5 rounded-full hover:bg-white/10 transition cursor-pointer ${
+                isLiked ? "text-[#D4FF00]" : "text-gray-400 hover:text-white"
               }`}
               aria-label="Like"
             >
-              <Heart className={`w-4 h-4 ${isLiked ? "fill-[#D2FF1F]" : ""}`} />
+              <Heart className={`w-4 h-4 ${isLiked ? "fill-[#D4FF00]" : ""}`} />
             </button>
 
             {/* Lime Circular Play/Pause */}
@@ -87,13 +87,13 @@ export default function MiniPlayer() {
                 e.stopPropagation();
                 togglePlay();
               }}
-              className="w-9 h-9 rounded-full bg-[#D2FF1F] hover:bg-[#bceb15] text-black flex items-center justify-center transition shadow-md shadow-[#D2FF1F]/30 active:scale-95 cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[#D4FF00] hover:bg-[#bceb15] text-black flex items-center justify-center transition shadow-md shadow-[#D4FF00]/30 active:scale-95 cursor-pointer"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
-                <Pause className="w-4 h-4 fill-black stroke-black" />
+                <Pause className="w-3.5 h-3.5 fill-black stroke-black" />
               ) : (
-                <Play className="w-4 h-4 fill-black stroke-black ml-0.5" />
+                <Play className="w-3.5 h-3.5 fill-black stroke-black ml-0.5" />
               )}
             </button>
 
@@ -102,7 +102,7 @@ export default function MiniPlayer() {
                 e.stopPropagation();
                 playNext();
               }}
-              className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              className="p-1.5 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
               aria-label="Next track"
             >
               <SkipForward className="w-4 h-4" />

@@ -14,12 +14,13 @@ import {
   RotateCcw,
   User,
   Music2,
+  MoreVertical,
+  ArrowLeft,
 } from "lucide-react";
 import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
 import HeroVisualizer from "@/components/HeroVisualizer";
 import TopDailyPlaylists from "@/components/TopDailyPlaylists";
-import ShelfCarousel from "@/components/ShelfCarousel";
 import UserShelves from "@/components/UserShelves";
 import GalaxyVisualizer from "@/components/GalaxyVisualizer";
 import NowPlayingView from "@/components/NowPlayingView";
@@ -40,6 +41,7 @@ const FALLBACK_VINYL =
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<NavTab>("home");
+  const [libraryFilter, setLibraryFilter] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [searchRadioQueue, setSearchRadioQueue] = useState<Song[]>([]);
@@ -185,12 +187,13 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-[#F0F0F2] flex flex-col selection:bg-[#D2FF1F] selection:text-black relative">
+    <>
       {/* 1. Mandatory First-Load Onboarding Modal */}
       <OnboardingModal />
 
-      {/* Main Content Pane */}
-      <main className="flex-1 pb-44">
+      {/* Main Mobile App Pane */}
+      <main className="flex-1 w-full pb-36 flex flex-col">
+        {/* TAB 1: HOME */}
         {activeTab === "home" && (
           <>
             {/* Header with Circular User Avatar & Greeting */}
@@ -212,34 +215,34 @@ export default function Home() {
 
             {/* A. Search Active View */}
             {isSearchActive ? (
-              <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 gpu-layer">
-                <div className="flex items-center justify-between mb-4">
+              <div className="w-full px-4 py-4 gpu-layer">
+                <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="text-[10px] font-mono font-bold text-[#D2FF1F] tracking-widest uppercase">
+                    <p className="text-[9px] font-mono font-bold text-[#D4FF00] tracking-widest uppercase">
                       CATALOG RESULTS
                     </p>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white mt-0.5">
+                    <h2 className="text-base font-bold text-white mt-0.5">
                       Results for &ldquo;{searchQuery}&rdquo;
                     </h2>
                   </div>
                   {searchResults.length > 0 && (
-                    <span className="text-xs font-mono text-neutral-400">
+                    <span className="text-[10px] font-mono text-gray-400">
                       {searchResults.length} tracks
                     </span>
                   )}
                 </div>
 
                 {isSearching && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 animate-pulse">
-                    {Array.from({ length: 6 }).map((_, i) => (
+                  <div className="flex flex-col gap-2.5 animate-pulse">
+                    {Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className="flex items-center space-x-3.5 p-3 rounded-2xl bg-white/[0.03] border border-white/5"
+                        className="flex items-center space-x-3 p-2.5 rounded-2xl bg-white/[0.03] border border-white/5"
                       >
-                        <div className="w-14 h-14 rounded-xl bg-neutral-800 flex-shrink-0" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-4 bg-neutral-800 rounded w-3/4" />
-                          <div className="h-3 bg-neutral-800/60 rounded w-1/2" />
+                        <div className="w-12 h-12 rounded-full bg-neutral-800 flex-shrink-0" />
+                        <div className="flex-1 space-y-1.5">
+                          <div className="h-3.5 bg-neutral-800 rounded w-3/4" />
+                          <div className="h-2.5 bg-neutral-800/60 rounded w-1/2" />
                         </div>
                       </div>
                     ))}
@@ -247,131 +250,113 @@ export default function Home() {
                 )}
 
                 {!isSearching && searchResults.length === 0 && (
-                  <div className="text-center py-20 flex flex-col items-center justify-center bg-white/[0.02] border border-white/10 rounded-3xl p-8 max-w-md mx-auto my-8">
-                    <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                      <SearchX className="w-8 h-8 text-[#D2FF1F]" />
+                  <div className="text-center py-16 flex flex-col items-center justify-center bg-white/[0.02] border border-white/10 rounded-3xl p-6 mx-2 my-6">
+                    <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+                      <SearchX className="w-6 h-6 text-[#D4FF00]" />
                     </div>
-                    <h3 className="text-lg font-bold text-white">No tracks located</h3>
-                    <p className="text-xs text-neutral-400 font-medium mt-1">
-                      Try searching for artist names, titles, or subgenres like &ldquo;phonk&rdquo; or &ldquo;punjabi&rdquo;.
+                    <h3 className="text-sm font-bold text-white">No tracks located</h3>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Try searching for artist names, titles, or phonk.
                     </p>
                   </div>
                 )}
 
                 {!isSearching && searchResults.length > 0 && (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
-                      {searchResults.map((song) => {
-                        const isCurrent = currentTrack?.id === song.id;
-                        return (
-                          <div
-                            key={song.id}
-                            onClick={() => playSong(song, searchResults)}
-                            className={`group relative p-3 flex items-center cursor-pointer rounded-2xl transition-all duration-200 ${
-                              isCurrent
-                                ? "bg-white/10 border border-[#D2FF1F]/50 shadow-lg shadow-[#D2FF1F]/10"
-                                : "bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06]"
-                            }`}
-                          >
-                            <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                  <div className="flex flex-col gap-2.5">
+                    {searchResults.map((song) => {
+                      const isCurrent = currentTrack?.id === song.id;
+                      return (
+                        <div
+                          key={song.id}
+                          onClick={() => playSong(song, searchResults)}
+                          className={`flex items-center justify-between p-2 rounded-2xl transition cursor-pointer select-none ${
+                            isCurrent
+                              ? "bg-white/10 border border-[#D4FF00]/40 shadow-sm"
+                              : "hover:bg-white/5 border border-transparent"
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3 min-w-0 flex-1">
+                            <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/10 shadow-sm">
                               <img
                                 src={song.imageUrl || FALLBACK_VINYL}
                                 alt={song.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                onError={(e) => {
-                                  (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
-                                }}
+                                className="w-full h-full object-cover"
                               />
-                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Play className="w-5 h-5 fill-white text-white ml-0.5" />
-                              </div>
                             </div>
-
-                            <div className="ml-3.5 min-w-0 flex-1 pr-2">
+                            <div className="min-w-0 flex-1 pr-2">
                               <h4
-                                className={`text-sm font-semibold truncate leading-tight ${
-                                  isCurrent ? "text-[#D2FF1F]" : "text-white"
+                                className={`text-xs font-semibold truncate ${
+                                  isCurrent ? "text-[#D4FF00]" : "text-white"
                                 }`}
                               >
                                 {song.name}
                               </h4>
-                              <p className="text-xs text-neutral-400 truncate mt-0.5">
+                              <p className="text-[10px] text-gray-400 truncate mt-0.5">
                                 {song.primaryArtists}
                               </p>
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-
-                    {searchRadioQueue.length > 0 && (
-                      <div className="mt-8">
-                        <ShelfCarousel
-                          title="Related Radio Stream"
-                          subtitle="CONTINUOUS AUTOPLAY"
-                          songs={searchRadioQueue}
-                        />
-                      </div>
-                    )}
-                  </>
+                          <div className="w-[30px] h-[30px] rounded-full bg-white/10 hover:bg-[#D4FF00] hover:text-black text-white flex items-center justify-center flex-shrink-0">
+                            <Play className="w-3.5 h-3.5 fill-current stroke-current ml-0.5" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             ) : isFavoritesActive ? (
               /* B. Favorites View */
-              <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 gpu-layer">
-                <div className="flex items-center justify-between mb-4">
+              <div className="w-full px-4 py-4 gpu-layer">
+                <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="text-[10px] font-mono font-bold text-[#D2FF1F] tracking-widest uppercase">
-                      OFFLINE COLLECTION
+                    <p className="text-[9px] font-mono font-bold text-[#D4FF00] tracking-widest uppercase">
+                      OFFLINE VAULT
                     </p>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white mt-0.5">
+                    <h2 className="text-base font-bold text-white mt-0.5">
                       Vault Favourites
                     </h2>
                   </div>
-                  <span className="text-xs font-mono text-neutral-400">
+                  <span className="text-[10px] font-mono text-gray-400">
                     {favoriteSongs.length} tracks
                   </span>
                 </div>
 
                 {favoriteSongs.length === 0 ? (
-                  <div className="text-center py-20 flex flex-col items-center justify-center bg-white/[0.02] border border-white/10 rounded-3xl p-8 max-w-md mx-auto my-8">
-                    <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                      <Heart className="w-8 h-8 text-[#D2FF1F]" />
+                  <div className="text-center py-16 flex flex-col items-center justify-center bg-white/[0.02] border border-white/10 rounded-3xl p-6 mx-2 my-6">
+                    <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+                      <Heart className="w-6 h-6 text-[#D4FF00]" />
                     </div>
-                    <h3 className="text-lg font-bold text-white">Vault is empty</h3>
-                    <p className="text-xs text-neutral-400 font-medium mt-1">
-                      Tap the heart icon on any song to store it in your Favorites collection.
+                    <h3 className="text-sm font-bold text-white">Vault is empty</h3>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Tap the heart icon on any song to save it here.
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                  <div className="flex flex-col gap-2.5">
                     {favoriteSongs.map((song) => (
                       <div
                         key={song.id}
                         onClick={() => playSong(song, favoriteSongs)}
-                        className="group relative bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] p-3 flex items-center cursor-pointer rounded-2xl transition"
+                        className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/5 transition cursor-pointer select-none"
                       >
-                        <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                        <div className="flex items-center space-x-3 min-w-0 flex-1">
                           <img
                             src={song.imageUrl || FALLBACK_VINYL}
                             alt={song.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
-                            }}
+                            className="w-12 h-12 rounded-full object-cover bg-neutral-900 border border-white/10"
                           />
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                          <div className="min-w-0 flex-1 pr-2">
+                            <h4 className="text-xs font-semibold text-white truncate">
+                              {song.name}
+                            </h4>
+                            <p className="text-[10px] text-gray-400 truncate mt-0.5">
+                              {song.primaryArtists}
+                            </p>
                           </div>
                         </div>
-
-                        <div className="ml-3.5 min-w-0 flex-1 pr-2">
-                          <h4 className="text-sm font-semibold text-white truncate leading-tight">
-                            {song.name}
-                          </h4>
-                          <p className="text-xs text-neutral-400 truncate mt-0.5">
-                            {song.primaryArtists}
-                          </p>
+                        <div className="w-[30px] h-[30px] rounded-full bg-white/10 hover:bg-[#D4FF00] hover:text-black text-white flex items-center justify-center flex-shrink-0">
+                          <Play className="w-3.5 h-3.5 fill-current stroke-current ml-0.5" />
                         </div>
                       </div>
                     ))}
@@ -380,62 +365,53 @@ export default function Home() {
               </div>
             ) : isCategoryActive ? (
               /* C. Category Filter View */
-              <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 gpu-layer">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-[10px] font-mono font-bold text-[#D2FF1F] tracking-widest uppercase">
-                      CURATED FEED
-                    </p>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white mt-0.5">
-                      {activeCategory} Feed
-                    </h2>
-                  </div>
+              <div className="w-full px-4 py-4 gpu-layer">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-base font-bold text-white">
+                    {activeCategory} Feed
+                  </h2>
                 </div>
 
                 {loadingCategory ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 animate-pulse">
-                    {Array.from({ length: 6 }).map((_, i) => (
+                  <div className="flex flex-col gap-2.5 animate-pulse">
+                    {Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className="flex items-center space-x-3.5 p-3 rounded-2xl bg-white/[0.03] border border-white/5"
+                        className="flex items-center space-x-3 p-2.5 rounded-2xl bg-white/[0.03] border border-white/5"
                       >
-                        <div className="w-14 h-14 rounded-xl bg-neutral-800" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-4 bg-neutral-800 rounded w-3/4" />
-                          <div className="h-3 bg-neutral-800/60 rounded w-1/2" />
+                        <div className="w-12 h-12 rounded-full bg-neutral-800" />
+                        <div className="flex-1 space-y-1.5">
+                          <div className="h-3.5 bg-neutral-800 rounded w-3/4" />
+                          <div className="h-2.5 bg-neutral-800/60 rounded w-1/2" />
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                  <div className="flex flex-col gap-2.5">
                     {categoryFeed.map((song) => (
                       <div
                         key={song.id}
                         onClick={() => playSong(song, categoryFeed)}
-                        className="group relative bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] p-3 flex items-center cursor-pointer rounded-2xl transition"
+                        className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/5 transition cursor-pointer select-none"
                       >
-                        <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                        <div className="flex items-center space-x-3 min-w-0 flex-1">
                           <img
                             src={song.imageUrl || FALLBACK_VINYL}
                             alt={song.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
-                            }}
+                            className="w-12 h-12 rounded-full object-cover bg-neutral-900 border border-white/10"
                           />
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                          <div className="min-w-0 flex-1 pr-2">
+                            <h4 className="text-xs font-semibold text-white truncate">
+                              {song.name}
+                            </h4>
+                            <p className="text-[10px] text-gray-400 truncate mt-0.5">
+                              {song.primaryArtists}
+                            </p>
                           </div>
                         </div>
-
-                        <div className="ml-3.5 min-w-0 flex-1 pr-2">
-                          <h4 className="text-sm font-semibold text-white truncate leading-tight">
-                            {song.name}
-                          </h4>
-                          <p className="text-xs text-neutral-400 truncate mt-0.5">
-                            {song.primaryArtists}
-                          </p>
+                        <div className="w-[30px] h-[30px] rounded-full bg-white/10 hover:bg-[#D4FF00] hover:text-black text-white flex items-center justify-center flex-shrink-0">
+                          <Play className="w-3.5 h-3.5 fill-current stroke-current ml-0.5" />
                         </div>
                       </div>
                     ))}
@@ -443,35 +419,21 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              /* D. Standard Home Page Experience (Matching Reference 1) */
+              /* D. Standard Home Page Experience (Reference 1 exact layout) */
               <>
-                {/* 1. Curated & Trending Hero Card */}
+                {/* 1. Curated & Trending Hero Card (Reference 1: h-48 rounded-[28px]) */}
                 <HeroVisualizer
                   featuredTrack={shelves.heroTrending[0] || null}
                   onPlay={(track) => playSong(track, shelves.heroTrending)}
                 />
 
-                {/* 2. Top Daily Playlists & Track Rows */}
+                {/* 2. Top Daily Playlists (Reference 1: round art, 30px play button) */}
                 <TopDailyPlaylists
                   songs={shelves.quickPicks.length > 0 ? shelves.quickPicks : shelves.heroTrending}
-                  onSeeAll={() => handleCategorySelect("Top Hits")}
+                  onSeeAll={() => handleCategorySelect("Top")}
                 />
 
-                {/* 3. Global Velocity Trends Carousel */}
-                <ShelfCarousel
-                  title="Global Velocity Trends"
-                  subtitle="LOSSLESS 320 KBPS"
-                  songs={shelves.heroTrending}
-                />
-
-                {/* 4. Cyber Phonk & Bass Carousel */}
-                <ShelfCarousel
-                  title="Cyber Phonk & Bassline"
-                  subtitle="HIGH-BPM DRIFT"
-                  songs={shelves.gymPhonk}
-                />
-
-                {/* 5. Personal Activity Decks (Heavy Rotation, Vault, Rewind) */}
+                {/* 3. Personal Activity Decks */}
                 <UserShelves
                   onSelectSearchQuery={(query) => setSearchQuery(query)}
                 />
@@ -480,170 +442,170 @@ export default function Home() {
           </>
         )}
 
-        {/* Tab 2: Interactive Music Constellation Galaxy Discovery */}
+        {/* TAB 2: INTERACTIVE MUSIC GALAXY / CONSTELLATION NODE GRAPH (Reference 2) */}
         {activeTab === "galaxy" && (
-          <div className="px-3 sm:px-6 md:px-8 pt-4">
+          <div className="w-full px-4 pt-4">
             <GalaxyVisualizer />
           </div>
         )}
 
-        {/* Tab 3: My Library */}
+        {/* TAB 3: MY MUSIC / LIBRARY (Reference 3 Screen 3) */}
         {activeTab === "library" && (
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 pt-6 gpu-layer">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 rounded-2xl bg-[#D2FF1F]/10 border border-[#D2FF1F]/30 flex items-center justify-center text-[#D2FF1F]">
-                <Music2 className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">
-                  My Library
-                </h2>
-                <p className="text-xs text-neutral-400">
-                  {likedSongs.length} saved songs • {recentlyPlayed.length} in history
-                </p>
+          <div className="w-full px-4 pt-5 gpu-layer">
+            {/* Header: Back arrow, "My Music", Three dots */}
+            <div className="flex items-center justify-between pb-3">
+              <button
+                onClick={() => setActiveTab("home")}
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <h2 className="text-base font-bold text-white tracking-tight">
+                My Music
+              </h2>
+              <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white cursor-pointer">
+                <MoreVertical className="w-4 h-4" />
               </div>
             </div>
 
-            {/* Saved Songs List */}
-            <div className="mb-8">
-              <h3 className="text-sm font-mono font-bold text-neutral-300 uppercase tracking-wider mb-3">
-                Liked Songs ({likedSongs.length})
-              </h3>
-              {likedSongs.length === 0 ? (
-                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 text-center text-xs text-neutral-400">
-                  No liked songs yet. Heart your favorite tracks to save them here.
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {likedSongs.map((song) => (
-                    <div
-                      key={`lib-liked-${song.id}`}
-                      onClick={() => playSong(song, likedSongs)}
-                      className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] cursor-pointer transition"
-                    >
-                      <div className="flex items-center space-x-3 min-w-0 flex-1">
-                        <img
-                          src={song.imageUrl || FALLBACK_VINYL}
-                          alt={song.name}
-                          className="w-11 h-11 rounded-xl object-cover bg-neutral-900"
-                        />
-                        <div className="min-w-0 truncate">
-                          <p className="text-sm font-semibold text-white truncate">{song.name}</p>
-                          <p className="text-xs text-neutral-400 truncate">{song.primaryArtists}</p>
-                        </div>
-                      </div>
-                      <Play className="w-4 h-4 text-[#D2FF1F]" />
-                    </div>
-                  ))}
-                </div>
-              )}
+            {/* Filter Pills matching Reference 3 Screen 3: "All", "Playlists", "Liked Songs", "Downloads" */}
+            <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-2">
+              {["All", "Playlists", "Liked Songs", "Downloads"].map((item) => {
+                const isSelected = libraryFilter === item;
+                return (
+                  <button
+                    key={item}
+                    onClick={() => setLibraryFilter(item)}
+                    className={`whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                      isSelected
+                        ? "px-5 py-2 rounded-full text-xs font-bold bg-[#D4FF00] text-black shadow-md shadow-[#D4FF00]/25"
+                        : "px-4 py-2 rounded-full text-xs font-medium bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10"
+                    }`}
+                  >
+                    {item}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Recently Played */}
-            <div>
-              <h3 className="text-sm font-mono font-bold text-neutral-300 uppercase tracking-wider mb-3">
-                Recently Streamed
-              </h3>
-              <div className="space-y-2">
-                {recentlyPlayed.slice(0, 10).map((song, i) => (
+            {/* Track List rows matching Reference 3 Screen 3 */}
+            <div className="flex flex-col gap-2.5 mt-3">
+              {(libraryFilter === "Liked Songs"
+                ? likedSongs
+                : libraryFilter === "Playlists"
+                ? shelves.speedDial
+                : [...likedSongs, ...shelves.heroTrending]
+              )
+                .slice(0, 8)
+                .map((song, idx) => (
                   <div
-                    key={`lib-rec-${song.id}-${i}`}
-                    onClick={() => playSong(song, recentlyPlayed)}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] cursor-pointer transition"
+                    key={`lib-item-${song.id}-${idx}`}
+                    onClick={() => playSong(song)}
+                    className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/5 transition cursor-pointer select-none"
                   >
                     <div className="flex items-center space-x-3 min-w-0 flex-1">
                       <img
                         src={song.imageUrl || FALLBACK_VINYL}
                         alt={song.name}
-                        className="w-11 h-11 rounded-xl object-cover bg-neutral-900"
+                        className="w-12 h-12 rounded-full object-cover bg-neutral-900 border border-white/10 shadow-sm"
                       />
-                      <div className="min-w-0 truncate">
-                        <p className="text-sm font-semibold text-white truncate">{song.name}</p>
-                        <p className="text-xs text-neutral-400 truncate">{song.primaryArtists}</p>
+                      <div className="min-w-0 flex-1 pr-2">
+                        <h4 className="text-xs font-semibold text-white truncate">
+                          {song.name}
+                        </h4>
+                        <p className="text-[10px] text-gray-400 truncate mt-0.5">
+                          By {song.primaryArtists || "Alexiao"} • {((idx * 7 + 8) % 24) + 8} Songs
+                        </p>
                       </div>
                     </div>
-                    <RotateCcw className="w-4 h-4 text-neutral-400 hover:text-white" />
+                    <div className="w-[30px] h-[30px] rounded-full bg-white/10 hover:bg-[#D4FF00] hover:text-black text-white flex items-center justify-center flex-shrink-0">
+                      <Play className="w-3.5 h-3.5 fill-current stroke-current ml-0.5" />
+                    </div>
                   </div>
                 ))}
-              </div>
             </div>
           </div>
         )}
 
-        {/* Tab 4: Profile & Creator Attribution */}
+        {/* TAB 4: PROFILE (Reference 2 Screen 2 - Oliver Bennet Glass Style) */}
         {activeTab === "profile" && (
-          <div className="max-w-md mx-auto px-4 pt-6 gpu-layer text-center flex flex-col items-center">
-            {/* Avatar */}
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-[#D2FF1F] shadow-[0_0_30px_rgba(210,255,31,0.3)] mb-4 bg-neutral-900">
-              <img
-                src="/creator.jpg"
-                alt={userName || "User"}
-                className="w-full h-full object-cover"
-              />
-            </div>
+          <div className="w-full px-4 pt-6 gpu-layer text-center flex flex-col items-center">
+            {/* 3D Glass Profile Card */}
+            <div className="w-full bg-[#14141B] border border-white/10 rounded-[28px] p-6 shadow-2xl relative overflow-hidden text-left">
+              {/* Soft Ambient Radiance */}
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#D4FF00]/10 rounded-full blur-2xl pointer-events-none" />
 
-            <div className="flex items-center justify-center space-x-1.5 mb-1">
-              <h2 className="text-2xl font-bold text-white tracking-tight">
-                {userName || "Guest Listener"}
+              {/* Avatar + Handle */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#D4FF00] shadow-md bg-neutral-900">
+                  <img
+                    src="/creator.jpg"
+                    alt={userName || "Samantha"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <button
+                  onClick={() => resetOnboarding()}
+                  className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 text-xs text-white font-medium cursor-pointer"
+                >
+                  Edit Profile
+                </button>
+              </div>
+
+              <h2 className="text-xl font-bold text-white tracking-tight">
+                {userName || "Samantha"}
               </h2>
-              <CheckCircle2 className="w-5 h-5 text-[#D2FF1F]" />
+              <p className="text-xs text-gray-400 mt-0.5">
+                @{userName ? userName.toLowerCase().replace(/\s+/g, "_") : "samantha_music"}
+              </p>
+              <p className="text-xs text-gray-300 mt-2.5 leading-relaxed">
+                Audiophile exploring high-fidelity slow instrumental playlists &amp; visual soundscapes.
+              </p>
+
+              {/* Stats Row matching Reference 2 Screen 2 */}
+              <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/10 text-center">
+                <div>
+                  <p className="text-base font-bold text-white">521</p>
+                  <p className="text-[10px] text-gray-400">Followers</p>
+                </div>
+                <div>
+                  <p className="text-base font-bold text-white">345</p>
+                  <p className="text-[10px] text-gray-400">Following</p>
+                </div>
+                <div>
+                  <p className="text-base font-bold text-white">{likedSongs.length}</p>
+                  <p className="text-[10px] text-gray-400">Liked Songs</p>
+                </div>
+              </div>
             </div>
 
-            <p className="text-xs font-mono font-semibold text-[#D2FF1F] uppercase tracking-wider mb-4">
-              Age: {userAge || "21"} • RhythmX VIP Member
-            </p>
-
-            <div className="w-full p-4 rounded-2xl bg-white/[0.03] border border-white/10 mb-6 text-left space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-neutral-400">Audio Engine:</span>
-                <span className="text-white font-mono font-bold">HTML5 Singleton (320kbps)</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-neutral-400">Discovery Mode:</span>
-                <span className="text-[#D2FF1F] font-mono font-bold">Organic Constellation Graph</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-neutral-400">Background Playback:</span>
-                <span className="text-white font-mono font-bold">Android MediaSession Active</span>
-              </div>
-            </div>
-
-            {/* Reset Onboarding Option */}
-            <button
-              onClick={() => resetOnboarding()}
-              className="text-xs text-neutral-400 hover:text-red-400 transition py-2 flex items-center space-x-1.5 cursor-pointer"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Edit Name / Re-trigger Onboarding</span>
-            </button>
-
-            {/* Creator Attribution */}
-            <div className="w-full mt-8 pt-6 border-t border-white/[0.08] flex flex-col items-center">
-              <p className="text-xs text-neutral-400 mb-3">
-                Crafted by <strong>Rishabh Singh</strong> • Lead Systems Architect
+            {/* Creator Attribution & Instagram Connection */}
+            <div className="w-full mt-6 p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-center">
+              <p className="text-xs text-gray-400 mb-2.5">
+                Engineered by <strong>Rishabh Singh</strong> • Lead Mobile Architect
               </p>
               <Link
                 href="https://www.instagram.com/rish4bhsiingh/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 px-5 rounded-2xl bg-[#D2FF1F] hover:bg-[#bceb15] text-black font-extrabold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-[#D2FF1F]/20 active:scale-95"
+                className="w-full py-2.5 px-4 rounded-xl bg-[#D4FF00] hover:bg-[#bceb15] text-black font-bold text-xs flex items-center justify-center space-x-1.5 transition shadow-md shadow-[#D4FF00]/25 active:scale-95"
               >
                 <span>Follow on Instagram (@rish4bhsiingh)</span>
-                <ExternalLink className="w-3.5 h-3.5 ml-1" />
+                <ExternalLink className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
         )}
       </main>
 
-      {/* MiniPlayer: Suspended directly above bottom nav */}
+      {/* MiniPlayer: Fixed floating directly above the bottom nav within the 430px frame */}
       <MiniPlayer />
 
-      {/* Full Immersive Now Playing View (Matching Reference 1 Middle Mockup) */}
+      {/* Now Playing View: Fixed overlay within the 430px frame */}
       <NowPlayingView />
 
-      {/* Floating Bottom Navigation Bar (Home, Galaxy, Library, Profile) */}
+      {/* Floating Bottom Nav: Anchored within the 430px frame */}
       <BottomNav activeTab={activeTab} onSelectTab={setActiveTab} />
-    </div>
+    </>
   );
 }
