@@ -6,34 +6,40 @@ import {
   Sparkles,
   ExternalLink,
   Play,
-  CheckCircle2,
-  SearchX,
-  Radio,
-  Flame,
-  Zap,
   Heart,
-  Disc3,
-  Cpu,
+  SearchX,
+  Compass,
+  CheckCircle2,
+  Trash2,
+  RotateCcw,
+  User,
+  Music2,
 } from "lucide-react";
 import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
 import HeroVisualizer from "@/components/HeroVisualizer";
-import UserShelves from "@/components/UserShelves";
+import TopDailyPlaylists from "@/components/TopDailyPlaylists";
 import ShelfCarousel from "@/components/ShelfCarousel";
+import UserShelves from "@/components/UserShelves";
+import GalaxyVisualizer from "@/components/GalaxyVisualizer";
+import NowPlayingView from "@/components/NowPlayingView";
 import MiniPlayer from "@/components/MiniPlayer";
-import FullPlayerModal from "@/components/FullPlayerModal";
+import BottomNav, { NavTab } from "@/components/BottomNav";
+import OnboardingModal from "@/components/OnboardingModal";
+import { useUserStore } from "@/store/userStore";
+import { usePlayerStore } from "@/store/playerStore";
 import {
   searchSongsWithRadio,
   getHomeShelves,
   getCategoryFeed,
 } from "@/services/api";
 import { Song } from "@/types/music";
-import { usePlayerStore } from "@/store/playerStore";
 
 const FALLBACK_VINYL =
   "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<NavTab>("home");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [searchRadioQueue, setSearchRadioQueue] = useState<Song[]>([]);
@@ -44,10 +50,17 @@ export default function Home() {
   const [loadingCategory, setLoadingCategory] = useState(false);
 
   const searchReqIdRef = useRef<number>(0);
-  const { playSong, currentTrack, likedSongIds, likedSongs, recordSearchQuery } =
-    usePlayerStore();
+  const { userName, userAge, resetOnboarding } = useUserStore();
+  const {
+    playSong,
+    currentTrack,
+    likedSongIds,
+    likedSongs,
+    recentlyPlayed,
+    recordSearchQuery,
+  } = usePlayerStore();
 
-  // RhythmX Crimson-Void Home Shelves
+  // Home shelves state
   const [shelves, setShelves] = useState<{
     heroTrending: Song[];
     speedDial: Song[];
@@ -64,7 +77,7 @@ export default function Home() {
 
   const [loadingShelves, setLoadingShelves] = useState(true);
 
-  // Load home shelves on mount
+  // Fetch initial curated shelves
   useEffect(() => {
     let active = true;
 
@@ -76,7 +89,7 @@ export default function Home() {
           setShelves(data);
         }
       } catch (err) {
-        console.error("Failed to load RhythmX Crimson-Void shelves:", err);
+        console.error("Failed to load shelves:", err);
       } finally {
         if (active) setLoadingShelves(false);
       }
@@ -114,7 +127,7 @@ export default function Home() {
     }
   };
 
-  // 250ms Debounced Fast Search Engine to Prevent UI Thread Lockups
+  // Debounced search engine
   useEffect(() => {
     const trimmed = searchQuery.trim();
 
@@ -158,7 +171,7 @@ export default function Home() {
   const isCategoryActive =
     activeCategory && activeCategory !== "All" && !isFavoritesActive;
 
-  // Saved favorites
+  // Deduplicated liked songs list
   const allKnownSongs = [
     ...(likedSongs || []),
     ...(shelves.heroTrending || []),
@@ -172,355 +185,465 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-[#08080A] text-[#F0F0F2] flex flex-col selection:bg-[#E10600] selection:text-white relative">
-      {/* Subtle Burgundy Ambient Background Light */}
-      <div className="fixed top-0 right-1/4 w-96 h-96 bg-[#4A0000]/10 rounded-full blur-[120px] pointer-events-none -z-10" />
+    <div className="min-h-screen bg-[#0A0A0C] text-[#F0F0F2] flex flex-col selection:bg-[#D2FF1F] selection:text-black relative">
+      {/* 1. Mandatory First-Load Onboarding Modal */}
+      <OnboardingModal />
 
-      {/* 1. Header & Command Search Deck */}
-      <Header
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        isSearching={isSearching}
-      />
+      {/* Main Content Pane */}
+      <main className="flex-1 pb-44">
+        {activeTab === "home" && (
+          <>
+            {/* Header with Circular User Avatar & Greeting */}
+            <Header
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              isSearching={isSearching}
+              onOpenFavorites={() => handleCategorySelect("Favorites")}
+              onOpenProfile={() => setActiveTab("profile")}
+            />
 
-      {/* 2. Tactile Mood & Subgenre Pills */}
-      {!isSearchActive && (
-        <CategoryChips
-          activeCategory={activeCategory}
-          onSelectCategory={handleCategorySelect}
-        />
-      )}
+            {/* Pill Filter Chips Bar */}
+            {!isSearchActive && (
+              <CategoryChips
+                activeCategory={activeCategory}
+                onSelectCategory={handleCategorySelect}
+              />
+            )}
 
-      {/* Main Content Area */}
-      <main className="flex-1 pb-36">
-        {/* ================================================================ */}
-        {/* SEARCH ACTIVE VIEW: HIGH-VELOCITY RESULTS GRID                   */}
-        {/* ================================================================ */}
-        {isSearchActive ? (
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 gpu-layer">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-[10px] font-mono font-bold text-[#E10600] tracking-widest uppercase">
-                  CATALOG SEARCH RESULTS
-                </p>
-                <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">
-                  Results for &ldquo;{searchQuery}&rdquo;
-                </h1>
-              </div>
-              {searchResults.length > 0 && (
-                <span className="text-xs font-mono text-[#8A8A93]">
-                  {searchResults.length} tracks found
-                </span>
-              )}
-            </div>
-
-            {/* Skeleton Pulse Loader */}
-            {isSearching && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 animate-pulse">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center space-x-3.5 p-3 rounded-xl m-card bg-[#111116]"
-                  >
-                    <div className="w-14 h-14 rounded-lg bg-neutral-800 flex-shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-neutral-800 rounded w-3/4" />
-                      <div className="h-3 bg-neutral-800/60 rounded w-1/2" />
-                    </div>
+            {/* A. Search Active View */}
+            {isSearchActive ? (
+              <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 gpu-layer">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-[10px] font-mono font-bold text-[#D2FF1F] tracking-widest uppercase">
+                      CATALOG RESULTS
+                    </p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mt-0.5">
+                      Results for &ldquo;{searchQuery}&rdquo;
+                    </h2>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Empty Search State */}
-            {!isSearching && searchResults.length === 0 && (
-              <div className="text-center py-20 flex flex-col items-center justify-center m-card bg-[#111116] rounded-2xl p-8 max-w-md mx-auto my-10">
-                <div className="w-16 h-16 rounded-full bg-[#16161C] border border-white/10 flex items-center justify-center mb-4">
-                  <SearchX className="w-8 h-8 text-[#E10600]" />
+                  {searchResults.length > 0 && (
+                    <span className="text-xs font-mono text-neutral-400">
+                      {searchResults.length} tracks
+                    </span>
+                  )}
                 </div>
-                <h3 className="text-lg font-black text-white">No tracks located</h3>
-                <p className="text-xs text-[#8A8A93] font-medium mt-1">
-                  Try searching for artist names, titles, or genres like &ldquo;phonk&rdquo; or &ldquo;punjabi&rdquo;.
-                </p>
-              </div>
-            )}
 
-            {/* Search Results Grid */}
-            {!isSearching && searchResults.length > 0 && (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
-                  {searchResults.map((song) => {
-                    const isCurrent = currentTrack?.id === song.id;
-                    return (
+                {isSearching && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 animate-pulse">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center space-x-3.5 p-3 rounded-2xl bg-white/[0.03] border border-white/5"
+                      >
+                        <div className="w-14 h-14 rounded-xl bg-neutral-800 flex-shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-neutral-800 rounded w-3/4" />
+                          <div className="h-3 bg-neutral-800/60 rounded w-1/2" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {!isSearching && searchResults.length === 0 && (
+                  <div className="text-center py-20 flex flex-col items-center justify-center bg-white/[0.02] border border-white/10 rounded-3xl p-8 max-w-md mx-auto my-8">
+                    <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+                      <SearchX className="w-8 h-8 text-[#D2FF1F]" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white">No tracks located</h3>
+                    <p className="text-xs text-neutral-400 font-medium mt-1">
+                      Try searching for artist names, titles, or subgenres like &ldquo;phonk&rdquo; or &ldquo;punjabi&rdquo;.
+                    </p>
+                  </div>
+                )}
+
+                {!isSearching && searchResults.length > 0 && (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                      {searchResults.map((song) => {
+                        const isCurrent = currentTrack?.id === song.id;
+                        return (
+                          <div
+                            key={song.id}
+                            onClick={() => playSong(song, searchResults)}
+                            className={`group relative p-3 flex items-center cursor-pointer rounded-2xl transition-all duration-200 ${
+                              isCurrent
+                                ? "bg-white/10 border border-[#D2FF1F]/50 shadow-lg shadow-[#D2FF1F]/10"
+                                : "bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06]"
+                            }`}
+                          >
+                            <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                              <img
+                                src={song.imageUrl || FALLBACK_VINYL}
+                                alt={song.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                              </div>
+                            </div>
+
+                            <div className="ml-3.5 min-w-0 flex-1 pr-2">
+                              <h4
+                                className={`text-sm font-semibold truncate leading-tight ${
+                                  isCurrent ? "text-[#D2FF1F]" : "text-white"
+                                }`}
+                              >
+                                {song.name}
+                              </h4>
+                              <p className="text-xs text-neutral-400 truncate mt-0.5">
+                                {song.primaryArtists}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {searchRadioQueue.length > 0 && (
+                      <div className="mt-8">
+                        <ShelfCarousel
+                          title="Related Radio Stream"
+                          subtitle="CONTINUOUS AUTOPLAY"
+                          songs={searchRadioQueue}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ) : isFavoritesActive ? (
+              /* B. Favorites View */
+              <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 gpu-layer">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-[10px] font-mono font-bold text-[#D2FF1F] tracking-widest uppercase">
+                      OFFLINE COLLECTION
+                    </p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mt-0.5">
+                      Vault Favourites
+                    </h2>
+                  </div>
+                  <span className="text-xs font-mono text-neutral-400">
+                    {favoriteSongs.length} tracks
+                  </span>
+                </div>
+
+                {favoriteSongs.length === 0 ? (
+                  <div className="text-center py-20 flex flex-col items-center justify-center bg-white/[0.02] border border-white/10 rounded-3xl p-8 max-w-md mx-auto my-8">
+                    <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+                      <Heart className="w-8 h-8 text-[#D2FF1F]" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white">Vault is empty</h3>
+                    <p className="text-xs text-neutral-400 font-medium mt-1">
+                      Tap the heart icon on any song to store it in your Favorites collection.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                    {favoriteSongs.map((song) => (
                       <div
                         key={song.id}
-                        onClick={() => playSong(song, searchResults)}
-                        className={`group relative m-card p-3 flex items-center cursor-pointer rounded-xl transition-all duration-200 ${
-                          isCurrent
-                            ? "border-[#E10600] shadow-[0_4px_20px_rgba(225,6,0,0.35)] bg-[#16161C]"
-                            : ""
-                        }`}
+                        onClick={() => playSong(song, favoriteSongs)}
+                        className="group relative bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] p-3 flex items-center cursor-pointer rounded-2xl transition"
                       >
-                        <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-[#08080A] shadow">
+                        <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
                           <img
                             src={song.imageUrl || FALLBACK_VINYL}
                             alt={song.name}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            className="w-full h-full object-cover"
                             onError={(e) => {
                               (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
                             }}
                           />
-                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <Play className="w-5 h-5 fill-white text-white ml-0.5" />
                           </div>
                         </div>
 
                         <div className="ml-3.5 min-w-0 flex-1 pr-2">
-                          <h4
-                            className={`text-sm font-bold truncate leading-tight ${
-                              isCurrent ? "text-[#E10600]" : "text-white"
-                            }`}
-                          >
+                          <h4 className="text-sm font-semibold text-white truncate leading-tight">
                             {song.name}
                           </h4>
-                          <p className="text-xs text-[#8A8A93] truncate mt-0.5 font-medium">
+                          <p className="text-xs text-neutral-400 truncate mt-0.5">
                             {song.primaryArtists}
-                          </p>
-                          <p className="text-[10px] text-neutral-500 font-mono truncate">
-                            {song.album || "Single"}
                           </p>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-
-                {/* Related Radio Queue */}
-                {searchRadioQueue.length > 0 && (
-                  <div className="mt-10">
-                    <ShelfCarousel
-                      title="Related Radio Stream"
-                      subtitle="CONTINUOUS AUTOPLAY QUEUE"
-                      songs={searchRadioQueue}
-                    />
+                    ))}
                   </div>
                 )}
+              </div>
+            ) : isCategoryActive ? (
+              /* C. Category Filter View */
+              <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 gpu-layer">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-[10px] font-mono font-bold text-[#D2FF1F] tracking-widest uppercase">
+                      CURATED FEED
+                    </p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mt-0.5">
+                      {activeCategory} Feed
+                    </h2>
+                  </div>
+                </div>
+
+                {loadingCategory ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 animate-pulse">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center space-x-3.5 p-3 rounded-2xl bg-white/[0.03] border border-white/5"
+                      >
+                        <div className="w-14 h-14 rounded-xl bg-neutral-800" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-neutral-800 rounded w-3/4" />
+                          <div className="h-3 bg-neutral-800/60 rounded w-1/2" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                    {categoryFeed.map((song) => (
+                      <div
+                        key={song.id}
+                        onClick={() => playSong(song, categoryFeed)}
+                        className="group relative bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] p-3 flex items-center cursor-pointer rounded-2xl transition"
+                      >
+                        <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900 shadow">
+                          <img
+                            src={song.imageUrl || FALLBACK_VINYL}
+                            alt={song.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                          </div>
+                        </div>
+
+                        <div className="ml-3.5 min-w-0 flex-1 pr-2">
+                          <h4 className="text-sm font-semibold text-white truncate leading-tight">
+                            {song.name}
+                          </h4>
+                          <p className="text-xs text-neutral-400 truncate mt-0.5">
+                            {song.primaryArtists}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* D. Standard Home Page Experience (Matching Reference 1) */
+              <>
+                {/* 1. Curated & Trending Hero Card */}
+                <HeroVisualizer
+                  featuredTrack={shelves.heroTrending[0] || null}
+                  onPlay={(track) => playSong(track, shelves.heroTrending)}
+                />
+
+                {/* 2. Top Daily Playlists & Track Rows */}
+                <TopDailyPlaylists
+                  songs={shelves.quickPicks.length > 0 ? shelves.quickPicks : shelves.heroTrending}
+                  onSeeAll={() => handleCategorySelect("Top Hits")}
+                />
+
+                {/* 3. Global Velocity Trends Carousel */}
+                <ShelfCarousel
+                  title="Global Velocity Trends"
+                  subtitle="LOSSLESS 320 KBPS"
+                  songs={shelves.heroTrending}
+                />
+
+                {/* 4. Cyber Phonk & Bass Carousel */}
+                <ShelfCarousel
+                  title="Cyber Phonk & Bassline"
+                  subtitle="HIGH-BPM DRIFT"
+                  songs={shelves.gymPhonk}
+                />
+
+                {/* 5. Personal Activity Decks (Heavy Rotation, Vault, Rewind) */}
+                <UserShelves
+                  onSelectSearchQuery={(query) => setSearchQuery(query)}
+                />
               </>
             )}
-          </div>
-        ) : isFavoritesActive ? (
-          /* ================================================================ */
-          /* VAULT FAVOURITES VIEW                                            */
-          /* ================================================================ */
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 gpu-layer">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-[10px] font-mono font-bold text-[#E10600] tracking-widest uppercase">
-                  OFFLINE VAULT
-                </p>
-                <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">
-                  Vault Favourites
-                </h1>
-              </div>
-              <span className="text-xs font-mono text-[#8A8A93]">
-                {favoriteSongs.length} saved songs
-              </span>
-            </div>
-
-            {favoriteSongs.length === 0 ? (
-              <div className="text-center py-20 flex flex-col items-center justify-center m-card bg-[#111116] rounded-2xl p-8 max-w-md mx-auto my-10">
-                <div className="w-16 h-16 rounded-full bg-[#16161C] border border-white/10 flex items-center justify-center mb-4">
-                  <Heart className="w-8 h-8 text-[#E10600]" />
-                </div>
-                <h3 className="text-lg font-black text-white">Vault is empty</h3>
-                <p className="text-xs text-[#8A8A93] font-medium mt-1">
-                  Tap the heart icon on any song to store it in your Crimson Vault.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
-                {favoriteSongs.map((song) => (
-                  <div
-                    key={song.id}
-                    onClick={() => playSong(song, favoriteSongs)}
-                    className="group relative m-card bg-[#111116] p-3 flex items-center cursor-pointer rounded-xl"
-                  >
-                    <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-[#08080A] shadow">
-                      <img
-                        src={song.imageUrl || FALLBACK_VINYL}
-                        alt={song.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Play className="w-5 h-5 fill-white text-white ml-0.5" />
-                      </div>
-                    </div>
-
-                    <div className="ml-3.5 min-w-0 flex-1 pr-2">
-                      <h4 className="text-sm font-bold text-white truncate leading-tight">
-                        {song.name}
-                      </h4>
-                      <p className="text-xs text-[#8A8A93] truncate mt-0.5 font-medium">
-                        {song.primaryArtists}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : isCategoryActive ? (
-          /* ================================================================ */
-          /* CATEGORY FILTERED VIEW: DYNAMIC MOOD BUNDLE                      */
-          /* ================================================================ */
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 gpu-layer">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-[10px] font-mono font-bold text-[#E10600] tracking-widest uppercase">
-                  SUBGENRE SECTOR
-                </p>
-                <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">
-                  {activeCategory} Radio
-                </h1>
-              </div>
-            </div>
-
-            {loadingCategory ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center space-x-3.5 p-3 rounded-xl m-card bg-[#111116]"
-                  >
-                    <div className="w-14 h-14 rounded-lg bg-neutral-800" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-neutral-800 rounded w-3/4" />
-                      <div className="h-3 bg-neutral-800/60 rounded w-1/2" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
-                {categoryFeed.map((song) => (
-                  <div
-                    key={song.id}
-                    onClick={() => playSong(song, categoryFeed)}
-                    className="group relative m-card bg-[#111116] p-3 flex items-center cursor-pointer rounded-xl"
-                  >
-                    <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-[#08080A] shadow">
-                      <img
-                        src={song.imageUrl || FALLBACK_VINYL}
-                        alt={song.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Play className="w-5 h-5 fill-white text-white ml-0.5" />
-                      </div>
-                    </div>
-
-                    <div className="ml-3.5 min-w-0 flex-1 pr-2">
-                      <h4 className="text-sm font-bold text-white truncate leading-tight">
-                        {song.name}
-                      </h4>
-                      <p className="text-xs text-[#8A8A93] truncate mt-0.5 font-medium">
-                        {song.primaryArtists}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          /* ================================================================ */
-          /* BMW M-PERFORMANCE CRIMSON-VOID HOME EXPERIENCE                   */
-          /* HeroVisualizer -> Personal Activity Decks -> Curated Shelves     */
-          /* ================================================================ */
-          <>
-            {/* 3. The BMW M-Performance Track Showcase */}
-            <HeroVisualizer
-              featuredTrack={shelves.heroTrending[0] || null}
-              onPlay={(track) => playSong(track, shelves.heroTrending)}
-            />
-
-            {/* 4. Persistent Personal Activity Decks (Heavy Rotation, Vault, Rewind) */}
-            <UserShelves
-              onSelectSearchQuery={(query) => setSearchQuery(query)}
-            />
-
-            {/* 5. Trending Global Hits Carousel */}
-            <ShelfCarousel
-              title="Global Velocity Trends"
-              subtitle="LOSSLESS 320 KBPS CHARTS"
-              songs={shelves.heroTrending}
-            />
-
-            {/* 6. Cyber Phonk & Bass Carousel */}
-            <ShelfCarousel
-              title="Cyber Phonk & Bassline Drift"
-              subtitle="HIGH-BPM ENERGY"
-              songs={shelves.gymPhonk}
-            />
-
-            {/* 7. Midnight Lo-Fi Sanctuary Carousel */}
-            <ShelfCarousel
-              title="Midnight Lo-Fi Sanctuary"
-              subtitle="SLOWED & REVERB CHILL"
-              songs={shelves.midnightChill}
-            />
-
-            {/* 8. BMW Architecture & Creator Spotlight */}
-            <section className="px-3 sm:px-6 md:px-8 my-10 gpu-layer">
-              <div className="relative m-card bg-[#111116] rounded-2xl overflow-hidden p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_12px_40px_rgba(0,0,0,0.85)]">
-                <div className="flex items-center space-x-4 sm:space-x-5">
-                  <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-xl overflow-hidden border-2 border-[#E10600] shadow-[0_0_16px_rgba(225,6,0,0.35)] flex-shrink-0 bg-neutral-900">
-                    <img
-                      src="/creator.jpg"
-                      alt="Rishabh Singh"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h3 className="text-lg sm:text-xl font-black text-white">
-                        Rishabh Singh
-                      </h3>
-                      <CheckCircle2 className="w-4 h-4 text-[#E10600]" />
-                    </div>
-                    <p className="text-xs font-mono font-bold text-[#E10600] mt-0.5">
-                      Systems Mobile Architect • Founder
-                    </p>
-                    <p className="text-xs text-[#8A8A93] font-medium mt-1 max-w-md">
-                      Pioneered the RhythmX Crimson-Void engine: locked 60fps GPU acceleration, resilient HTML5 audio singletons, and native Android MediaSession integration.
-                    </p>
-                  </div>
-                </div>
-
-                <Link
-                  href="https://www.instagram.com/rish4bhsiingh/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-xl bg-[#E10600] hover:bg-[#C20500] text-white font-bold text-xs flex items-center space-x-2 transition shadow-md shadow-[#E10600]/25 active:scale-95 flex-shrink-0"
-                >
-                  <span>CONNECT ON INSTAGRAM</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </section>
           </>
+        )}
+
+        {/* Tab 2: Interactive Music Constellation Galaxy Discovery */}
+        {activeTab === "galaxy" && (
+          <div className="px-3 sm:px-6 md:px-8 pt-4">
+            <GalaxyVisualizer />
+          </div>
+        )}
+
+        {/* Tab 3: My Library */}
+        {activeTab === "library" && (
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 pt-6 gpu-layer">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-[#D2FF1F]/10 border border-[#D2FF1F]/30 flex items-center justify-center text-[#D2FF1F]">
+                <Music2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-white tracking-tight">
+                  My Library
+                </h2>
+                <p className="text-xs text-neutral-400">
+                  {likedSongs.length} saved songs • {recentlyPlayed.length} in history
+                </p>
+              </div>
+            </div>
+
+            {/* Saved Songs List */}
+            <div className="mb-8">
+              <h3 className="text-sm font-mono font-bold text-neutral-300 uppercase tracking-wider mb-3">
+                Liked Songs ({likedSongs.length})
+              </h3>
+              {likedSongs.length === 0 ? (
+                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 text-center text-xs text-neutral-400">
+                  No liked songs yet. Heart your favorite tracks to save them here.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {likedSongs.map((song) => (
+                    <div
+                      key={`lib-liked-${song.id}`}
+                      onClick={() => playSong(song, likedSongs)}
+                      className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] cursor-pointer transition"
+                    >
+                      <div className="flex items-center space-x-3 min-w-0 flex-1">
+                        <img
+                          src={song.imageUrl || FALLBACK_VINYL}
+                          alt={song.name}
+                          className="w-11 h-11 rounded-xl object-cover bg-neutral-900"
+                        />
+                        <div className="min-w-0 truncate">
+                          <p className="text-sm font-semibold text-white truncate">{song.name}</p>
+                          <p className="text-xs text-neutral-400 truncate">{song.primaryArtists}</p>
+                        </div>
+                      </div>
+                      <Play className="w-4 h-4 text-[#D2FF1F]" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Recently Played */}
+            <div>
+              <h3 className="text-sm font-mono font-bold text-neutral-300 uppercase tracking-wider mb-3">
+                Recently Streamed
+              </h3>
+              <div className="space-y-2">
+                {recentlyPlayed.slice(0, 10).map((song, i) => (
+                  <div
+                    key={`lib-rec-${song.id}-${i}`}
+                    onClick={() => playSong(song, recentlyPlayed)}
+                    className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] cursor-pointer transition"
+                  >
+                    <div className="flex items-center space-x-3 min-w-0 flex-1">
+                      <img
+                        src={song.imageUrl || FALLBACK_VINYL}
+                        alt={song.name}
+                        className="w-11 h-11 rounded-xl object-cover bg-neutral-900"
+                      />
+                      <div className="min-w-0 truncate">
+                        <p className="text-sm font-semibold text-white truncate">{song.name}</p>
+                        <p className="text-xs text-neutral-400 truncate">{song.primaryArtists}</p>
+                      </div>
+                    </div>
+                    <RotateCcw className="w-4 h-4 text-neutral-400 hover:text-white" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: Profile & Creator Attribution */}
+        {activeTab === "profile" && (
+          <div className="max-w-md mx-auto px-4 pt-6 gpu-layer text-center flex flex-col items-center">
+            {/* Avatar */}
+            <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-[#D2FF1F] shadow-[0_0_30px_rgba(210,255,31,0.3)] mb-4 bg-neutral-900">
+              <img
+                src="/creator.jpg"
+                alt={userName || "User"}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="flex items-center justify-center space-x-1.5 mb-1">
+              <h2 className="text-2xl font-bold text-white tracking-tight">
+                {userName || "Guest Listener"}
+              </h2>
+              <CheckCircle2 className="w-5 h-5 text-[#D2FF1F]" />
+            </div>
+
+            <p className="text-xs font-mono font-semibold text-[#D2FF1F] uppercase tracking-wider mb-4">
+              Age: {userAge || "21"} • RhythmX VIP Member
+            </p>
+
+            <div className="w-full p-4 rounded-2xl bg-white/[0.03] border border-white/10 mb-6 text-left space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-neutral-400">Audio Engine:</span>
+                <span className="text-white font-mono font-bold">HTML5 Singleton (320kbps)</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-neutral-400">Discovery Mode:</span>
+                <span className="text-[#D2FF1F] font-mono font-bold">Organic Constellation Graph</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-neutral-400">Background Playback:</span>
+                <span className="text-white font-mono font-bold">Android MediaSession Active</span>
+              </div>
+            </div>
+
+            {/* Reset Onboarding Option */}
+            <button
+              onClick={() => resetOnboarding()}
+              className="text-xs text-neutral-400 hover:text-red-400 transition py-2 flex items-center space-x-1.5 cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Edit Name / Re-trigger Onboarding</span>
+            </button>
+
+            {/* Creator Attribution */}
+            <div className="w-full mt-8 pt-6 border-t border-white/[0.08] flex flex-col items-center">
+              <p className="text-xs text-neutral-400 mb-3">
+                Crafted by <strong>Rishabh Singh</strong> • Lead Systems Architect
+              </p>
+              <Link
+                href="https://www.instagram.com/rish4bhsiingh/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 px-5 rounded-2xl bg-[#D2FF1F] hover:bg-[#bceb15] text-black font-extrabold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-[#D2FF1F]/20 active:scale-95"
+              >
+                <span>Follow on Instagram (@rish4bhsiingh)</span>
+                <ExternalLink className="w-3.5 h-3.5 ml-1" />
+              </Link>
+            </div>
+          </div>
         )}
       </main>
 
-      {/* Global Persistent Floating Dock Player & FullPlayerModal */}
+      {/* MiniPlayer: Suspended directly above bottom nav */}
       <MiniPlayer />
-      <FullPlayerModal />
+
+      {/* Full Immersive Now Playing View (Matching Reference 1 Middle Mockup) */}
+      <NowPlayingView />
+
+      {/* Floating Bottom Navigation Bar (Home, Galaxy, Library, Profile) */}
+      <BottomNav activeTab={activeTab} onSelectTab={setActiveTab} />
     </div>
   );
 }

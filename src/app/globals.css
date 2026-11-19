@@ -4,10 +4,10 @@
 
 :root {
   color-scheme: dark;
-  --carbon-base: #08080a;
-  --slate-charcoal: #121216;
-  --crimson-red: #e10600;
-  --burgundy-deep: #4a0000;
+  --matte-obsidian: #0a0a0c;
+  --slate-dark: #121217;
+  --lime-accent: #d2ff1f;
+  --purple-glow: #7c3aed;
   --text-primary: #f0f0f2;
   --text-muted: #8a8a93;
 }
@@ -18,21 +18,21 @@
   box-sizing: border-box;
 }
 
-/* Selection Highlight */
+/* Selection Highlight in Lime */
 ::selection {
-  background-color: #e10600;
-  color: #ffffff;
+  background-color: #d2ff1f;
+  color: #000000;
 }
 
 ::-moz-selection {
-  background-color: #e10600;
-  color: #ffffff;
+  background-color: #d2ff1f;
+  color: #000000;
 }
 
-/* Base Body Styles - Deep Carbon Obsidian with subtle burgundy ambient undertones */
+/* Base Body Styles - Deep Matte Obsidian Dark Base (#0A0A0C) */
 html,
 body {
-  background-color: #08080a;
+  background-color: #0a0a0c;
   color: #f0f0f2;
   overflow-x: hidden;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -57,57 +57,19 @@ body {
   will-change: transform, opacity;
 }
 
-/* BMW M-Performance Crimson-Void Card Classes */
-.m-card {
-  background: #111116;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+/* Slow Rotating Disc Keyframes for Now Playing */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.m-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.m-card:active {
-  transform: scale(0.98);
-  border-color: #e10600;
-}
-
-.crimson-pill {
-  background: #e10600;
-  color: #ffffff;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-/* Refined Dark Luxury Glass Card Surfaces */
-.rhythmx-glass {
-  background: linear-gradient(145deg, #121217 0%, #0b0b0e 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.85);
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.rhythmx-glass:hover {
-  border-color: rgba(225, 6, 0, 0.4);
-}
-
-.glass-card {
-  background: #111116;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.8);
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.glass-card:hover {
-  border-color: rgba(225, 6, 0, 0.4);
-}
-
-.glass-card:active {
-  transform: scale(0.98);
-  border-color: #e10600;
+.animate-spin-slow {
+  animation: spin-slow 14s linear infinite;
+  will-change: transform;
 }
 
 /* Safe Area Inset Padding Helpers for Mobile WebViews */
@@ -127,14 +89,14 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
-/* Custom Scrollbar for Crimson-Void */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #08080a;
+  background: #0a0a0c;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -143,7 +105,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #e10600;
+  background: #d2ff1f;
 }
 
 .no-scrollbar::-webkit-scrollbar {

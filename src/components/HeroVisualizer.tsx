@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Play, Pause, Volume2, Sparkles, Disc } from "lucide-react";
+import { Play, Pause, Heart, Plus, MoreHorizontal } from "lucide-react";
 import { Song } from "@/types/music";
 import { usePlayerStore } from "@/store/playerStore";
 
@@ -17,7 +17,7 @@ export default function HeroVisualizer({
   featuredTrack,
   onPlay,
 }: HeroVisualizerProps) {
-  const { currentTrack, isPlaying, progress, togglePlay, playSong } =
+  const { currentTrack, isPlaying, togglePlay, playSong, toggleLike, likedSongIds } =
     usePlayerStore();
 
   const activeTrack = currentTrack || featuredTrack;
@@ -26,8 +26,11 @@ export default function HeroVisualizer({
   );
   const trackIsPlaying = isCurrentActive && isPlaying;
 
+  if (!activeTrack) return null;
+
+  const isLiked = Boolean(likedSongIds[activeTrack.id]);
+
   const handleAction = () => {
-    if (!activeTrack) return;
     if (isCurrentActive) {
       togglePlay();
     } else {
@@ -39,96 +42,93 @@ export default function HeroVisualizer({
     }
   };
 
-  if (!activeTrack) return null;
-
   return (
-    <section className="relative px-3 sm:px-6 md:px-8 my-5 gpu-layer">
-      {/* Sleek BMW M-Performance Dark Luxury Showcase Card */}
-      <div className="relative m-card rounded-2xl overflow-hidden p-5 sm:p-7 md:p-8 bg-[#111116] border border-white/[0.08] shadow-[0_12px_40px_rgba(0,0,0,0.85)]">
-        {/* Precision Progress Line in Crimson Red along the top edge */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/[0.05]">
-          <div
-            className="h-full bg-[#E10600] transition-all duration-200"
-            style={{
-              width: `${Math.max(0, Math.min(100, isCurrentActive ? progress : 0))}%`,
-            }}
-          />
-        </div>
+    <section className="px-4 md:px-8 my-5 gpu-layer">
+      {/* Section Title matching Reference 1 */}
+      <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight mb-3">
+        Curated &amp; trending
+      </h2>
 
-        {/* Ambient Subtle Burgundy Undertone */}
-        <div className="absolute -right-24 -bottom-24 w-80 h-80 bg-[#4A0000]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -left-20 -top-20 w-80 h-80 bg-[#16161C]/60 rounded-full blur-3xl pointer-events-none" />
+      {/* Featured Hero Card with Neon Purple-to-Dark Gradient */}
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#4c1d95] via-[#2e1065] to-[#0A0A0C] border border-white/10 p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* Soft Ambient Radiance */}
+        <div className="absolute -top-16 -left-16 w-64 h-64 bg-[#7c3aed]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -right-16 w-64 h-64 bg-[#D2FF1F]/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8">
-          {/* Large High-Definition Album Art with Precision 1px Border */}
-          <div className="relative group w-48 h-48 sm:w-56 sm:h-56 md:w-60 md:h-60 rounded-xl overflow-hidden border border-white/10 shadow-2xl flex-shrink-0 bg-[#08080A]">
-            <img
-              src={activeTrack.imageUrl || FALLBACK_VINYL}
-              alt={activeTrack.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
-              }}
-            />
+        {/* Left Side Content */}
+        <div className="relative z-10 flex-1 min-w-0 text-left w-full">
+          {/* Discover Weekly Pill */}
+          <span className="inline-block px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[10px] font-mono font-semibold uppercase text-white/90 tracking-wider mb-2.5">
+            Discover weekly
+          </span>
 
-            {/* Direct Tap Play Overlay */}
+          {/* Heading */}
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight truncate">
+            {activeTrack.name}
+          </h3>
+          <p className="text-xs sm:text-sm text-neutral-300 font-medium mt-1 truncate">
+            {activeTrack.primaryArtists}
+          </p>
+          <p className="text-xs text-neutral-400 mt-2 font-normal">
+            The original sound curated for your taste.
+          </p>
+
+          {/* Action Row: Circular Lime Play Button + Heart + Plus + More */}
+          <div className="flex items-center space-x-3 mt-6">
+            {/* Circular High-Contrast Lime Play Button */}
             <button
               onClick={handleAction}
-              className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-[#E10600] hover:bg-[#C20500] text-white flex items-center justify-center shadow-lg shadow-[#E10600]/40 transition-transform active:scale-95 cursor-pointer"
-              aria-label={trackIsPlaying ? "Pause Track" : "Play Track"}
+              className="w-12 h-12 rounded-full bg-[#D2FF1F] hover:bg-[#bceb15] text-black flex items-center justify-center shadow-lg shadow-[#D2FF1F]/30 active:scale-95 transition cursor-pointer"
+              aria-label={trackIsPlaying ? "Pause" : "Play"}
             >
               {trackIsPlaying ? (
-                <Pause className="w-6 h-6 fill-white text-white" />
+                <Pause className="w-5 h-5 fill-black stroke-black" />
               ) : (
-                <Play className="w-6 h-6 fill-white text-white ml-0.5" />
+                <Play className="w-5 h-5 fill-black stroke-black ml-0.5" />
               )}
             </button>
+
+            {/* Heart (Like) Button */}
+            <button
+              onClick={() => toggleLike(activeTrack)}
+              className={`w-10 h-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 flex items-center justify-center transition active:scale-95 cursor-pointer ${
+                isLiked ? "text-[#D2FF1F]" : "text-white"
+              }`}
+              aria-label="Like track"
+            >
+              <Heart className={`w-4 h-4 ${isLiked ? "fill-[#D2FF1F]" : ""}`} />
+            </button>
+
+            {/* Plus (Queue) Button */}
+            <button
+              onClick={() => playSong(activeTrack)}
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 flex items-center justify-center text-white transition active:scale-95 cursor-pointer"
+              aria-label="Add to queue"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+
+            {/* More Options */}
+            <button
+              onClick={() => togglePlay()}
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 flex items-center justify-center text-white transition active:scale-95 cursor-pointer"
+              aria-label="Options"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
           </div>
+        </div>
 
-          {/* Industrial Typography & Minimalist Action Deck */}
-          <div className="flex-1 text-center md:text-left min-w-0">
-            {/* Precision Badge */}
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-[#16161C] border border-white/[0.08] text-xs font-mono font-medium text-[#8A8A93] uppercase tracking-wider mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E10600]" />
-              <span>BMW M-PERFORMANCE AUDIO</span>
-            </div>
-
-            {/* Pure Industrial Typography */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight truncate">
-              {activeTrack.name}
-            </h1>
-            <p className="text-base sm:text-lg font-medium text-[#8A8A93] mt-1.5 truncate">
-              {activeTrack.primaryArtists}
-            </p>
-            <p className="text-xs text-neutral-500 font-mono mt-1 truncate">
-              {activeTrack.album || "Single"} • High-Definition Stream
-            </p>
-
-            {/* Action Buttons: Solid Crimson "PLAY NOW" + "LOSSLESS AUDIO" */}
-            <div className="mt-6 flex flex-wrap items-center justify-center md:justify-start gap-3">
-              <button
-                onClick={handleAction}
-                className="px-7 py-3 rounded-xl bg-[#E10600] hover:bg-[#C20500] text-white font-bold text-sm tracking-wide flex items-center space-x-2.5 transition active:scale-95 shadow-[0_4px_16px_rgba(225,6,0,0.35)] cursor-pointer"
-              >
-                {trackIsPlaying ? (
-                  <>
-                    <Pause className="w-4 h-4 fill-white text-white" />
-                    <span>PAUSE</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4 fill-white text-white ml-0.5" />
-                    <span>PLAY NOW</span>
-                  </>
-                )}
-              </button>
-
-              <div className="inline-flex items-center space-x-2 px-4 py-3 rounded-xl bg-[#16161C] border border-white/[0.08] text-xs font-mono font-medium text-[#8A8A93]">
-                <Volume2 className="w-4 h-4 text-[#E10600]" />
-                <span>LOSSLESS AUDIO</span>
-              </div>
-            </div>
-          </div>
+        {/* Right Side Visual: HD Artwork Visual */}
+        <div className="relative z-10 w-44 h-44 sm:w-52 sm:h-52 md:w-56 md:h-56 rounded-2xl overflow-hidden border border-white/15 shadow-2xl flex-shrink-0 bg-neutral-900">
+          <img
+            src={activeTrack.imageUrl || FALLBACK_VINYL}
+            alt={activeTrack.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
+            }}
+          />
         </div>
       </div>
     </section>
