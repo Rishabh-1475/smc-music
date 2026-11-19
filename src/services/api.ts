@@ -1,5 +1,3 @@
-import CryptoJS from 'crypto-js';
-
 export interface Song {
   id: string;
   name: string;
@@ -14,14 +12,12 @@ export interface Song {
   title?: string;
   audioUrl?: string;
   image?: any;
-  hasLyrics?: boolean;
-  lyrics?: string;
   [key: string]: any;
 }
 
-export const DEFAULT_FALLBACK_TRACKS: Song[] = [
+export const BACKUP_SONGS: Song[] = [
   {
-    id: "fb_1",
+    id: "bk_1",
     name: "Tu Mil Jaaye (From \"KING\")",
     album: "KING",
     year: "2026",
@@ -30,11 +26,22 @@ export const DEFAULT_FALLBACK_TRACKS: Song[] = [
     primaryArtists: "Sachin-Jigar, Ed Sheeran, Arijit Singh",
     imageUrl: "https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg",
     streamUrl: "https://aac.saavncdn.com/978/f7c1348a47eb9e2b109b8d2eb45a76fa_320.mp4",
-    audioUrl: "https://aac.saavncdn.com/978/f7c1348a47eb9e2b109b8d2eb45a76fa_320.mp4",
     language: "hindi"
   },
   {
-    id: "fb_2",
+    id: "bk_2",
+    name: "Kalyani (Remix)",
+    album: "Kalyani",
+    year: "2026",
+    duration: "201",
+    label: "Singh Music",
+    primaryArtists: "ARJN, KDS, FIFTY4, Shreya Ghoshal",
+    imageUrl: "https://c.saavncdn.com/475/KALYANI-Remix-Malayalam-2026-20260622131127-500x500.jpg",
+    streamUrl: "https://aac.saavncdn.com/475/TwAeSigUBFmoRG0TK4kYR_320.mp4",
+    language: "hindi"
+  },
+  {
+    id: "bk_3",
     name: "295",
     album: "Moosetape",
     year: "2021",
@@ -43,37 +50,10 @@ export const DEFAULT_FALLBACK_TRACKS: Song[] = [
     primaryArtists: "Sidhu Moose Wala",
     imageUrl: "https://c.saavncdn.com/026/Moosetape-Punjabi-2021-20210514130005-500x500.jpg",
     streamUrl: "https://aac.saavncdn.com/026/8a3ebc6e2d04b9e8c14a0a3e59ad1a28_320.mp4",
-    audioUrl: "https://aac.saavncdn.com/026/8a3ebc6e2d04b9e8c14a0a3e59ad1a28_320.mp4",
     language: "punjabi"
   },
   {
-    id: "fb_3",
-    name: "Lollipop Lagelu",
-    album: "Lollipop Lagelu",
-    year: "2015",
-    duration: "240",
-    label: "Wave Music",
-    primaryArtists: "Pawan Singh",
-    imageUrl: "https://c.saavncdn.com/495/Lollipop-Lagelu-Bhojpuri-2015-500x500.jpg",
-    streamUrl: "https://aac.saavncdn.com/495/d94bc17e1f8e7e8bfb5e8cc4a0a0d5c5_320.mp4",
-    audioUrl: "https://aac.saavncdn.com/495/d94bc17e1f8e7e8bfb5e8cc4a0a0d5c5_320.mp4",
-    language: "bhojpuri"
-  },
-  {
-    id: "fb_4",
-    name: "Murder In My Mind",
-    album: "Murder In My Mind",
-    year: "2022",
-    duration: "145",
-    label: "KORDHELL",
-    primaryArtists: "KORDHELL",
-    imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80",
-    streamUrl: "https://aac.saavncdn.com/sample/phonk.mp4",
-    audioUrl: "https://aac.saavncdn.com/sample/phonk.mp4",
-    language: "english"
-  },
-  {
-    id: "fb_5",
+    id: "bk_4",
     name: "Apna Bana Le",
     album: "Bhediya",
     year: "2022",
@@ -82,173 +62,163 @@ export const DEFAULT_FALLBACK_TRACKS: Song[] = [
     primaryArtists: "Arijit Singh, Sachin-Jigar",
     imageUrl: "https://c.saavncdn.com/815/Bhediya-Hindi-2023-20230927155213-500x500.jpg",
     streamUrl: "https://aac.saavncdn.com/675/1456dc2903d0fb4465d2d2904008803b_320.mp4",
-    audioUrl: "https://aac.saavncdn.com/675/1456dc2903d0fb4465d2d2904008803b_320.mp4",
+    language: "hindi"
+  },
+  {
+    id: "bk_5",
+    name: "Lollipop Lagelu",
+    album: "Superhit Bhojpuri",
+    year: "2015",
+    duration: "240",
+    label: "Wave Music",
+    primaryArtists: "Pawan Singh",
+    imageUrl: "https://c.saavncdn.com/495/Lollipop-Lagelu-Bhojpuri-2015-500x500.jpg",
+    streamUrl: "https://aac.saavncdn.com/495/d94bc17e1f8e7e8bfb5e8cc4a0a0d5c5_320.mp4",
+    language: "bhojpuri"
+  },
+  {
+    id: "bk_6",
+    name: "Blinding Lights",
+    album: "The Highlights",
+    year: "2020",
+    duration: "200",
+    label: "Republic Records",
+    primaryArtists: "The Weeknd",
+    imageUrl: "https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.jpg",
+    streamUrl: "https://aac.saavncdn.com/179/ee99b14844e2699aad400fa1e946c0ed_320.mp4",
+    language: "english"
+  },
+  {
+    id: "bk_7",
+    name: "Labon Ko",
+    album: "Bhool Bhulaiyaa",
+    year: "2007",
+    duration: "341",
+    label: "T-Series",
+    primaryArtists: "KK, Pritam",
+    imageUrl: "https://c.saavncdn.com/056/Bhool-Bhulaiyaa-Hindi-2007-20241223151003-500x500.jpg",
+    streamUrl: "https://aac.saavncdn.com/675/1456dc2903d0fb4465d2d2904008803b_320.mp4",
+    language: "hindi"
+  },
+  {
+    id: "bk_8",
+    name: "Tum Hi Ho",
+    album: "Aashiqui 2",
+    year: "2013",
+    duration: "262",
+    label: "T-Series",
+    primaryArtists: "Mithoon, Arijit Singh",
+    imageUrl: "https://c.saavncdn.com/430/Aashiqui-2-Hindi-2013-500x500.jpg",
+    streamUrl: "https://aac.saavncdn.com/430/2LOBgFbPNFEPLtUR1p7SaTBSm47kY9OJLK2_320.mp4",
     language: "hindi"
   }
 ];
 
-const decodeHtml = (html: string): string => {
-  if (typeof window === 'undefined') return html || '';
+export const DEFAULT_FALLBACK_TRACKS = BACKUP_SONGS;
+
+export const decodeHtml = (str: string): string => {
+  if (typeof window === 'undefined') return str || '';
   const txt = document.createElement('textarea');
-  txt.innerHTML = html;
+  txt.innerHTML = str;
   return txt.value;
 };
 
-const extractBestImage = (images: any): string => {
-  if (Array.isArray(images) && images.length > 0) {
-    const highest = images[images.length - 1];
-    const url = typeof highest === 'string' ? highest : highest?.url || highest?.link || '';
-    if (url) return url.replace('50x50', '500x500').replace('150x150', '500x500');
-  }
-  if (typeof images === 'string' && images.length > 0) {
-    return images.replace('50x50', '500x500').replace('150x150', '500x500');
-  }
-  return 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80';
-};
+export const extractRealCover = (img: any): string => {
+  if (!img) return 'https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg';
 
-export const extractRealCover = extractBestImage;
-
-const extractBestStream = (downloadUrls: any, fallback?: string): string => {
-  if (Array.isArray(downloadUrls) && downloadUrls.length > 0) {
-    const q320 = downloadUrls.find((u: any) => u.quality === '320kbps' || u.bitrate === '320kbps' || u.quality === '320');
-    if (q320?.url || q320?.link) return q320.url || q320.link;
-    const q160 = downloadUrls.find((u: any) => u.quality === '160kbps' || u.bitrate === '160kbps' || u.quality === '160');
-    if (q160?.url || q160?.link) return q160.url || q160.link;
-    const last = downloadUrls[downloadUrls.length - 1];
-    return last?.url || last?.link || '';
-  }
-  return fallback || '';
-};
-
-export const decryptMediaUrl = (encryptedMediaUrl: string): string => {
-  if (!encryptedMediaUrl || typeof encryptedMediaUrl !== 'string') return '';
-  try {
-    const key = CryptoJS.enc.Utf8.parse('38346591');
-    const decrypted = CryptoJS.DES.decrypt(
-      { ciphertext: CryptoJS.enc.Base64.parse(encryptedMediaUrl.trim()) },
-      key,
-      { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
-    );
-    const decryptedUrl = decrypted.toString(CryptoJS.enc.Utf8);
-    if (decryptedUrl && decryptedUrl.startsWith('http')) {
-      const httpsUrl = decryptedUrl.replace('http://', 'https://');
-      return httpsUrl.includes('_96.') ? httpsUrl.replace(/_96\./g, '_320.') : httpsUrl;
+  if (Array.isArray(img) && img.length > 0) {
+    const last = img[img.length - 1];
+    const u = typeof last === 'string' ? last : last?.url || last?.link || '';
+    if (u && typeof u === 'string') {
+      return u.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
     }
-  } catch {
-    // Fail silently
   }
-  return '';
+
+  if (typeof img === 'string' && img.startsWith('http')) {
+    return img.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
+  }
+
+  if (typeof img === 'object') {
+    const u = img.url || img.link || img.imageUrl || '';
+    if (u && typeof u === 'string') {
+      return u.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
+    }
+  }
+
+  return 'https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg';
 };
 
-const parseItem = (item: any): Song | null => {
-  if (!item) return null;
-  const rawImg = item.image || item.images || item.album_image;
-  const rawAudio = item.downloadUrl || item.downloadUrls || item.media_urls;
-  let stream = extractBestStream(rawAudio, item.media_url);
+const extractCover = extractRealCover;
 
-  if (!stream && item.more_info?.encrypted_media_url) {
-    stream = decryptMediaUrl(item.more_info.encrypted_media_url);
+const extractStream = (down: any, fallback?: string): string => {
+  if (Array.isArray(down) && down.length > 0) {
+    const q320 = down.find((d: any) => d.quality === '320kbps' || d.bitrate === '320kbps' || d.quality === '320');
+    if (q320?.url || q320?.link) return (q320.url || q320.link).replace('http://', 'https://');
+    const q160 = down.find((d: any) => d.quality === '160kbps' || d.bitrate === '160kbps' || d.quality === '160');
+    if (q160?.url || q160?.link) return (q160.url || q160.link).replace('http://', 'https://');
+    const last = down[down.length - 1];
+    const u = last?.url || last?.link || '';
+    if (u) return u.replace('http://', 'https://');
   }
-  if (!stream && typeof item.encrypted_media_url === 'string') {
-    stream = decryptMediaUrl(item.encrypted_media_url);
-  }
-
-  if (!stream) return null;
-
-  const name = decodeHtml(item.name || item.title || item.song || 'Song');
-  const artists = decodeHtml(
-    item.primaryArtists ||
-    item.singers ||
-    item.artist ||
-    (Array.isArray(item.artists?.primary) ? item.artists.primary.map((a: any) => a.name).join(', ') : '') ||
-    (Array.isArray(item.more_info?.artistMap?.primary_artists) ? item.more_info.artistMap.primary_artists.map((a: any) => a.name).join(', ') : '') ||
-    item.more_info?.music ||
-    item.subtitle ||
-    'Various Artists'
-  );
-
-  const img = extractBestImage(rawImg);
-
-  return {
-    id: item.id || String(Math.random()),
-    name,
-    title: name,
-    album: decodeHtml(item.album?.name || item.more_info?.album || item.album || 'Single'),
-    year: String(item.year || item.more_info?.release_date?.slice(0, 4) || '2026'),
-    duration: item.duration || item.more_info?.duration || '210',
-    label: item.label || item.more_info?.copyright_text || '',
-    primaryArtists: artists,
-    imageUrl: img,
-    image: img,
-    streamUrl: stream,
-    audioUrl: stream,
-    language: item.language || 'hindi'
-  };
+  return fallback ? fallback.replace('http://', 'https://') : '';
 };
 
-export const fetchSongsByQuery = async (query: string, page: number = 1): Promise<Song[]> => {
-  if (!query || !query.trim()) return DEFAULT_FALLBACK_TRACKS;
+export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
+  if (!query || !query.trim()) return BACKUP_SONGS;
 
   const cleanQuery = encodeURIComponent(query.trim());
-
-  // Direct client-side resilient search endpoints with multi-mirror racing
-  const endpoints = [
-    `https://saavnapi-beta.vercel.app/search/songs?query=${cleanQuery}&page=${page}&limit=40`,
-    `https://saavn.dev/api/search/songs?query=${cleanQuery}&page=${page}&limit=40`,
-    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${cleanQuery}&page=${page}&limit=40`,
+  const mirrors = [
+    `https://saavnapi-beta.vercel.app/search/songs?query=${cleanQuery}&page=1&limit=40`,
     `https://jiosaavn-api.vercel.app/search?query=${cleanQuery}`,
-    `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=40&p=${page}&q=${cleanQuery}`
+    `https://saavn.dev/api/search/songs?query=${cleanQuery}&page=1&limit=40`,
+    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${cleanQuery}&page=1&limit=40`
   ];
 
-  for (const url of endpoints) {
+  for (const mirror of mirrors) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4500);
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-      const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+      const res = await fetch(mirror, { signal: controller.signal });
       clearTimeout(timeoutId);
 
       if (!res.ok) continue;
-
       const data = await res.json();
-      const rawList =
-        data?.data?.results ||
-        data?.results ||
-        data?.data?.songs?.results ||
-        (Array.isArray(data?.data) ? data.data : []);
+      const list = data?.data?.results || data?.results || (Array.isArray(data?.data) ? data.data : []);
 
-      if (Array.isArray(rawList) && rawList.length > 0) {
-        const parsed = rawList.map(parseItem).filter((s): s is Song => s !== null);
+      if (Array.isArray(list) && list.length > 0) {
+        const parsed = list.map((item: any) => {
+          const rawAudio = item.downloadUrl || item.downloadUrls || item.media_urls;
+          const streamUrl = extractStream(rawAudio, item.media_url);
+          const rawImg = item.image || item.images || item.album_image;
+          const imageUrl = extractRealCover(rawImg);
+          const name = decodeHtml(item.name || item.title || item.song || 'Song');
+
+          return {
+            id: String(item.id || Math.random()),
+            name,
+            title: name,
+            album: decodeHtml(item.album?.name || item.album || 'Single'),
+            year: String(item.year || '2026'),
+            duration: item.duration || '210',
+            label: item.label || '',
+            primaryArtists: decodeHtml(item.primaryArtists || item.singers || item.artist || 'Various Artists'),
+            imageUrl,
+            image: imageUrl,
+            streamUrl,
+            audioUrl: streamUrl,
+            language: item.language || 'hindi'
+          };
+        }).filter((s: Song) => s.streamUrl && s.imageUrl);
+
         if (parsed.length > 0) return parsed;
       }
     } catch {
-      // Try next mirror
+      // try next mirror
     }
   }
 
-  return DEFAULT_FALLBACK_TRACKS;
+  return BACKUP_SONGS;
 };
 
 export const searchSongs = fetchSongsByQuery;
-
-export const getRadioForTrack = async (song: Song): Promise<Song[]> => {
-  const query = song.primaryArtists ? `${song.primaryArtists} Hits` : song.name;
-  return fetchSongsByQuery(query, 1);
-};
-
-export const getDynamicAutoplayQueue = async (currentTrack: Song): Promise<Song[]> => {
-  return getRadioForTrack(currentTrack);
-};
-
-export const getLyrics = async (songId: string): Promise<string> => {
-  try {
-    const res = await fetch(`https://saavn.dev/api/lyrics?id=${songId}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data?.data?.lyrics) return data.data.lyrics;
-    }
-  } catch {
-    // Fail silently
-  }
-  return '';
-};

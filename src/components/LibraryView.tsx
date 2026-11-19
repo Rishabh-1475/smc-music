@@ -4,10 +4,10 @@ import { Play, Trash2, Heart } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 
 export const LibraryView: React.FC = () => {
-  const { likedSongs, toggleLike, playTrack, currentTrack, isPlaying } = usePlayerStore();
+  const { likedSongs, toggleLike, playTrack, currentTrack } = usePlayerStore();
 
   return (
-    <div className="px-4 py-4 min-h-[60vh] select-none">
+    <div className="px-4 py-4 min-h-[60vh]">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-extrabold text-white">Liked Songs</h1>
@@ -16,7 +16,7 @@ export const LibraryView: React.FC = () => {
         {likedSongs.length > 0 && (
           <button
             onClick={() => playTrack(likedSongs[0])}
-            className="px-4 py-2 rounded-full bg-[#CCFF00] text-black font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition cursor-pointer"
+            className="px-4 py-2 rounded-full bg-[#CCFF00] text-black font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition"
           >
             <Play className="w-3.5 h-3.5 fill-black" /> Play All
           </button>
@@ -44,41 +44,19 @@ export const LibraryView: React.FC = () => {
                   isCurrent ? 'bg-white/10 border-white/20' : 'bg-white/5 border-white/5'
                 }`}
               >
-                <div
-                  onClick={() => playTrack(song)}
-                  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
-                >
-                  <img
-                    src={song.imageUrl}
-                    alt={song.name}
-                    className="w-12 h-12 rounded-xl object-cover border border-white/10 flex-shrink-0 bg-neutral-900"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (target.src !== 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80') {
-                        target.src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80';
-                      }
-                    }}
-                  />
+                <div onClick={() => playTrack(song)} className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
+                  <img src={song.imageUrl} alt={song.name} className="w-12 h-12 rounded-xl object-cover border border-white/10 flex-shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <p className={`text-xs font-bold truncate ${isCurrent ? 'text-[#CCFF00]' : 'text-white'}`}>
-                      {song.name}
-                    </p>
+                    <p className={`text-xs font-bold truncate ${isCurrent ? 'text-[#CCFF00]' : 'text-white'}`}>{song.name}</p>
                     <p className="text-[10px] text-gray-400 truncate mt-0.5">{song.primaryArtists}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => playTrack(song)}
-                    className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-[#CCFF00] hover:text-black transition cursor-pointer"
-                  >
+                  <button onClick={() => playTrack(song)} className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center">
                     <Play className="w-3.5 h-3.5 fill-current translate-x-0.5" />
                   </button>
-                  <button
-                    onClick={() => toggleLike(song)}
-                    className="w-8 h-8 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition cursor-pointer"
-                    title="Remove from Liked"
-                  >
+                  <button onClick={() => toggleLike(song)} className="w-8 h-8 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -90,5 +68,3 @@ export const LibraryView: React.FC = () => {
     </div>
   );
 };
-
-export default LibraryView;
