@@ -4,39 +4,104 @@ import React, { useState, useEffect, useRef } from "react";
 import { Search, Heart, X, Loader2 } from "lucide-react";
 import { useUserStore } from "@/store/userStore";
 import { usePlayerStore } from "@/store/playerStore";
+import { fetchSongsByQuery, Song } from "@/services/api";
 
-interface HeaderProps {
+export interface HeaderProps {
   searchQuery?: string;
-  setSearchQuery?: (query: string) => void;
   onSearchChange?: (query: string) => void;
+  onSearchResults?: (results: Song[], query: string) => void;
+  onClearSearch?: () => void;
   isSearching?: boolean;
   onOpenFavorites?: () => void;
   onOpenProfile?: () => void;
 }
 
-export default function Header({
+export const Header: React.FC<HeaderProps> = ({
   searchQuery = "",
-  setSearchQuery,
   onSearchChange,
+  onSearchResults,
+  onClearSearch,
   isSearching = false,
   onOpenFavorites,
   onOpenProfile,
-}: HeaderProps) {
+}) => {
   const { userName } = useUserStore();
   const { likedSongs } = usePlayerStore();
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [localQuery, setLocalQuery] = useState(searchQuery);
+  const [internalSearching, setInternalSearching] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setLocalQuery(searchQuery);
     if (searchQuery) setShowSearchInput(true);
   }, [searchQuery]);
 
-  const updateQuery = (value: string) => {
-    setLocalQuery(value);
-    if (setSearchQuery) setSearchQuery(value);
-    if (onSearchChange) onSearchChange(value);
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleInputChange = (val: string) => {
+    setLocalQuery(val);
+    if (onSearchChange) onSearchChange(val);
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    const clean = val.trim();
+    if (!clean) {
+      setInternalSearching(false);
+      if (onClearSearch) onClearSearch();
+      return;
+    }
+
+    setInternalSearching(true);
+    debounceTimerRef.current = setTimeout(async () => {
+      try {
+        const results = await fetchSongsByQuery(clean, 1);
+        if (onSearchResults) {
+          onSearchResults(results, clean);
+        }
+      } catch (err) {
+        console.warn("Search execution failed:", err);
+      } finally {
+        setInternalSearching(false);
+      }
+    }, 300);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      const clean = localQuery.trim();
+      if (clean) {
+        setInternalSearching(true);
+        fetchSongsByQuery(clean, 1)
+          .then((res) => {
+            if (onSearchResults) onSearchResults(res, clean);
+          })
+          .catch((err) => console.warn("Immediate search failed:", err))
+          .finally(() => setInternalSearching(false));
+      }
+    }
+  };
+
+  const handleClear = () => {
+    setLocalQuery("");
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    setInternalSearching(false);
+    if (onSearchChange) onSearchChange("");
+    if (onClearSearch) onClearSearch();
+    searchInputRef.current?.focus();
   };
 
   const handleToggleSearch = () => {
@@ -45,7 +110,7 @@ export default function Header({
       if (next) {
         setTimeout(() => searchInputRef.current?.focus(), 100);
       } else {
-        updateQuery("");
+        handleClear();
       }
       return next;
     });
@@ -53,6 +118,7 @@ export default function Header({
 
   const displayName = userName?.trim() || "Samantha";
   const favoritesCount = likedSongs?.length || 0;
+  const isSearchActive = isSearching || internalSearching;
 
   return (
     <header className="relative w-full bg-[#0A0A0C] px-4 pt-6 pb-2 flex flex-col gap-2 select-none overflow-hidden">
@@ -84,7 +150,7 @@ export default function Header({
           <button
             onClick={handleToggleSearch}
             className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all cursor-pointer border ${
-              showSearchInput || searchQuery
+              showSearchInput || localQuery
                 ? "bg-[#D4FF00] text-black border-[#D4FF00] shadow-md shadow-[#D4FF00]/25"
                 : "bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border-white/10"
             }`}
@@ -113,7 +179,7 @@ export default function Header({
         </div>
       </div>
 
-      {/* Prominent Greeting Headline matching Reference 1 & Reference 3 */}
+      {/* Prominent Greeting Headline */}
       <div className="relative z-10 pt-1">
         <h1 className="text-2xl font-bold tracking-tight text-white">
           Hi, {displayName}
@@ -125,7 +191,7 @@ export default function Header({
         <div className="relative z-10 w-full animate-in slide-in-from-top-1 duration-150 pt-1">
           <div className="relative w-full rounded-2xl bg-[#14141A] border border-white/10 focus-within:border-[#D4FF00] shadow-lg transition-all">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              {isSearching ? (
+              {isSearchActive ? (
                 <Loader2 className="w-3.5 h-3.5 text-[#D4FF00] animate-spin" />
               ) : (
                 <Search className="w-3.5 h-3.5 text-gray-400" />
@@ -136,14 +202,15 @@ export default function Header({
               ref={searchInputRef}
               type="text"
               value={localQuery}
-              onChange={(e) => updateQuery(e.target.value)}
-              placeholder="Search artists, tracks, phonk..."
+              onChange={(e) => handleInputChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Search 50+ songs on JioSaavn (e.g. Sidhu, Arijit, Phonk)..."
               className="w-full pl-9 pr-9 py-2.5 bg-transparent text-white placeholder-gray-500 text-xs rounded-2xl focus:outline-none"
             />
 
             {localQuery.length > 0 && (
               <button
-                onClick={() => updateQuery("")}
+                onClick={handleClear}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition cursor-pointer"
                 aria-label="Clear search"
               >
@@ -155,6 +222,6 @@ export default function Header({
       )}
     </header>
   );
-}
+};
 
-export { Header };
+export default Header;

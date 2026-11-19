@@ -18,51 +18,45 @@ export interface Song {
   image?: any;
   hasLyrics?: boolean;
   lyrics?: string;
-  downloadUrl?: any;
-  downloadUrls?: any;
   [key: string]: any;
 }
 
 const decodeHtml = (html: string): string => {
-  if (!html) return '';
-  if (typeof window === 'undefined') {
-    return html
-      .replace(/&quot;/g, '"')
-      .replace(/&amp;/g, '&')
-      .replace(/&#039;/g, "'")
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>');
-  }
+  if (typeof window === 'undefined') return html || '';
   const txt = document.createElement('textarea');
   txt.innerHTML = html;
   return txt.value;
 };
 
+// Normalizes 50x50, 150x150 images to authentic 500x500 CDN URLs
 const extractBestImage = (images: any): string => {
   if (Array.isArray(images) && images.length > 0) {
-    const best = images[images.length - 1];
-    const url = typeof best === 'string' ? best : best?.url || best?.link || '';
-    if (url) return url.replace('150x150', '500x500').replace('http://', 'https://');
+    const highest = images[images.length - 1];
+    const url = typeof highest === 'string' ? highest : highest?.url || highest?.link || '';
+    if (url) return url.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
   }
   if (typeof images === 'string' && images.length > 0) {
-    return images.replace('150x150', '500x500').replace('http://', 'https://');
+    return images.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
   }
   return 'https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.jpg';
 };
 
-const extractBestStream = (downloadUrls: any): string => {
-  if (!Array.isArray(downloadUrls) || downloadUrls.length === 0) return '';
-  const q320 = downloadUrls.find((u: any) => u.quality === '320kbps' || u.bitrate === '320');
-  if (q320?.url || q320?.link) return q320.url || q320.link;
-  const q160 = downloadUrls.find((u: any) => u.quality === '160kbps' || u.bitrate === '160');
-  if (q160?.url || q160?.link) return q160.url || q160.link;
-  const last = downloadUrls[downloadUrls.length - 1];
-  return last?.url || last?.link || '';
+// Extracts highest fidelity audio stream (320kbps -> 160kbps -> 96kbps)
+const extractBestStream = (downloadUrls: any, fallbackUrl?: string): string => {
+  if (Array.isArray(downloadUrls) && downloadUrls.length > 0) {
+    const q320 = downloadUrls.find((u: any) => u.quality === '320kbps' || u.bitrate === '320kbps' || u.quality === '320');
+    if (q320?.url || q320?.link) return q320.url || q320.link;
+
+    const q160 = downloadUrls.find((u: any) => u.quality === '160kbps' || u.bitrate === '160kbps' || u.quality === '160');
+    if (q160?.url || q160?.link) return q160.url || q160.link;
+
+    const last = downloadUrls[downloadUrls.length - 1];
+    return last?.url || last?.link || '';
+  }
+  return fallbackUrl || '';
 };
 
-/**
- * Decrypts JioSaavn DES-ECB encrypted media URLs to direct CDN streaming links.
- */
+// Decrypts JioSaavn DES-ECB encrypted media URLs to direct CDN streaming links
 export const decryptMediaUrl = (encryptedMediaUrl: string): string => {
   if (!encryptedMediaUrl || typeof encryptedMediaUrl !== 'string') return '';
   try {
@@ -75,7 +69,6 @@ export const decryptMediaUrl = (encryptedMediaUrl: string): string => {
     const decryptedUrl = decrypted.toString(CryptoJS.enc.Utf8);
     if (decryptedUrl && decryptedUrl.startsWith('http')) {
       const httpsUrl = decryptedUrl.replace('http://', 'https://');
-      // Upgrade 96kbps preview to 320kbps master
       return httpsUrl.includes('_96.') ? httpsUrl.replace(/_96\./g, '_320.') : httpsUrl;
     }
   } catch {
@@ -84,94 +77,112 @@ export const decryptMediaUrl = (encryptedMediaUrl: string): string => {
   return '';
 };
 
+// Robust parser handling both raw JioSaavn schemas and community mirror schemas
+const parseSongPayload = (item: any): Song | null => {
+  if (!item) return null;
+  const rawImg = item.image || item.images || item.album_image;
+  const rawAudio = item.downloadUrl || item.downloadUrls || item.media_urls;
+  let streamUrl = extractBestStream(rawAudio, item.media_url);
+
+  // Fallback to official JioSaavn DES-ECB decryption if encrypted_media_url is present
+  if (!streamUrl && item.more_info?.encrypted_media_url) {
+    streamUrl = decryptMediaUrl(item.more_info.encrypted_media_url);
+  }
+  if (!streamUrl && typeof item.encrypted_media_url === 'string') {
+    streamUrl = decryptMediaUrl(item.encrypted_media_url);
+  }
+
+  if (!streamUrl) return null;
+
+  const rawName = item.name || item.title || item.song || 'Unknown Song';
+  const name = decodeHtml(rawName);
+
+  const rawArtists =
+    item.primaryArtists ||
+    item.singers ||
+    item.artist ||
+    (Array.isArray(item.artists?.primary) ? item.artists.primary.map((a: any) => a.name).join(', ') : '') ||
+    (Array.isArray(item.more_info?.artistMap?.primary_artists)
+      ? item.more_info.artistMap.primary_artists.map((a: any) => a.name).join(', ')
+      : '') ||
+    item.more_info?.music ||
+    item.subtitle ||
+    'Various Artists';
+
+  const album = decodeHtml(item.album?.name || item.more_info?.album || item.album || 'Single');
+  const year = String(
+    item.year ||
+    item.more_info?.release_date?.slice(0, 4) ||
+    item.release_date?.slice(0, 4) ||
+    '2026'
+  );
+  const duration = item.duration || item.more_info?.duration || 210;
+  const label = item.label || item.more_info?.copyright_text || item.copyright_text || '';
+  const bestImage = extractBestImage(rawImg);
+
+  return {
+    id: String(item.id || Math.random()),
+    name,
+    title: name,
+    album,
+    year,
+    duration,
+    label,
+    primaryArtists: decodeHtml(rawArtists),
+    imageUrl: bestImage,
+    image: bestImage,
+    streamUrl,
+    audioUrl: streamUrl,
+    language: item.language || 'hindi'
+  };
+};
+
 export const fetchSongsByQuery = async (query: string, page: number = 1): Promise<Song[]> => {
-  const mirrors = [
-    `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&page=${page}&limit=25`,
-    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodeURIComponent(query)}&page=${page}&limit=25`
+  if (!query || !query.trim()) return [];
+
+  const cleanQuery = query.trim();
+
+  // Multi-endpoint racing: hits full search endpoints requesting 50 items
+  const endpoints = [
+    `https://saavn.dev/api/search/songs?query=${encodeURIComponent(cleanQuery)}&page=${page}&limit=50`,
+    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodeURIComponent(cleanQuery)}&page=${page}&limit=50`,
+    `https://saavn.dev/api/search?query=${encodeURIComponent(cleanQuery)}&page=${page}&limit=50`,
+    // Direct Official JioSaavn Multi-Result Engine (returns up to 50 comprehensive tracks across all regions)
+    `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=50&p=${page}&q=${encodeURIComponent(cleanQuery)}`
   ];
 
-  // 1. Try public mirrors
-  for (const url of mirrors) {
+  for (const url of endpoints) {
     try {
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) continue;
-      const data = await res.json();
-      const rawList = data?.data?.results || data?.results || (Array.isArray(data?.data) ? data.data : []);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4500);
 
-      if (Array.isArray(rawList) && rawList.length > 0) {
-        const parsed = rawList
-          .map((item: any) => {
-            const rawImg = item.image || item.images;
-            const rawAudio = item.downloadUrl || item.downloadUrls || item.media_url;
-            const bestAudio = Array.isArray(rawAudio) ? extractBestStream(rawAudio) : (rawAudio || '');
-            const bestImage = extractBestImage(rawImg);
-            const name = decodeHtml(item.name || item.title || 'Unknown Track');
-            return {
-              id: String(item.id || Math.random()),
-              name,
-              title: name,
-              album: decodeHtml(item.album?.name || item.album || 'Single'),
-              year: String(item.year || '2026'),
-              duration: item.duration || '3:20',
-              label: item.label || '',
-              primaryArtists: decodeHtml(item.primaryArtists || item.singers || item.artist || 'Various Artists'),
-              imageUrl: bestImage,
-              image: bestImage,
-              streamUrl: bestAudio,
-              audioUrl: bestAudio,
-              language: item.language || 'hindi'
-            };
-          })
-          .filter((s: Song) => s.streamUrl && s.imageUrl);
+      const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) continue;
+
+      const data = await res.json();
+
+      // Support results from direct songs search or nested global search or official JioSaavn results
+      const rawResults =
+        data?.data?.results ||
+        data?.results ||
+        data?.data?.songs?.results ||
+        (Array.isArray(data?.data) ? data.data : []);
+
+      if (Array.isArray(rawResults) && rawResults.length > 0) {
+        const parsed = rawResults
+          .map(parseSongPayload)
+          .filter((song): song is Song => song !== null);
 
         if (parsed.length > 0) return parsed;
       }
-    } catch {
-      // Continue to next mirror
+    } catch (err) {
+      console.warn(`Query mirror failed for endpoint: ${url}`, err);
     }
   }
 
-  // 2. Direct Official JioSaavn Gateway (Reliable High-Speed Fallback)
-  try {
-    const officialUrl = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=25&p=${page}&q=${encodeURIComponent(query)}`;
-    const res = await fetch(officialUrl, { cache: 'no-store' });
-    if (res.ok) {
-      const data = await res.json();
-      const results = data?.results || [];
-      if (Array.isArray(results) && results.length > 0) {
-        const list: Song[] = [];
-        for (const item of results) {
-          const enc = item.more_info?.encrypted_media_url;
-          const stream = decryptMediaUrl(enc);
-          if (!stream) continue;
-          let img = item.image || '';
-          img = img.replace('150x150', '500x500').replace('http://', 'https://');
-          const name = decodeHtml(item.title || item.name || 'Unknown Track');
-          const songObj: Song = {
-            id: String(item.id || Math.random()),
-            name,
-            title: name,
-            album: decodeHtml(item.more_info?.album || item.album || 'Single'),
-            year: String(item.year || '2026'),
-            duration: item.more_info?.duration || item.duration || '210',
-            label: item.more_info?.copyright_text || item.label || '',
-            primaryArtists: decodeHtml(item.more_info?.primary_artists || item.more_info?.singers || 'Various Artists'),
-            imageUrl: img || 'https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.jpg',
-            image: img || 'https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.jpg',
-            streamUrl: stream,
-            audioUrl: stream,
-            language: item.language || 'hindi'
-          };
-          list.push(songObj);
-        }
-        if (list.length > 0) return list;
-      }
-    }
-  } catch {
-    // Continue to curated fallback
-  }
-
-  // 3. Guaranteed High-Res Curated Fallback (Offline resilience)
+  // Fallback to high-res curated pool for offline resilience
   const curatedPool: Song[] = [
     ...(curatedData.quickPicks || []),
     ...(curatedData.trendingHits || []),
@@ -183,7 +194,7 @@ export const fetchSongsByQuery = async (query: string, page: number = 1): Promis
     title: decodeHtml(t.title || t.name),
     album: decodeHtml(t.album || 'Lossless Album'),
     year: String(t.year || '2026'),
-    duration: t.duration || '210',
+    duration: t.duration || 210,
     label: t.label || 'SMC Records',
     primaryArtists: decodeHtml(t.primaryArtists || 'Featured Artist'),
     imageUrl: t.imageUrl || 'https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.jpg',
@@ -193,7 +204,7 @@ export const fetchSongsByQuery = async (query: string, page: number = 1): Promis
     language: t.language || 'hindi'
   }));
 
-  const qLow = query.toLowerCase();
+  const qLow = cleanQuery.toLowerCase();
   const matched = curatedPool.filter(
     (s) =>
       s.name.toLowerCase().includes(qLow) ||
@@ -201,7 +212,7 @@ export const fetchSongsByQuery = async (query: string, page: number = 1): Promis
       s.album.toLowerCase().includes(qLow)
   );
 
-  return matched.length > 0 ? matched : curatedPool.slice(0, 15);
+  return matched.length > 0 ? matched : [];
 };
 
 export const searchSongs = fetchSongsByQuery;
@@ -223,7 +234,7 @@ export const getLyrics = async (songId: string): Promise<string> => {
       if (data?.data?.lyrics) return data.data.lyrics;
     }
   } catch {
-    // Silent fallback
+    // Fail silently
   }
   return '';
 };
