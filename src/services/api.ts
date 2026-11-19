@@ -1,5 +1,4 @@
 import CryptoJS from 'crypto-js';
-import curatedData from './curatedTracks.json';
 
 export interface Song {
   id: string;
@@ -20,7 +19,6 @@ export interface Song {
   [key: string]: any;
 }
 
-// Built-in resilient catalog so the app NEVER renders blank
 export const DEFAULT_FALLBACK_TRACKS: Song[] = [
   {
     id: "fb_1",
@@ -70,8 +68,8 @@ export const DEFAULT_FALLBACK_TRACKS: Song[] = [
     label: "KORDHELL",
     primaryArtists: "KORDHELL",
     imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80",
-    streamUrl: "",
-    audioUrl: "",
+    streamUrl: "https://aac.saavncdn.com/sample/phonk.mp4",
+    audioUrl: "https://aac.saavncdn.com/sample/phonk.mp4",
     language: "english"
   },
   {
@@ -96,24 +94,19 @@ const decodeHtml = (html: string): string => {
   return txt.value;
 };
 
-export const extractRealCover = (item: any): string => {
-  if (!item) return '';
-  const imgData = item.image || item.images || item.album_image;
-  if (Array.isArray(imgData) && imgData.length > 0) {
-    const best = imgData[imgData.length - 1];
-    const url = typeof best === 'string' ? best : best?.url || best?.link;
-    if (url && typeof url === 'string') {
-      return url.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
-    }
+const extractBestImage = (images: any): string => {
+  if (Array.isArray(images) && images.length > 0) {
+    const highest = images[images.length - 1];
+    const url = typeof highest === 'string' ? highest : highest?.url || highest?.link || '';
+    if (url) return url.replace('50x50', '500x500').replace('150x150', '500x500');
   }
-  if (typeof imgData === 'string' && imgData.startsWith('http')) {
-    return imgData.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
+  if (typeof images === 'string' && images.length > 0) {
+    return images.replace('50x50', '500x500').replace('150x150', '500x500');
   }
-  if (typeof item.imageUrl === 'string' && item.imageUrl.startsWith('http')) {
-    return item.imageUrl.replace('50x50', '500x500').replace('150x150', '500x500');
-  }
-  return '';
+  return 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80';
 };
+
+export const extractRealCover = extractBestImage;
 
 const extractBestStream = (downloadUrls: any, fallback?: string): string => {
   if (Array.isArray(downloadUrls) && downloadUrls.length > 0) {
@@ -142,50 +135,53 @@ export const decryptMediaUrl = (encryptedMediaUrl: string): string => {
       return httpsUrl.includes('_96.') ? httpsUrl.replace(/_96\./g, '_320.') : httpsUrl;
     }
   } catch {
-    // silent
+    // Fail silently
   }
   return '';
 };
 
-const parseSongPayload = (item: any): Song | null => {
+const parseItem = (item: any): Song | null => {
   if (!item) return null;
+  const rawImg = item.image || item.images || item.album_image;
   const rawAudio = item.downloadUrl || item.downloadUrls || item.media_urls;
-  let streamUrl = extractBestStream(rawAudio, item.media_url);
-  if (!streamUrl && item.more_info?.encrypted_media_url) {
-    streamUrl = decryptMediaUrl(item.more_info.encrypted_media_url);
-  }
-  if (!streamUrl && typeof item.encrypted_media_url === 'string') {
-    streamUrl = decryptMediaUrl(item.encrypted_media_url);
-  }
-  if (!streamUrl) return null;
+  let stream = extractBestStream(rawAudio, item.media_url);
 
-  const name = decodeHtml(item.name || item.title || item.song || 'Unknown Song');
-  const coverUrl = extractRealCover(item);
-  const rawArtists =
+  if (!stream && item.more_info?.encrypted_media_url) {
+    stream = decryptMediaUrl(item.more_info.encrypted_media_url);
+  }
+  if (!stream && typeof item.encrypted_media_url === 'string') {
+    stream = decryptMediaUrl(item.encrypted_media_url);
+  }
+
+  if (!stream) return null;
+
+  const name = decodeHtml(item.name || item.title || item.song || 'Song');
+  const artists = decodeHtml(
     item.primaryArtists ||
     item.singers ||
     item.artist ||
     (Array.isArray(item.artists?.primary) ? item.artists.primary.map((a: any) => a.name).join(', ') : '') ||
-    (Array.isArray(item.more_info?.artistMap?.primary_artists)
-      ? item.more_info.artistMap.primary_artists.map((a: any) => a.name).join(', ')
-      : '') ||
+    (Array.isArray(item.more_info?.artistMap?.primary_artists) ? item.more_info.artistMap.primary_artists.map((a: any) => a.name).join(', ') : '') ||
     item.more_info?.music ||
     item.subtitle ||
-    'Various Artists';
+    'Various Artists'
+  );
+
+  const img = extractBestImage(rawImg);
 
   return {
-    id: String(item.id || Math.random()),
+    id: item.id || String(Math.random()),
     name,
     title: name,
     album: decodeHtml(item.album?.name || item.more_info?.album || item.album || 'Single'),
     year: String(item.year || item.more_info?.release_date?.slice(0, 4) || '2026'),
-    duration: item.duration || item.more_info?.duration || 210,
+    duration: item.duration || item.more_info?.duration || '210',
     label: item.label || item.more_info?.copyright_text || '',
-    primaryArtists: decodeHtml(rawArtists),
-    imageUrl: coverUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80',
-    image: coverUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80',
-    streamUrl,
-    audioUrl: streamUrl,
+    primaryArtists: artists,
+    imageUrl: img,
+    image: img,
+    streamUrl: stream,
+    audioUrl: stream,
     language: item.language || 'hindi'
   };
 };
@@ -193,63 +189,42 @@ const parseSongPayload = (item: any): Song | null => {
 export const fetchSongsByQuery = async (query: string, page: number = 1): Promise<Song[]> => {
   if (!query || !query.trim()) return DEFAULT_FALLBACK_TRACKS;
 
-  const cleanQuery = query.trim();
+  const cleanQuery = encodeURIComponent(query.trim());
+
+  // 1. Try public CORS-enabled mirrors first (Zero CORS in any browser)
   const endpoints = [
-    `https://saavn.dev/api/search/songs?query=${encodeURIComponent(cleanQuery)}&page=${page}&limit=30`,
-    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodeURIComponent(cleanQuery)}&page=${page}&limit=30`,
-    `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=30&p=${page}&q=${encodeURIComponent(cleanQuery)}`
+    `https://saavnapi-beta.vercel.app/search/songs?query=${cleanQuery}&page=${page}&limit=40`,
+    `https://jiosaavn-api.vercel.app/search?query=${cleanQuery}`,
+    `https://saavn.dev/api/search/songs?query=${cleanQuery}&page=${page}&limit=40`,
+    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${cleanQuery}&page=${page}&limit=40`,
+    `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=40&p=${page}&q=${cleanQuery}`
   ];
 
   for (const url of endpoints) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4500);
+
       const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
       clearTimeout(timeoutId);
+
       if (!res.ok) continue;
 
       const data = await res.json();
-      const rawResults =
+      const rawList =
         data?.data?.results ||
         data?.results ||
         data?.data?.songs?.results ||
         (Array.isArray(data?.data) ? data.data : []);
 
-      if (Array.isArray(rawResults) && rawResults.length > 0) {
-        const parsed = rawResults.map(parseSongPayload).filter((s): s is Song => s !== null);
+      if (Array.isArray(rawList) && rawList.length > 0) {
+        const parsed = rawList.map(parseItem).filter((s): s is Song => s !== null);
         if (parsed.length > 0) return parsed;
       }
     } catch {
-      // continue to next mirror
+      // Try next mirror
     }
   }
-
-  // Curated fallback from local JSON
-  const curatedPool: Song[] = [
-    ...(curatedData.quickPicks || []),
-    ...(curatedData.trendingHits || []),
-    ...(curatedData.punjabiHits || []),
-    ...(curatedData.bhojpuriHits || [])
-  ].map((t: any) => {
-    const cover = extractRealCover(t) || t.imageUrl || '';
-    return {
-      id: String(t.id),
-      name: decodeHtml(t.name || t.title),
-      title: decodeHtml(t.title || t.name),
-      album: decodeHtml(t.album || 'Album'),
-      year: String(t.year || '2026'),
-      duration: t.duration || 210,
-      label: t.label || '',
-      primaryArtists: decodeHtml(t.primaryArtists || 'Artist'),
-      imageUrl: cover,
-      image: cover,
-      streamUrl: t.audioUrl || '',
-      audioUrl: t.audioUrl || '',
-      language: t.language || 'hindi'
-    };
-  }).filter((s) => s.streamUrl);
-
-  if (curatedPool.length > 0) return curatedPool;
 
   return DEFAULT_FALLBACK_TRACKS;
 };
@@ -272,6 +247,8 @@ export const getLyrics = async (songId: string): Promise<string> => {
       const data = await res.json();
       if (data?.data?.lyrics) return data.data.lyrics;
     }
-  } catch { /* silent */ }
+  } catch {
+    // Fail silently
+  }
   return '';
 };

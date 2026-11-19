@@ -1,284 +1,123 @@
-"use client";
+'use client';
+import React from 'react';
+import { ChevronDown, Bookmark, Heart, Play, Pause, SkipBack, SkipForward, Shuffle } from 'lucide-react';
+import { usePlayerStore } from '@/store/playerStore';
 
-import React, { useState, useEffect } from "react";
-import {
-  ChevronDown,
-  Menu,
-  Heart,
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Shuffle,
-  Repeat,
-  Repeat1,
-  Clock,
-  Radio,
-  Bookmark,
-} from "lucide-react";
-import { usePlayerStore } from "@/store/playerStore";
-import { getLyrics } from "@/services/api";
-import { decodeHtmlEntities } from "./TopDailyPlaylists";
+interface Props {
+  onClose?: () => void;
+}
 
-const formatTime = (secs: number): string => {
-  if (isNaN(secs) || secs < 0) return "0:00";
-  const m = Math.floor(secs / 60);
-  const s = Math.floor(secs % 60);
-  return `${m}:${s < 10 ? "0" : ""}${s}`;
-};
-
-export default function NowPlayingView() {
+export const NowPlayingView: React.FC<Props> = ({ onClose }) => {
   const {
     currentTrack,
     isPlaying,
-    currentTime,
-    duration,
-    progress,
-    isPlayerOpen,
-    isShuffled,
-    repeatMode,
-    likedSongIds,
     togglePlay,
     playNext,
     playPrev,
-    seekTo,
-    togglePlayerOpen,
-    toggleShuffle,
-    toggleRepeat,
     toggleLike,
+    likedSongs,
+    currentTime,
+    duration,
+    seek,
+    togglePlayerOpen
   } = usePlayerStore();
 
-  const [lyricsSnippet, setLyricsSnippet] = useState<string[]>([]);
+  const handleClose = () => {
+    if (onClose) onClose();
+    else togglePlayerOpen(false);
+  };
 
-  // Fetch lyrics preview when track changes
-  useEffect(() => {
-    if (!currentTrack) return;
-    let active = true;
+  if (!currentTrack) return null;
 
-    async function loadLyricsPreview() {
-      try {
-        const fullLyrics = await getLyrics(currentTrack!.name, currentTrack!.primaryArtists);
-        if (active) {
-          const lines = fullLyrics
-            .split("\n")
-            .map((l) => l.replace(/\[\d{2}:\d{2}\.\d{2}\]/g, "").trim())
-            .filter((l) => l.length > 0 && !l.includes("♪"));
+  const isLiked = likedSongs?.some((s) => s.id === currentTrack.id);
 
-          setLyricsSnippet(
-            lines.length >= 3
-              ? lines.slice(0, 3)
-              : [
-                  "Whispers in the midnight breeze,",
-                  "Carrying dreams across the seas,",
-                  "I close my eyes, let go, and drift away",
-                ]
-          );
-        }
-      } catch {
-        if (active) {
-          setLyricsSnippet([
-            "Whispers in the midnight breeze,",
-            "Carrying dreams across the seas,",
-            "I close my eyes, let go, and drift away",
-          ]);
-        }
-      }
-    }
-
-    loadLyricsPreview();
-    return () => {
-      active = false;
-    };
-  }, [currentTrack?.id]);
-
-  if (!isPlayerOpen || !currentTrack) return null;
-
-  const isLiked = Boolean(likedSongIds[currentTrack.id]);
-  const trackTitle = decodeHtmlEntities(currentTrack.name || "Calm your soul");
-  const trackArtist = decodeHtmlEntities(currentTrack.primaryArtists || "Goodeech Design");
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    seekTo(parseFloat(e.target.value));
+  const formatTime = (secs: number) => {
+    if (isNaN(secs) || secs < 0) return '0:00';
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 md:inset-auto md:top-0 md:bottom-0 md:left-1/2 md:-translate-x-1/2 md:w-[430px] z-50 bg-[#070B14] md:border-x md:border-white/10 text-white flex flex-col justify-between overflow-hidden select-none shadow-2xl gpu-layer animate-in fade-in duration-300"
-    >
-      {/* Background: Exact Moody Silhouette from Reference Image 5 */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="/showcase/now_playing_silhouette.jpg"
-          alt="Atmospheric Silhouette"
-          className="w-full h-full object-cover object-center opacity-85"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src =
-              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80";
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050811] via-black/40 to-[#050811]/70" />
-      </div>
+    <div className="fixed inset-0 z-50 bg-[#08080A] flex flex-col justify-between max-w-[430px] mx-auto overflow-hidden select-none">
+      {/* DYNAMIC AMBIENT BACKDROP: Uses current track artwork with high blur */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-30 blur-3xl scale-125 pointer-events-none transition-all duration-700"
+        style={{ backgroundImage: `url(${currentTrack.imageUrl})` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-[#08080A] pointer-events-none" />
 
-      {/* Top Bar: Down Chevron & Bookmark (Image 5) */}
-      <div className="relative z-10 w-full flex items-center justify-between px-6 pt-7">
-        <button
-          onClick={() => togglePlayerOpen(false)}
-          className="w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 border border-white/20 backdrop-blur-md flex items-center justify-center text-white transition cursor-pointer"
-          aria-label="Collapse player"
-        >
+      {/* Header */}
+      <div className="relative z-10 flex items-center justify-between px-6 pt-10 pb-4">
+        <button onClick={handleClose} className="p-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 transition cursor-pointer">
           <ChevronDown className="w-5 h-5" />
         </button>
+        <span className="text-[11px] font-bold tracking-widest text-white/80 uppercase">Now Playing</span>
+        <button className="p-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 transition cursor-pointer">
+          <Bookmark className="w-5 h-5" />
+        </button>
+      </div>
 
-        <h3 className="text-xs font-bold uppercase tracking-widest text-white/80">
-          Now Playing
-        </h3>
-
-        <div className="w-10 h-10 rounded-full bg-black/40 border border-white/20 backdrop-blur-md flex items-center justify-center text-white">
-          <Bookmark className="w-4 h-4" />
+      {/* Center Artwork Disc */}
+      <div className="relative z-10 flex flex-col items-center justify-center px-8 my-auto">
+        <div className="w-64 h-64 rounded-full p-2 bg-gradient-to-b from-white/15 to-white/5 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.9)] bg-neutral-900">
+          <img 
+            src={currentTrack.imageUrl} 
+            alt={currentTrack.name} 
+            className={`w-full h-full rounded-full object-cover shadow-inner ${isPlaying ? 'animate-[spin_20s_linear_infinite]' : ''}`} 
+          />
         </div>
       </div>
 
-      {/* Center: Exact Floating Glass HUD from Reference Image 5 */}
-      <div className="relative z-10 mx-5 my-auto">
-        <div className="w-full rounded-[32px] border-2 border-white/80 bg-black/30 backdrop-blur-xl p-6 shadow-[0_0_50px_rgba(255,255,255,0.2)] flex flex-col justify-between">
-          {/* Top HUD Row: Menu */}
-          <div className="flex items-center justify-between pb-4">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-[#D4FF00]">
-              Lossless Master
-            </span>
-            <Menu className="w-4 h-4 text-white/80" />
-          </div>
+      {/* Floating Card Deck for Controls */}
+      <div className="relative z-10 mx-4 mb-8 bg-[#121217]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-2xl">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-[10px] font-bold tracking-wider text-[#CCFF00] uppercase">Lossless Master • 320kbps</span>
+        </div>
 
-          {/* Title & Artist */}
-          <div className="my-3">
-            <h2 className="text-xl font-extrabold text-white tracking-tight line-clamp-1">
-              {trackTitle}
-            </h2>
-            <p className="text-xs text-gray-300 font-medium mt-1 truncate">
-              {trackArtist}
-            </p>
-          </div>
+        <h2 className="text-white font-extrabold text-lg truncate mt-1">{currentTrack.name}</h2>
+        <p className="text-gray-400 text-xs truncate mt-0.5">{currentTrack.primaryArtists}</p>
 
-          {/* Minimalist Scrubber with 1:10 and 2:47 matching Image 5 */}
-          <div className="w-full my-3">
-            <div className="relative flex items-center">
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={0.1}
-                value={progress}
-                onChange={handleSeek}
-                className="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-white"
-              />
-            </div>
-            <div className="flex justify-between text-[11px] font-mono text-gray-300 mt-2">
-              <span>{formatTime(currentTime) || "1:10"}</span>
-              <span>{formatTime(duration) || "2:47"}</span>
-            </div>
-          </div>
-
-          {/* Main Controls Row: Heart, Prev, Big White Play Button, Next, Like */}
-          <div className="flex items-center justify-between pt-2">
-            <button
-              onClick={() => toggleLike(currentTrack)}
-              className="text-white/80 hover:text-white transition active:scale-95 cursor-pointer"
-              aria-label="Like"
-            >
-              <Heart
-                className={`w-5 h-5 ${
-                  isLiked ? "fill-red-500 text-red-500" : ""
-                }`}
-              />
-            </button>
-
-            <button
-              onClick={playPrev}
-              className="text-white hover:text-neutral-300 transition active:scale-95 cursor-pointer"
-              aria-label="Previous"
-            >
-              <SkipBack className="w-6 h-6 fill-white" />
-            </button>
-
-            {/* Large Circular White Button with Black Pause/Play Icon */}
-            <button
-              onClick={togglePlay}
-              className="w-14 h-14 rounded-full bg-white hover:bg-neutral-200 text-black flex items-center justify-center transition shadow-2xl active:scale-95 cursor-pointer"
-              aria-label={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? (
-                <Pause className="w-6 h-6 fill-black stroke-black" />
-              ) : (
-                <Play className="w-6 h-6 fill-black stroke-black ml-0.5" />
-              )}
-            </button>
-
-            <button
-              onClick={playNext}
-              className="text-white hover:text-neutral-300 transition active:scale-95 cursor-pointer"
-              aria-label="Next"
-            >
-              <SkipForward className="w-6 h-6 fill-white" />
-            </button>
-
-            <button
-              onClick={toggleShuffle}
-              className={`transition cursor-pointer ${
-                isShuffled ? "text-[#D4FF00]" : "text-white/80 hover:text-white"
-              }`}
-              aria-label="Shuffle"
-            >
-              <Shuffle className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Secondary Auxiliary Row matching Image 5: Repeat, HQ, Timer, Shuffle */}
-          <div className="flex items-center justify-around pt-6 border-t border-white/10 mt-5 text-gray-300">
-            <button
-              onClick={toggleRepeat}
-              className={`p-1.5 transition cursor-pointer ${
-                repeatMode !== "off" ? "text-[#D4FF00]" : "hover:text-white"
-              }`}
-              title="Repeat"
-            >
-              {repeatMode === "one" ? (
-                <Repeat1 className="w-4 h-4" />
-              ) : (
-                <Repeat className="w-4 h-4" />
-              )}
-            </button>
-
-            <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-white/30 text-white">
-              HQ
-            </span>
-
-            <button
-              onClick={() => {}}
-              className="p-1.5 hover:text-white transition cursor-pointer"
-              title="Sleep Timer"
-            >
-              <Clock className="w-4 h-4" />
-            </button>
-
-            <button
-              onClick={() => {}}
-              className="p-1.5 hover:text-white transition cursor-pointer"
-              title="Radio Station"
-            >
-              <Radio className="w-4 h-4" />
-            </button>
+        {/* Scrubber */}
+        <div className="mt-4">
+          <input
+            type="range"
+            min={0}
+            max={duration || 100}
+            value={currentTime || 0}
+            onChange={(e) => seek(Number(e.target.value))}
+            className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#CCFF00]"
+          />
+          <div className="flex justify-between text-[10px] text-gray-400 font-mono mt-1">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
           </div>
         </div>
-      </div>
 
-      {/* Bottom Padding */}
-      <div className="relative z-10 w-full pb-6 text-center">
-        <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">
-          RhythmX 320kbps Atmospheric Engine
-        </p>
+        {/* Transport Actions */}
+        <div className="flex items-center justify-between mt-3 px-2">
+          <button onClick={() => toggleLike(currentTrack)} className="text-gray-400 hover:text-white transition cursor-pointer">
+            <Heart className={`w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+          </button>
+          <button onClick={playPrev} className="text-white hover:scale-110 transition cursor-pointer">
+            <SkipBack className="w-5 h-5 fill-white" />
+          </button>
+          <button
+            onClick={togglePlay}
+            className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-lg cursor-pointer"
+          >
+            {isPlaying ? <Pause className="w-6 h-6 fill-black" /> : <Play className="w-6 h-6 fill-black translate-x-0.5" />}
+          </button>
+          <button onClick={playNext} className="text-white hover:scale-110 transition cursor-pointer">
+            <SkipForward className="w-5 h-5 fill-white" />
+          </button>
+          <button className="text-gray-400 hover:text-white transition cursor-pointer">
+            <Shuffle className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default NowPlayingView;

@@ -3,7 +3,11 @@ import React from 'react';
 import { Play, Pause, SkipForward, Heart } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 
-export const MiniPlayer: React.FC = () => {
+interface MiniPlayerProps {
+  onOpenNowPlaying?: () => void;
+}
+
+export const MiniPlayer: React.FC<MiniPlayerProps> = ({ onOpenNowPlaying }) => {
   const { currentTrack, isPlaying, togglePlay, playNext, toggleLike, likedSongs } = usePlayerStore();
 
   if (!currentTrack) return null;
@@ -12,7 +16,10 @@ export const MiniPlayer: React.FC = () => {
 
   return (
     <div className="fixed bottom-[72px] left-3 right-3 max-w-[406px] mx-auto z-40 bg-[#16161C]/95 backdrop-blur-xl border border-white/15 rounded-2xl px-3 py-2 flex items-center justify-between shadow-2xl">
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div
+        onClick={onOpenNowPlaying}
+        className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+      >
         <img
           src={currentTrack.imageUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80'}
           alt={currentTrack.name}

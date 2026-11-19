@@ -8,6 +8,7 @@ import { fetchSongsByQuery, Song } from "@/services/api";
 
 export interface HeaderProps {
   searchQuery?: string;
+  onSearch?: (query: string) => void;
   onSearchChange?: (query: string) => void;
   onSearchResults?: (results: Song[], query: string) => void;
   onClearSearch?: () => void;
@@ -18,6 +19,7 @@ export interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   searchQuery = "",
+  onSearch,
   onSearchChange,
   onSearchResults,
   onClearSearch,
@@ -48,6 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleInputChange = (val: string) => {
     setLocalQuery(val);
+    if (onSearch) onSearch(val);
     if (onSearchChange) onSearchChange(val);
 
     if (debounceTimerRef.current) {
@@ -99,6 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
       clearTimeout(debounceTimerRef.current);
     }
     setInternalSearching(false);
+    if (onSearch) onSearch("");
     if (onSearchChange) onSearchChange("");
     if (onClearSearch) onClearSearch();
     searchInputRef.current?.focus();

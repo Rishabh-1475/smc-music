@@ -7,18 +7,17 @@ import { TopDailyPlaylists } from '@/components/TopDailyPlaylists';
 import { GalaxyVisualizer } from '@/components/GalaxyVisualizer';
 import { BottomNav } from '@/components/BottomNav';
 import { MiniPlayer } from '@/components/MiniPlayer';
+import { NowPlayingView } from '@/components/NowPlayingView';
 import { ProfileView } from '@/components/ProfileView';
-import OnboardingModal from '@/components/OnboardingModal';
-import NowPlayingView from '@/components/NowPlayingView';
-import { fetchSongsByQuery, Song, DEFAULT_FALLBACK_TRACKS } from '@/services/api';
+import { fetchSongsByQuery, Song } from '@/services/api';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'home' | 'galaxy' | 'library' | 'profile'>('home');
   const [category, setCategory] = useState('All');
-  const [songs, setSongs] = useState<Song[]>(DEFAULT_FALLBACK_TRACKS);
-  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Song[] | null>(null);
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isNowPlayingOpen, setIsNowPlayingOpen] = useState(false);
 
   const categoryQueries: Record<string, string> = {
     All: 'Trending India Hits 2026',
@@ -34,100 +33,67 @@ export default function Home() {
     let isMounted = true;
     setLoading(true);
 
-    const q = categoryQueries[category] || 'Trending India Hits 2026';
-    fetchSongsByQuery(q, 1)
-      .then((res) => {
-        if (isMounted) {
-          setSongs(res.length > 0 ? res : DEFAULT_FALLBACK_TRACKS);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setSongs(DEFAULT_FALLBACK_TRACKS);
-          setLoading(false);
-        }
-      });
+    const activeQuery = searchQuery.trim() ? searchQuery.trim() : (categoryQueries[category] || 'Trending India Hits 2026');
 
-    return () => { isMounted = false; };
-  }, [category]);
+    fetchSongsByQuery(activeQuery, 1).then((res) => {
+      if (isMounted) {
+        setSongs(res);
+        setLoading(false);
+      }
+    });
 
-  const handleSearchResults = (results: Song[], query: string) => {
-    setSearchQuery(query);
-    setSearchResults(results.length > 0 ? results : null);
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery('');
-    setSearchResults(null);
-  };
-
-  const handleSelectCategory = (cat: string) => {
-    if (searchResults !== null) handleClearSearch();
-    setCategory(cat);
-  };
-
-  const isSearchActive = searchResults !== null && searchQuery.trim().length > 0;
-  const displaySongs = isSearchActive ? searchResults : songs;
-  const heroSong = displaySongs[0] || DEFAULT_FALLBACK_TRACKS[0];
-  const listSongs = displaySongs.length > 1 ? displaySongs.slice(1) : displaySongs;
+    return () => {
+      isMounted = false;
+    };
+  }, [category, searchQuery]);
 
   return (
     <main className="min-h-screen bg-[#050505] flex justify-center">
       <div className="w-full max-w-[430px] min-h-screen bg-[#0A0A0C] border-x border-white/5 relative flex flex-col pb-36">
-        <OnboardingModal />
-        <NowPlayingView />
-
-        <Header
-          searchQuery={searchQuery}
-          onSearchChange={(q) => { setSearchQuery(q); if (!q.trim()) handleClearSearch(); }}
-          onSearchResults={handleSearchResults}
-          onClearSearch={handleClearSearch}
-        />
+        <Header onSearch={(q: string) => setSearchQuery(q)} />
 
         {activeTab === 'home' && (
           <>
-            <CategoryChips
-              activeCategory={isSearchActive ? '' : category}
-              onSelectCategory={handleSelectCategory}
+            <CategoryChips 
+              activeCategory={category} 
+              onSelectCategory={(c) => { 
+                setSearchQuery(''); 
+                setCategory(c); 
+              }} 
             />
 
-            {loading && songs.length === 0 ? (
+            {loading ? (
               <div className="flex items-center justify-center h-48 text-gray-500 text-xs">
-                Loading lossless stream...
+                Searching live catalog...
+              </div>
+            ) : songs.length === 0 ? (
+              <div className="flex items-center justify-center h-48 text-gray-500 text-xs">
+                No songs found for &quot;{searchQuery}&quot;
               </div>
             ) : (
               <>
-                {isSearchActive && (
-                  <div className="px-4 pt-2 pb-1 flex items-center justify-between">
-                    <p className="text-xs text-gray-400">
-                      Results for <span className="text-[#CCFF00] font-semibold">&quot;{searchQuery}&quot;</span>
-                    </p>
-                    <button onClick={handleClearSearch} className="text-[11px] text-gray-400 hover:text-white underline cursor-pointer">
-                      Clear
-                    </button>
-                  </div>
-                )}
-                <HeroVisualizer featuredSong={heroSong} />
+                {!searchQuery && <HeroVisualizer featuredSong={songs[0] || null} />}
                 <TopDailyPlaylists
-                  title={isSearchActive ? 'Search Results' : category === 'All' ? 'Top daily playlists' : `${category} Feed`}
-                  songs={listSongs}
+                  title={searchQuery ? `Results for "${searchQuery}"` : (category === 'All' ? 'Top daily playlists' : `${category} Feed`)}
+                  songs={searchQuery ? songs : songs.slice(1)}
                 />
               </>
             )}
           </>
         )}
 
-        {activeTab === 'galaxy' && <GalaxyVisualizer songs={displaySongs} />}
+        {activeTab === 'galaxy' && <GalaxyVisualizer songs={songs} />}
         {activeTab === 'library' && (
           <div className="px-1 py-2">
-            <TopDailyPlaylists title="Your Library" songs={displaySongs} />
+            <TopDailyPlaylists title="Your Library" songs={songs} />
           </div>
         )}
         {activeTab === 'profile' && <ProfileView />}
 
-        <MiniPlayer />
+        <MiniPlayer onOpenNowPlaying={() => setIsNowPlayingOpen(true)} />
         <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+        {isNowPlayingOpen && <NowPlayingView onClose={() => setIsNowPlayingOpen(false)} />}
       </div>
     </main>
   );

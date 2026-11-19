@@ -255,6 +255,7 @@ export interface PlayerStore {
   playPrev: () => void;
   nextTrack: () => void;
   prevTrack: () => void;
+  seek: (secs: number) => void;
   seekTo: (percent: number) => void;
   setVolume: (level: number) => void;
   togglePlayerOpen: (open?: boolean) => void;
@@ -889,6 +890,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
 
     nextTrack: () => get().playNext(),
     prevTrack: () => get().playPrev(),
+
+    seek: (secs: number) => {
+      if (!globalAudio) return;
+      globalAudio.currentTime = secs;
+      set({ currentTime: secs, progress: globalAudio.duration ? (secs / globalAudio.duration) * 100 : 0 });
+    },
 
     seekTo: (percent: number) => {
       if (!globalAudio || !globalAudio.duration) return;
