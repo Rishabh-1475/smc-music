@@ -7,7 +7,9 @@ import { usePlayerStore } from "@/store/playerStore";
 
 interface TopDailyPlaylistsProps {
   songs: Song[];
+  title?: string;
   onSeeAll?: () => void;
+  maxItems?: number;
 }
 
 const FALLBACK_VINYL =
@@ -15,35 +17,36 @@ const FALLBACK_VINYL =
 
 export default function TopDailyPlaylists({
   songs = [],
+  title = "Top daily playlists",
   onSeeAll,
+  maxItems = 5,
 }: TopDailyPlaylistsProps) {
   const { currentTrack, isPlaying, playSong, togglePlay } = usePlayerStore();
 
   if (!songs || songs.length === 0) return null;
 
   return (
-    <section className="w-full my-3 select-none gpu-layer">
-      {/* Header matching Reference 1: px-4 pt-4 pb-2 */}
-      <div className="px-4 pt-4 pb-2 flex justify-between items-center">
-        <h2 className="text-sm font-bold text-white tracking-tight">
-          Top daily playlists
+    <section className="w-full my-2 select-none gpu-layer">
+      {/* Section Header: flex justify-between items-center px-4 mb-2 */}
+      <div className="flex justify-between items-center px-4 mb-2">
+        <h2 className="font-bold text-white text-sm tracking-tight">
+          {title}
         </h2>
         {onSeeAll && (
           <button
             onClick={onSeeAll}
-            className="text-xs text-gray-400 hover:text-white transition cursor-pointer"
+            className="text-xs text-lime-400 font-medium hover:text-white transition cursor-pointer"
           >
             See all
           </button>
         )}
       </div>
 
-      {/* List rows: flex flex-col gap-3 px-4 */}
-      <div className="flex flex-col gap-2.5 px-4">
-        {songs.slice(0, 5).map((song, idx) => {
+      {/* List items */}
+      <div className="flex flex-col gap-1.5 px-2">
+        {songs.slice(0, maxItems).map((song) => {
           const isCurrent = currentTrack?.id === song.id;
           const isCardPlaying = isCurrent && isPlaying;
-          const songCount = ((idx * 7 + 8) % 24) + 8; // e.g. 8 Songs, 15 Songs, 24 Songs matching reference
 
           return (
             <div
@@ -52,14 +55,14 @@ export default function TopDailyPlaylists({
                 if (isCurrent) togglePlay();
                 else playSong(song, songs);
               }}
-              className={`flex items-center justify-between p-2 rounded-2xl transition cursor-pointer select-none ${
+              className={`px-4 py-2 flex items-center justify-between hover:bg-white/5 rounded-2xl transition cursor-pointer select-none ${
                 isCurrent
-                  ? "bg-white/10 border border-[#D4FF00]/40 shadow-sm"
-                  : "hover:bg-white/5 border border-transparent"
+                  ? "bg-white/[0.08] border border-[#D4FF00]/30 shadow-sm"
+                  : "border border-transparent"
               }`}
             >
-              {/* Left: 48x48 rounded-full album image with crisp object-cover */}
-              <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/10 shadow-sm">
+              {/* Left: 46x46 rounded-2xl album image */}
+              <div className="w-[46px] h-[46px] rounded-2xl overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/10 shadow-sm">
                 <img
                   src={song.imageUrl || FALLBACK_VINYL}
                   alt={song.name}
@@ -75,34 +78,34 @@ export default function TopDailyPlaylists({
               <div className="flex-1 px-3 min-w-0">
                 <h4
                   className={`text-xs font-semibold truncate ${
-                    isCurrent ? "text-[#D4FF00]" : "text-white"
+                    isCurrent ? "text-lime-400" : "text-white"
                   }`}
                 >
                   {song.name}
                 </h4>
                 <p className="text-[10px] text-gray-400 truncate mt-0.5">
-                  By {song.primaryArtists || "Waveform"} • {songCount} Songs
+                  By {song.primaryArtists || "Waveform"} • Lossless
                 </p>
               </div>
 
-              {/* Right: 30px circular dark play button with white triangle (bg-white/10) */}
+              {/* Right: 28px rounded-full bg-white/5 border border-white/10 */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isCurrent) togglePlay();
                   else playSong(song, songs);
                 }}
-                className={`w-[30px] h-[30px] rounded-full flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 cursor-pointer ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 cursor-pointer ${
                   isCardPlaying
-                    ? "bg-[#D4FF00] text-black shadow-md shadow-[#D4FF00]/30"
-                    : "bg-white/10 hover:bg-white/20 text-white"
+                    ? "bg-[#D4FF00] text-black shadow-md shadow-[#D4FF00]/30 border border-[#D4FF00]"
+                    : "bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/10"
                 }`}
                 aria-label={isCardPlaying ? "Pause" : "Play"}
               >
                 {isCardPlaying ? (
-                  <Pause className="w-3.5 h-3.5 fill-current stroke-current" />
+                  <Pause className="w-3 h-3 fill-current stroke-current" />
                 ) : (
-                  <Play className="w-3.5 h-3.5 fill-current stroke-current ml-0.5" />
+                  <Play className="w-3 h-3 fill-current stroke-current ml-0.5" />
                 )}
               </button>
             </div>

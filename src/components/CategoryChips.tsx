@@ -24,13 +24,12 @@ export default function CategoryChips({
 }: CategoryChipsProps) {
   const { activeMood, setActiveMood } = usePlayerStore();
 
-  const currentSelection =
-    activeCategory && activeCategory !== "" ? activeCategory : activeMood || "All";
+  const currentSelection = activeCategory || activeMood || "All";
 
   const handleSelect = (chipKey: string) => {
     setActiveMood(chipKey);
     if (onSelectCategory) {
-      onSelectCategory(chipKey === "All" ? "" : chipKey);
+      onSelectCategory(chipKey);
     }
   };
 
@@ -41,8 +40,7 @@ export default function CategoryChips({
     >
       {CATEGORY_CHIPS.map((chip) => {
         const isSelected =
-          currentSelection.toLowerCase() === chip.key.toLowerCase() ||
-          (chip.key === "All" && (!currentSelection || currentSelection === "" || currentSelection === "All"));
+          currentSelection.toLowerCase() === chip.key.toLowerCase();
 
         return (
           <button
