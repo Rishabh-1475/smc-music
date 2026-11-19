@@ -15,6 +15,45 @@ interface TopDailyPlaylistsProps {
 const FALLBACK_VINYL =
   "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
 
+export const getSongCover = (song: any): string => {
+  if (!song) return FALLBACK_VINYL;
+  if (Array.isArray(song.image) && song.image.length > 0) {
+    const last = song.image[song.image.length - 1];
+    return typeof last === "string"
+      ? last
+      : last?.url || last?.link || song.image[0]?.url || song.image[0]?.link || FALLBACK_VINYL;
+  }
+  if (Array.isArray(song.images) && song.images.length > 0) {
+    const last = song.images[song.images.length - 1];
+    return typeof last === "string"
+      ? last
+      : last?.url || last?.link || song.images[0]?.url || FALLBACK_VINYL;
+  }
+  return song.imageUrl || song.image || FALLBACK_VINYL;
+};
+
+export const decodeHtmlEntities = (text: string): string => {
+  if (!text) return "";
+  return text
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&copy;/g, "©")
+    .replace(/&reg;/g, "®")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#(\d+);/g, (_, dec) => {
+      try {
+        return String.fromCharCode(parseInt(dec, 10));
+      } catch {
+        return "";
+      }
+    })
+    .trim();
+};
+
 export default function TopDailyPlaylists({
   songs = [],
   title = "Top daily playlists",
@@ -42,11 +81,14 @@ export default function TopDailyPlaylists({
         )}
       </div>
 
-      {/* List items */}
+      {/* List items matching Reference 1 */}
       <div className="flex flex-col gap-1.5 px-2">
         {songs.slice(0, maxItems).map((song) => {
           const isCurrent = currentTrack?.id === song.id;
           const isCardPlaying = isCurrent && isPlaying;
+          const songTitle = decodeHtmlEntities(song.name || song.title || "Track");
+          const songArtist = decodeHtmlEntities(song.primaryArtists || "Waveform");
+          const coverUrl = getSongCover(song);
 
           return (
             <div
@@ -61,30 +103,30 @@ export default function TopDailyPlaylists({
                   : "border border-transparent"
               }`}
             >
-              {/* Left: 46x46 rounded-2xl album image */}
-              <div className="w-[46px] h-[46px] rounded-2xl overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/10 shadow-sm">
+              {/* Left: 12x12 (48px) circular image with actual song cover */}
+              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/10 shadow-sm">
                 <img
-                  src={song.imageUrl || FALLBACK_VINYL}
-                  alt={song.name}
+                  src={coverUrl}
+                  alt={songTitle}
                   loading="lazy"
-                  className="w-full h-full object-cover"
+                  className="w-12 h-12 rounded-full object-cover border border-white/10 flex-shrink-0"
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
                   }}
                 />
               </div>
 
-              {/* Center (flex-1 px-3 min-w-0) */}
+              {/* Center (flex-1 px-3 min-w-0): Real decoded string */}
               <div className="flex-1 px-3 min-w-0">
                 <h4
                   className={`text-xs font-semibold truncate ${
                     isCurrent ? "text-lime-400" : "text-white"
                   }`}
                 >
-                  {song.name}
+                  {songTitle}
                 </h4>
                 <p className="text-[10px] text-gray-400 truncate mt-0.5">
-                  By {song.primaryArtists || "Waveform"} • Lossless
+                  By {songArtist} • Lossless
                 </p>
               </div>
 

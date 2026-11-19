@@ -30,6 +30,7 @@ import {
   getHomeShelves,
 } from "@/services/api";
 import { Song } from "@/types/music";
+import curatedTracks from "@/services/curatedTracks.json";
 
 const FALLBACK_VINYL =
   "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
@@ -66,7 +67,7 @@ export default function Home() {
     recordSearchQuery,
   } = usePlayerStore();
 
-  // Home shelves state
+  // Home shelves state initialized with instant curated data so Hero and Playlists never disappear
   const [shelves, setShelves] = useState<{
     heroTrending: Song[];
     speedDial: Song[];
@@ -74,11 +75,11 @@ export default function Home() {
     gymPhonk: Song[];
     midnightChill: Song[];
   }>({
-    heroTrending: [],
-    speedDial: [],
-    quickPicks: [],
-    gymPhonk: [],
-    midnightChill: [],
+    heroTrending: (curatedTracks.trendingHits as unknown as Song[]) || [],
+    speedDial: ((curatedTracks.trendingHits as unknown as Song[]) || []).slice(0, 9),
+    quickPicks: (curatedTracks.quickPicks as unknown as Song[]) || [],
+    gymPhonk: (curatedTracks.workoutHype as unknown as Song[]) || [],
+    midnightChill: (curatedTracks.chillVibes as unknown as Song[]) || [],
   });
 
   const [loadingShelves, setLoadingShelves] = useState(true);
@@ -363,9 +364,12 @@ export default function Home() {
             ) : (
               /* C. Standard 'All' View: Hero Showcase + Top Daily Playlists + Trending Hits + User Shelves */
               <>
-                {/* 1. Curated & Trending Hero Card */}
+                {/* 1. Curated & Trending Hero Card (Guaranteed Initial Render) */}
                 <HeroVisualizer
-                  featuredTrack={shelves.heroTrending[0] || null}
+                  featuredTrack={
+                    shelves.heroTrending[0] ||
+                    (curatedTracks.trendingHits as any)[0]
+                  }
                   badgeLabel="DISCOVER WEEKLY"
                   onPlay={(track) =>
                     playSong(track, shelves.heroTrending)
@@ -377,7 +381,7 @@ export default function Home() {
                   songs={
                     shelves.quickPicks.length > 0
                       ? shelves.quickPicks
-                      : shelves.heroTrending.slice(1, 6)
+                      : (curatedTracks.quickPicks as any)
                   }
                   title="Top daily playlists"
                   onSeeAll={() => handleCategorySelect("Top")}

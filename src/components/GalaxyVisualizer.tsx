@@ -1,71 +1,121 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Sparkles,
-  Play,
-  Pause,
-  SkipForward,
-  SkipBack,
-  RotateCw,
-  Compass,
-  Volume2,
-} from "lucide-react";
+import { Compass, RotateCw, Play, Pause, Sparkles } from "lucide-react";
 import { Song } from "@/types/music";
 import { usePlayerStore } from "@/store/playerStore";
-import { getDynamicAutoplayQueue, getRadioForTrack } from "@/services/api";
+import { getDynamicAutoplayQueue } from "@/services/api";
+import { getSongCover, decodeHtmlEntities } from "./TopDailyPlaylists";
+import curatedTracks from "@/services/curatedTracks.json";
 
-const FALLBACK_VINYL =
-  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
-
-const formatTime = (secs: number): string => {
-  if (isNaN(secs) || secs < 0) return "0:00";
-  const m = Math.floor(secs / 60);
-  const s = Math.floor(secs % 60);
-  return `${m}:${s < 10 ? "0" : ""}${s}`;
+const DEFAULT_CENTER_SONG: Song = {
+  id: "galaxy_default_center",
+  name: "Blinding Lights",
+  title: "Blinding Lights",
+  primaryArtists: "The Weeknd",
+  album: "After Hours",
+  duration: 200,
+  imageUrl: "https://c.saavncdn.com/649/After-Hours-English-2020-20200320011002-500x500.jpg",
+  audioUrl: "",
 };
 
+// Initial static seed pool to guarantee zero "0 linked constellations" on mount
+const INITIAL_SEED_SATELLITES: Song[] = [
+  {
+    id: "seed_1",
+    name: "Labon Ko",
+    title: "Labon Ko",
+    primaryArtists: "KK, Pritam",
+    album: "Bhool Bhulaiyaa",
+    duration: 341,
+    imageUrl: "https://c.saavncdn.com/024/Bhool-Bhulaiyaa-Hindi-2007-20220914170601-500x500.jpg",
+    audioUrl: "",
+  },
+  {
+    id: "seed_2",
+    name: "STAY",
+    title: "STAY",
+    primaryArtists: "The Kid LAROI, Justin Bieber",
+    album: "F*CK LOVE 3",
+    duration: 141,
+    imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80",
+    audioUrl: "",
+  },
+  {
+    id: "seed_3",
+    name: "Legends Never Die",
+    title: "Legends Never Die",
+    primaryArtists: "Juice WRLD",
+    album: "Legends Never Die",
+    duration: 196,
+    imageUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500&q=80",
+    audioUrl: "",
+  },
+  {
+    id: "seed_4",
+    name: "Tum Hi Ho",
+    title: "Tum Hi Ho",
+    primaryArtists: "Arijit Singh, Mithoon",
+    album: "Aashiqui 2",
+    duration: 261,
+    imageUrl: "https://c.saavncdn.com/179/World-Music-Day-Best-Of-Bollywood-Hits-Hindi-2026-20260622111029-500x500.jpg",
+    audioUrl: "",
+  },
+  {
+    id: "seed_5",
+    name: "Apna Bana Le",
+    title: "Apna Bana Le",
+    primaryArtists: "Arijit Singh, Sachin-Jigar",
+    album: "Bhediya",
+    duration: 261,
+    imageUrl: "https://c.saavncdn.com/675/Trending-Love-Songs-Hindi-2026-20260506185328-500x500.jpg",
+    audioUrl: "",
+  },
+  {
+    id: "seed_6",
+    name: "Starboy",
+    title: "Starboy",
+    primaryArtists: "The Weeknd, Daft Punk",
+    album: "Starboy",
+    duration: 230,
+    imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80",
+    audioUrl: "",
+  },
+  {
+    id: "seed_7",
+    name: "Calm Your Soul",
+    title: "Calm Your Soul",
+    primaryArtists: "Goodeech Design",
+    album: "Synthwave Vibes",
+    duration: 167,
+    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80",
+    audioUrl: "",
+  },
+];
+
 export default function GalaxyVisualizer() {
-  const {
-    currentTrack,
-    isPlaying,
-    progress,
-    currentTime,
-    duration,
-    togglePlay,
-    playSong,
-    playNext,
-    playPrev,
-    seekTo,
-    queue,
-  } = usePlayerStore();
+  const { currentTrack, isPlaying, togglePlay, playSong, queue } =
+    usePlayerStore();
 
-  const [clusterNodes, setClusterNodes] = useState<Song[]>([]);
-  const [loadingCluster, setLoadingCluster] = useState(false);
-  const [dimensions, setDimensions] = useState({ width: 400, height: 500 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 390, height: 560 });
+  const [satellites, setSatellites] = useState<Song[]>(INITIAL_SEED_SATELLITES);
+  const [loadingNodes, setLoadingNodes] = useState(false);
 
-  // Track the center seed track
-  const activeSeed =
+  // If currentTrack is null, pick first song from playlist/queue as centerNode
+  const centerSong: Song =
     currentTrack ||
-    queue[0] || {
-      id: "seed_galaxy",
-      name: "RhythmX Constellation",
-      title: "RhythmX Constellation",
-      album: "Galaxy Mix",
-      primaryArtists: "Sonic Discovery",
-      duration: 210,
-      imageUrl: FALLBACK_VINYL,
-      audioUrl: "",
-    };
+    (queue.length > 0 ? queue[0] : null) ||
+    ((curatedTracks.trendingHits as any)?.[0] as Song) ||
+    DEFAULT_CENTER_SONG;
 
-  // Measure container dimensions for responsive SVG lines
+  // Measure container dimensions for responsive SVG layout
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
         setDimensions({
-          width: containerRef.current.clientWidth,
-          height: containerRef.current.clientHeight,
+          width: containerRef.current.clientWidth || 390,
+          height: containerRef.current.clientHeight || 560,
         });
       }
     };
@@ -75,124 +125,140 @@ export default function GalaxyVisualizer() {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
-  // Fetch 6 to 8 surrounding related tracks when activeSeed changes
+  // Fetch or slice 6 to 8 outer satellite nodes when centerSong changes
   useEffect(() => {
     let active = true;
 
-    async function loadCluster() {
-      if (!activeSeed || !activeSeed.id) return;
-      setLoadingCluster(true);
+    async function generateSatellites() {
+      if (!centerSong) return;
+      setLoadingNodes(true);
+
       try {
-        const fresh = await getDynamicAutoplayQueue(activeSeed);
+        // Fetch dynamic radio queue related to center song
+        const dynamicQueue = await getDynamicAutoplayQueue(centerSong);
+
         if (active) {
-          const filtered = fresh
-            .filter((t) => t.id !== activeSeed.id && t.imageUrl)
+          const filtered = dynamicQueue
+            .filter((s) => s.id !== centerSong.id && s.name)
             .slice(0, 7);
-          setClusterNodes(filtered);
+
+          if (filtered.length >= 4) {
+            setSatellites(filtered);
+          } else {
+            // Slice from queue or fallback
+            const fallback = (
+              queue.length > 3 ? queue : INITIAL_SEED_SATELLITES
+            )
+              .filter((s) => s.id !== centerSong.id)
+              .slice(0, 7);
+            setSatellites(fallback.length > 0 ? fallback : INITIAL_SEED_SATELLITES);
+          }
         }
       } catch (err) {
-        console.warn("Galaxy cluster fetch error:", err);
+        console.warn("Galaxy satellite generation error:", err);
         if (active) {
-          const fallback = queue.filter((t) => t.id !== activeSeed.id).slice(0, 7);
-          setClusterNodes(fallback);
+          const fallback = (
+            queue.length > 3 ? queue : INITIAL_SEED_SATELLITES
+          )
+            .filter((s) => s.id !== centerSong.id)
+            .slice(0, 7);
+          setSatellites(fallback.length > 0 ? fallback : INITIAL_SEED_SATELLITES);
         }
       } finally {
-        if (active) setLoadingCluster(false);
+        if (active) setLoadingNodes(false);
       }
     }
 
-    loadCluster();
+    generateSatellites();
     return () => {
       active = false;
     };
-  }, [activeSeed.id]);
+  }, [centerSong.id]);
 
-  // Center coordinates in pixels
-  const cx = dimensions.width / 2;
-  const cy = (dimensions.height - 110) / 2; // leave room for bottom dock
-  const radius = Math.min(dimensions.width, dimensions.height) * 0.36;
+  // Constellation coordinate math
+  const centerX = dimensions.width / 2;
+  const centerY = dimensions.height / 2;
+  const radius = Math.min(145, Math.min(dimensions.width, dimensions.height) * 0.36);
 
-  // Calculate coordinates for each outer node in cluster
-  const nodePositions = clusterNodes.map((song, i) => {
-    const total = clusterNodes.length || 1;
-    // Distribute angles evenly with an aesthetic offset
-    const angle = (i * 2 * Math.PI) / total - Math.PI / 2;
-    // Slight organic jitter
-    const rVar = radius + (i % 2 === 0 ? 12 : -12);
-    const x = cx + rVar * Math.cos(angle);
-    const y = cy + rVar * Math.sin(angle);
-    return { song, x, y, angle };
+  const satellitePositions = satellites.map((song, i) => {
+    const total = satellites.length || 1;
+    const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
+    const x = centerX + radius * Math.cos(angle);
+    const y = centerY + radius * Math.sin(angle);
+    return { song, x, y };
   });
 
-  const handleNodeClick = (nodeSong: Song) => {
-    playSong(nodeSong);
+  // Clicking any satellite bubble smoothly promotes that song to centerNode, starts audio playback, and regenerates 6 new satellites
+  const handleSatelliteClick = (nodeSong: Song) => {
+    playSong(nodeSong, [nodeSong, ...satellites]);
   };
+
+  const centerTitle = decodeHtmlEntities(centerSong.name || centerSong.title || "Center Track");
+  const centerArtist = decodeHtmlEntities(centerSong.primaryArtists || "Waveform Audio");
+  const centerCover = getSongCover(centerSong);
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[calc(100vh-140px)] min-h-[550px] max-h-[780px] bg-[#0A0A0C] overflow-hidden rounded-3xl border border-white/[0.06] flex flex-col justify-between select-none shadow-2xl gpu-layer my-2"
+      className="relative w-full h-[calc(100vh-170px)] min-h-[520px] max-h-[720px] bg-[#0A0A0C] overflow-hidden rounded-3xl border border-white/[0.08] flex flex-col justify-between select-none shadow-2xl gpu-layer my-2"
     >
-      {/* Background Starlight & Ambient Nebulae */}
-      <div className="absolute inset-0 bg-[radial-gradient(#1e1e2d_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#7c3aed]/15 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#D2FF1F]/10 rounded-full blur-[100px] pointer-events-none" />
+      {/* Background Starlight & Ambient Cosmic Mesh */}
+      <div className="absolute inset-0 bg-[radial-gradient(#1e1e2d_1px,transparent_1px)] [background-size:24px_24px] opacity-30 pointer-events-none" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#3B0764]/35 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#D4FF00]/15 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Top Header */}
-      <div className="relative z-10 flex items-center justify-between px-6 pt-5">
+      <div className="relative z-10 flex items-center justify-between px-5 pt-4">
         <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-full bg-[#D2FF1F]/10 border border-[#D2FF1F]/30 flex items-center justify-center text-[#D2FF1F]">
+          <div className="w-8 h-8 rounded-full bg-[#D4FF00]/10 border border-[#D4FF00]/30 flex items-center justify-center text-[#D4FF00]">
             <Compass className="w-4 h-4 animate-spin-slow" />
           </div>
           <div>
             <h3 className="text-base font-bold text-white tracking-tight leading-tight">
               Music Galaxy
             </h3>
-            <p className="text-[10px] font-mono text-[#D2FF1F] uppercase tracking-wider">
-              {clusterNodes.length} Linked Constellations
+            <p className="text-[10px] font-mono text-[#D4FF00] uppercase tracking-wider font-semibold">
+              {satellites.length} Linked Constellations
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
-          {loadingCluster && (
-            <span className="flex items-center space-x-1 text-[11px] font-mono text-neutral-400">
-              <RotateCw className="w-3 h-3 animate-spin text-[#D2FF1F]" />
-              <span>Mapping nodes...</span>
-            </span>
-          )}
-        </div>
+        {loadingNodes && (
+          <span className="flex items-center space-x-1.5 text-[10px] font-mono text-gray-400">
+            <RotateCw className="w-3 h-3 animate-spin text-[#D4FF00]" />
+            <span>Harmonizing...</span>
+          </span>
+        )}
       </div>
 
-      {/* Interactive Spider-Web Node Graph Canvas */}
-      <div className="relative flex-1 w-full h-full">
-        {/* SVG Curved Organic Connecting Lines */}
+      {/* Interactive Constellation Canvas */}
+      <div className="relative flex-1 w-full h-full overflow-hidden">
+        {/* SVG Curved Connecting Lines */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
           <defs>
-            <linearGradient id="limeLineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#D2FF1F" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.3" />
+            <linearGradient id="galaxyLineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#D4FF00" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.3" />
             </linearGradient>
           </defs>
 
-          {nodePositions.map((pos, idx) => {
-            // Subtle curve calculation
-            const midX = (cx + pos.x) / 2 + (idx % 2 === 0 ? 15 : -15);
-            const midY = (cy + pos.y) / 2 + (idx % 2 === 0 ? -15 : 15);
+          {satellitePositions.map((pos, idx) => {
+            const midX = (centerX + pos.x) / 2 + (idx % 2 === 0 ? 12 : -12);
+            const midY = (centerY + pos.y) / 2 + (idx % 2 === 0 ? -12 : 12);
 
             return (
-              <g key={`svg-line-${idx}`}>
-                {/* Organic curved connector */}
+              <g key={`connector-${idx}`}>
+                {/* SVG Curved Connector Line */}
                 <path
-                  d={`M ${cx} ${cy} Q ${midX} ${midY} ${pos.x} ${pos.y}`}
+                  d={`M ${centerX} ${centerY} Q ${midX} ${midY} ${pos.x} ${pos.y}`}
                   fill="none"
-                  stroke="url(#limeLineGrad)"
+                  stroke="rgba(212,255,0,0.3)"
                   strokeWidth="1.5"
                   strokeDasharray="4 4"
                   className="animate-pulse"
                 />
-                {/* Micro orbit particle */}
-                <circle cx={midX} cy={midY} r="2" fill="#D2FF1F" opacity="0.6" />
+                {/* Micro Orbit Particle */}
+                <circle cx={midX} cy={midY} r="2.5" fill="#D4FF00" opacity="0.8" />
               </g>
             );
           })}
@@ -202,146 +268,95 @@ export default function GalaxyVisualizer() {
         <div
           style={{
             position: "absolute",
-            left: `${cx}px`,
-            top: `${cy}px`,
+            left: `${centerX}px`,
+            top: `${centerY}px`,
             transform: "translate(-50%, -50%)",
           }}
           className="z-20 flex flex-col items-center cursor-pointer group"
           onClick={togglePlay}
         >
-          {/* Animated Pulsing Orbit Ring */}
+          {/* Animated Orbit Halo */}
           <div className="relative">
             <div
-              className={`absolute -inset-3 rounded-full border-2 border-[#D2FF1F]/40 pointer-events-none ${
+              className={`absolute -inset-3 rounded-full border-2 border-[#D4FF00]/40 pointer-events-none ${
                 isPlaying ? "animate-ping opacity-60" : "opacity-20"
               }`}
             />
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-4 ring-[#D2FF1F] shadow-[0_0_35px_rgba(210,255,31,0.45)] bg-neutral-900 flex items-center justify-center">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden ring-4 ring-[#D4FF00] shadow-[0_0_35px_rgba(212,255,0,0.45)] bg-neutral-900 flex items-center justify-center">
               <img
-                src={activeSeed.imageUrl || FALLBACK_VINYL}
-                alt={activeSeed.name}
+                src={centerCover}
+                alt={centerTitle}
                 className={`w-full h-full object-cover transition-transform duration-700 ${
                   isPlaying ? "animate-spin-slow" : ""
                 }`}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src =
+                    "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
+                }}
               />
               <div className="absolute inset-0 bg-black/35 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 {isPlaying ? (
-                  <Pause className="w-6 h-6 fill-white text-white" />
+                  <Pause className="w-5 h-5 fill-white text-white" />
                 ) : (
-                  <Play className="w-6 h-6 fill-white text-white ml-0.5" />
+                  <Play className="w-5 h-5 fill-white text-white ml-0.5" />
                 )}
               </div>
             </div>
           </div>
 
           {/* Center Track Label */}
-          <div className="mt-2.5 px-3 py-1 rounded-full bg-[#121217]/90 border border-white/10 backdrop-blur-md text-center max-w-[160px] shadow-lg">
+          <div className="mt-2 px-3 py-1 rounded-full bg-[#141418]/90 border border-white/10 backdrop-blur-md text-center max-w-[150px] shadow-lg">
             <p className="text-xs font-bold text-white truncate leading-tight">
-              {activeSeed.name}
+              {centerTitle}
             </p>
-            <p className="text-[10px] text-[#D2FF1F] truncate font-medium">
-              {activeSeed.primaryArtists}
+            <p className="text-[10px] text-[#D4FF00] truncate font-medium">
+              {centerArtist}
             </p>
           </div>
         </div>
 
-        {/* Branching Outer Nodes */}
-        {nodePositions.map(({ song, x, y }, i) => (
-          <div
-            key={`node-${song.id}-${i}`}
-            style={{
-              position: "absolute",
-              left: `${x}px`,
-              top: `${y}px`,
-              transform: "translate(-50%, -50%)",
-            }}
-            onClick={() => handleNodeClick(song)}
-            className="z-10 flex flex-col items-center cursor-pointer group transition-transform duration-300 hover:scale-115 active:scale-95"
-          >
-            {/* Outer Circular Artwork Node */}
-            <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-white/20 group-hover:border-[#D2FF1F] group-hover:ring-4 group-hover:ring-[#D2FF1F]/30 shadow-xl bg-neutral-900 transition-all">
-              <img
-                src={song.imageUrl || FALLBACK_VINYL}
-                alt={song.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Play className="w-4 h-4 fill-[#D2FF1F] text-[#D2FF1F] ml-0.5" />
+        {/* 6 to 8 Branching Outer Satellite Nodes (54px Circular Bubbles) */}
+        {satellitePositions.map(({ song, x, y }, i) => {
+          const sTitle = decodeHtmlEntities(song.name || song.title || "Track");
+          const sCover = getSongCover(song);
+
+          return (
+            <div
+              key={`satellite-${song.id}-${i}`}
+              style={{
+                position: "absolute",
+                left: `${x}px`,
+                top: `${y}px`,
+                transform: "translate(-50%, -50%)",
+              }}
+              onClick={() => handleSatelliteClick(song)}
+              className="z-10 flex flex-col items-center cursor-pointer group transition-transform duration-300 hover:scale-115 active:scale-95"
+            >
+              {/* Outer 54px Circular Bubble with ACTUAL song cover */}
+              <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden border-2 border-white/20 group-hover:border-[#D4FF00] group-hover:ring-4 group-hover:ring-[#D4FF00]/30 shadow-xl bg-neutral-900 transition-all flex-shrink-0">
+                <img
+                  src={sCover}
+                  alt={sTitle}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Play className="w-4 h-4 fill-[#D4FF00] text-[#D4FF00] ml-0.5" />
+                </div>
+              </div>
+
+              {/* Satellite Micro Badge */}
+              <div className="mt-1 px-1.5 py-0.5 rounded-md bg-[#0D0D14]/90 border border-white/10 max-w-[90px] text-center shadow-md">
+                <p className="text-[9px] font-semibold text-neutral-200 group-hover:text-[#D4FF00] truncate transition-colors">
+                  {sTitle}
+                </p>
               </div>
             </div>
-
-            {/* Micro Badge */}
-            <div className="mt-1 px-2 py-0.5 rounded-md bg-[#0D0D14]/90 border border-white/10 max-w-[100px] text-center shadow-md">
-              <p className="text-[10px] font-semibold text-neutral-200 group-hover:text-[#D2FF1F] truncate transition-colors">
-                {song.name}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Bottom Mini-Dock matching Reference 2 */}
-      <div className="relative z-20 px-4 sm:px-6 py-3.5 bg-[#121217]/95 border-t border-white/[0.08] backdrop-blur-xl flex flex-col gap-2">
-        {/* Hairline Waveform Scrubber */}
-        <div className="w-full">
-          <div className="relative flex items-center">
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={0.1}
-              value={progress}
-              onChange={(e) => seekTo(parseFloat(e.target.value))}
-              className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-[#D2FF1F]"
-            />
-          </div>
-          <div className="flex justify-between text-[10px] font-mono text-neutral-400 mt-1">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
-        </div>
-
-        {/* Transport Controls Row */}
-        <div className="flex items-center justify-between">
-          <div className="min-w-0 flex-1 pr-3">
-            <h4 className="text-sm font-bold text-white truncate leading-tight">
-              {activeSeed.name}
-            </h4>
-            <p className="text-xs text-neutral-400 truncate mt-0.5 font-medium">
-              {activeSeed.primaryArtists}
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-2 flex-shrink-0">
-            <button
-              onClick={playPrev}
-              className="p-2 rounded-full text-neutral-400 hover:text-white transition cursor-pointer"
-              aria-label="Previous"
-            >
-              <SkipBack className="w-4 h-4" />
-            </button>
-
-            <button
-              onClick={togglePlay}
-              className="w-10 h-10 rounded-full bg-[#D2FF1F] hover:bg-[#bceb15] text-black flex items-center justify-center transition shadow-md shadow-[#D2FF1F]/30 active:scale-95 cursor-pointer"
-              aria-label={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? (
-                <Pause className="w-4 h-4 fill-black text-black" />
-              ) : (
-                <Play className="w-4 h-4 fill-black text-black ml-0.5" />
-              )}
-            </button>
-
-            <button
-              onClick={playNext}
-              className="p-2 rounded-full text-neutral-400 hover:text-white transition cursor-pointer"
-              aria-label="Next"
-            >
-              <SkipForward className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );
