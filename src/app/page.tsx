@@ -15,6 +15,8 @@ import Header from "@/components/Header";
 import CategoryChips from "@/components/CategoryChips";
 import HeroVisualizer from "@/components/HeroVisualizer";
 import TopDailyPlaylists from "@/components/TopDailyPlaylists";
+import CoverFlowCarousel from "@/components/CoverFlowCarousel";
+import NeonGlowPlayerWidget from "@/components/NeonGlowPlayerWidget";
 import UserShelves from "@/components/UserShelves";
 import GalaxyVisualizer from "@/components/GalaxyVisualizer";
 import NowPlayingView from "@/components/NowPlayingView";
@@ -362,9 +364,9 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              /* C. Standard 'All' View: Hero Showcase + Top Daily Playlists + Trending Hits + User Shelves */
+              /* C. Standard 'All' View: Hero Showcase + 3D Cover Flow + Neon Widget + Top Playlists + Personal Shelves */
               <>
-                {/* 1. Curated & Trending Hero Card (Guaranteed Initial Render) */}
+                {/* 1. Curated & Trending Hero Card (Reference 1 Guaranteed Render) */}
                 <HeroVisualizer
                   featuredTrack={
                     shelves.heroTrending[0] ||
@@ -376,7 +378,13 @@ export default function Home() {
                   }
                 />
 
-                {/* 2. Top Daily Playlists */}
+                {/* 2. 3D Cover Flow Carousel (Direct Reference from User Uploaded Images 1, 3, 4) */}
+                <CoverFlowCarousel />
+
+                {/* 3. Glowing Neon Frosted Player Widget (Direct Reference from User Uploaded Image 2) */}
+                <NeonGlowPlayerWidget />
+
+                {/* 4. Top Daily Playlists (With Real Song Covers & HTML Decoded Titles) */}
                 <TopDailyPlaylists
                   songs={
                     shelves.quickPicks.length > 0
@@ -388,7 +396,7 @@ export default function Home() {
                   maxItems={5}
                 />
 
-                {/* 3. Trending Hits Shelf */}
+                {/* 5. Trending Global Hits Shelf */}
                 {shelves.heroTrending.length > 5 && (
                   <TopDailyPlaylists
                     songs={shelves.heroTrending.slice(5, 20)}
@@ -397,7 +405,7 @@ export default function Home() {
                   />
                 )}
 
-                {/* 4. Personal Activity Shelves (Recently Played, Liked, Frequency) */}
+                {/* 6. Personal Activity Shelves (Recently Played, Liked, Frequency) */}
                 <UserShelves
                   onSelectSearchQuery={(query) => setSearchQuery(query)}
                 />
