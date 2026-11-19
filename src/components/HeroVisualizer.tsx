@@ -62,11 +62,17 @@ export const HeroVisualizer: React.FC<Props> = ({ featuredSong }) => {
           </div>
         </div>
 
-        <div className="relative w-28 h-28 flex-shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 z-10">
+        <div className="relative w-28 h-28 flex-shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 z-10 bg-zinc-900">
           <img
-            src={featuredSong.imageUrl}
+            src={featuredSong.imageUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80'}
             alt={featuredSong.name}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (target.src !== 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80') {
+                target.src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80';
+              }
+            }}
           />
         </div>
       </div>

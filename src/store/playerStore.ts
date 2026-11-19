@@ -74,7 +74,7 @@ if (typeof window !== "undefined") {
 }
 
 const CLEAN_VINYL_COVER =
-  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
+  "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80";
 
 /**
  * Sanitize song object before storing to prevent circular references,

@@ -47,10 +47,16 @@ export const TopDailyPlaylists: React.FC<Props> = ({ title, songs, onSeeAll }) =
             >
               <div className="relative w-12 h-12 flex-shrink-0 rounded-full overflow-hidden border border-white/10 bg-zinc-900">
                 <img
-                  src={song.imageUrl}
+                  src={song.imageUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80'}
                   alt={song.name}
                   className="w-full h-full object-cover"
                   loading="lazy"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80') {
+                      target.src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80';
+                    }
+                  }}
                 />
               </div>
 

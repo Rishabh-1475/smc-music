@@ -56,9 +56,15 @@ export const GalaxyVisualizer: React.FC<Props> = ({ songs }) => {
           <div className="relative z-10 flex flex-col items-center">
             <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-r from-[#CCFF00] via-emerald-400 to-purple-500 shadow-[0_0_30px_rgba(204,255,0,0.35)] animate-pulse">
               <img
-                src={centerSong.imageUrl}
+                src={centerSong.imageUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80'}
                 alt={centerSong.name}
                 className="w-full h-full rounded-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src !== 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80') {
+                    target.src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80';
+                  }
+                }}
               />
             </div>
             <div className="mt-2 text-center max-w-[160px] bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
@@ -80,7 +86,17 @@ export const GalaxyVisualizer: React.FC<Props> = ({ songs }) => {
               style={{ left: `${left}px`, top: `${top}px` }}
               className="absolute z-20 w-12 h-12 rounded-full overflow-hidden border-2 border-[#CCFF00]/50 hover:scale-125 hover:border-[#CCFF00] transition transform active:scale-95 shadow-lg group cursor-pointer"
             >
-              <img src={sat.imageUrl} alt={sat.name} className="w-full h-full object-cover" />
+              <img
+                src={sat.imageUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80'}
+                alt={sat.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src !== 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80') {
+                    target.src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80';
+                  }
+                }}
+              />
             </button>
           );
         })}

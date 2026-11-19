@@ -28,17 +28,32 @@ const decodeHtml = (html: string): string => {
   return txt.value;
 };
 
-// Normalizes 50x50, 150x150 images to authentic 500x500 CDN URLs
-const extractBestImage = (images: any): string => {
-  if (Array.isArray(images) && images.length > 0) {
-    const highest = images[images.length - 1];
-    const url = typeof highest === 'string' ? highest : highest?.url || highest?.link || '';
-    if (url) return url.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
+// Bulletproof Image Extraction Helper handling every schema shape
+export const extractRealCover = (item: any): string => {
+  if (!item) return '';
+
+  // 1. If it's the standard JioSaavn array of quality objects
+  const imgData = item.image || item.images || item.album_image;
+  if (Array.isArray(imgData) && imgData.length > 0) {
+    // Grab the highest resolution (last element or 500x500)
+    const best = imgData[imgData.length - 1];
+    const url = typeof best === 'string' ? best : best?.url || best?.link;
+    if (url && typeof url === 'string') {
+      return url.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
+    }
   }
-  if (typeof images === 'string' && images.length > 0) {
-    return images.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
+
+  // 2. If it's a direct URL string
+  if (typeof imgData === 'string' && imgData.startsWith('http')) {
+    return imgData.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
   }
-  return 'https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.jpg';
+
+  // 3. Check legacy or alternative mirror keys
+  if (typeof item.imageUrl === 'string' && item.imageUrl.startsWith('http')) {
+    return item.imageUrl.replace('50x50', '500x500').replace('150x150', '500x500');
+  }
+
+  return '';
 };
 
 // Extracts highest fidelity audio stream (320kbps -> 160kbps -> 96kbps)
@@ -80,7 +95,6 @@ export const decryptMediaUrl = (encryptedMediaUrl: string): string => {
 // Robust parser handling both raw JioSaavn schemas and community mirror schemas
 const parseSongPayload = (item: any): Song | null => {
   if (!item) return null;
-  const rawImg = item.image || item.images || item.album_image;
   const rawAudio = item.downloadUrl || item.downloadUrls || item.media_urls;
   let streamUrl = extractBestStream(rawAudio, item.media_url);
 
@@ -118,7 +132,7 @@ const parseSongPayload = (item: any): Song | null => {
   );
   const duration = item.duration || item.more_info?.duration || 210;
   const label = item.label || item.more_info?.copyright_text || item.copyright_text || '';
-  const bestImage = extractBestImage(rawImg);
+  const coverUrl = extractRealCover(item);
 
   return {
     id: String(item.id || Math.random()),
@@ -129,8 +143,8 @@ const parseSongPayload = (item: any): Song | null => {
     duration,
     label,
     primaryArtists: decodeHtml(rawArtists),
-    imageUrl: bestImage,
-    image: bestImage,
+    imageUrl: coverUrl,
+    image: coverUrl,
     streamUrl,
     audioUrl: streamUrl,
     language: item.language || 'hindi'
@@ -188,21 +202,24 @@ export const fetchSongsByQuery = async (query: string, page: number = 1): Promis
     ...(curatedData.trendingHits || []),
     ...(curatedData.punjabiHits || []),
     ...(curatedData.bhojpuriHits || [])
-  ].map((t: any) => ({
-    id: String(t.id),
-    name: decodeHtml(t.name || t.title),
-    title: decodeHtml(t.title || t.name),
-    album: decodeHtml(t.album || 'Lossless Album'),
-    year: String(t.year || '2026'),
-    duration: t.duration || 210,
-    label: t.label || 'SMC Records',
-    primaryArtists: decodeHtml(t.primaryArtists || 'Featured Artist'),
-    imageUrl: t.imageUrl || 'https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.jpg',
-    image: t.imageUrl || 'https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.jpg',
-    streamUrl: t.audioUrl || '',
-    audioUrl: t.audioUrl || '',
-    language: t.language || 'hindi'
-  }));
+  ].map((t: any) => {
+    const cover = extractRealCover(t);
+    return {
+      id: String(t.id),
+      name: decodeHtml(t.name || t.title),
+      title: decodeHtml(t.title || t.name),
+      album: decodeHtml(t.album || 'Lossless Album'),
+      year: String(t.year || '2026'),
+      duration: t.duration || 210,
+      label: t.label || 'SMC Records',
+      primaryArtists: decodeHtml(t.primaryArtists || 'Featured Artist'),
+      imageUrl: cover,
+      image: cover,
+      streamUrl: t.audioUrl || '',
+      audioUrl: t.audioUrl || '',
+      language: t.language || 'hindi'
+    };
+  });
 
   const qLow = cleanQuery.toLowerCase();
   const matched = curatedPool.filter(
