@@ -156,3 +156,5 @@ export default function Header({
     </header>
   );
 }
+
+export { Header };

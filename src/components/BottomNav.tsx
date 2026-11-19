@@ -6,16 +6,23 @@ import { usePlayerStore } from "@/store/playerStore";
 
 export type NavTab = "home" | "galaxy" | "library" | "profile";
 
-interface BottomNavProps {
+export interface BottomNavProps {
   activeTab: NavTab;
-  onSelectTab: (tab: NavTab) => void;
+  onTabChange?: (tab: NavTab) => void;
+  onSelectTab?: (tab: NavTab) => void;
 }
 
-export default function BottomNav({
+export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab = "home",
+  onTabChange,
   onSelectTab,
-}: BottomNavProps) {
-  const { togglePlayerOpen, isPlayerOpen, isPlaying } = usePlayerStore();
+}) => {
+  const { togglePlayerOpen, isPlayerOpen, isPlaying, currentTrack } = usePlayerStore();
+
+  const handleTabClick = (tab: NavTab) => {
+    if (onTabChange) onTabChange(tab);
+    if (onSelectTab) onSelectTab(tab);
+  };
 
   const handlePlayerClick = () => {
     togglePlayerOpen(!isPlayerOpen);
@@ -28,7 +35,7 @@ export default function BottomNav({
     >
       {/* 1. Home */}
       <button
-        onClick={() => onSelectTab("home")}
+        onClick={() => handleTabClick("home")}
         className={`relative flex items-center justify-center transition-all duration-200 cursor-pointer ${
           activeTab === "home"
             ? "w-11 h-11 rounded-full bg-[#D4FF00] text-black shadow-lg shadow-[#D4FF00]/30"
@@ -43,20 +50,16 @@ export default function BottomNav({
       {/* 2. Audio Player / Track Disc */}
       <button
         onClick={handlePlayerClick}
-        className={`relative flex items-center justify-center transition-all duration-200 cursor-pointer ${
-          isPlayerOpen
-            ? "w-11 h-11 rounded-full bg-[#D4FF00] text-black shadow-lg shadow-[#D4FF00]/30"
-            : "w-11 h-11 rounded-full text-gray-400 hover:text-white hover:bg-white/5"
-        }`}
+        className="w-11 h-11 rounded-full text-gray-400 hover:text-white hover:bg-white/5 relative flex items-center justify-center transition-all duration-200 cursor-pointer"
         title="Now Playing"
         aria-label="Now Playing"
       >
-        <Disc3 className={`w-5 h-5 ${isPlaying ? "animate-spin-slow text-white" : ""}`} />
+        <Disc3 className={`w-5 h-5 ${isPlaying ? "animate-spin text-[#D4FF00]" : ""}`} />
       </button>
 
       {/* 3. Discover Galaxy */}
       <button
-        onClick={() => onSelectTab("galaxy")}
+        onClick={() => handleTabClick("galaxy")}
         className={`relative flex items-center justify-center transition-all duration-200 cursor-pointer ${
           activeTab === "galaxy"
             ? "w-11 h-11 rounded-full bg-[#D4FF00] text-black shadow-lg shadow-[#D4FF00]/30"
@@ -70,7 +73,7 @@ export default function BottomNav({
 
       {/* 4. Library */}
       <button
-        onClick={() => onSelectTab("library")}
+        onClick={() => handleTabClick("library")}
         className={`relative flex items-center justify-center transition-all duration-200 cursor-pointer ${
           activeTab === "library"
             ? "w-11 h-11 rounded-full bg-[#D4FF00] text-black shadow-lg shadow-[#D4FF00]/30"
@@ -84,7 +87,7 @@ export default function BottomNav({
 
       {/* 5. Profile */}
       <button
-        onClick={() => onSelectTab("profile")}
+        onClick={() => handleTabClick("profile")}
         className={`relative flex items-center justify-center transition-all duration-200 cursor-pointer ${
           activeTab === "profile"
             ? "w-11 h-11 rounded-full bg-[#D4FF00] text-black shadow-lg shadow-[#D4FF00]/30"
@@ -97,4 +100,6 @@ export default function BottomNav({
       </button>
     </nav>
   );
-}
+};
+
+export default BottomNav;

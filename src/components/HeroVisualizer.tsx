@@ -1,151 +1,77 @@
-"use client";
+'use client';
+import React from 'react';
+import { Play, Heart, Plus, MoreHorizontal } from 'lucide-react';
+import { Song } from '@/services/api';
+import { usePlayerStore } from '@/store/playerStore';
 
-import React from "react";
-import { Play, Pause, Heart, Plus, MoreHorizontal } from "lucide-react";
-import { Song } from "@/types/music";
-import { usePlayerStore } from "@/store/playerStore";
-import { getSongCover, decodeHtmlEntities } from "./TopDailyPlaylists";
-
-interface HeroVisualizerProps {
-  featuredTrack?: Song | null;
-  onPlay?: (track: Song) => void;
-  badgeLabel?: string;
+interface Props {
+  featuredSong: Song | null;
 }
 
-const FALLBACK_VINYL =
-  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80";
+export const HeroVisualizer: React.FC<Props> = ({ featuredSong }) => {
+  const { playTrack, toggleLike, likedSongs } = usePlayerStore();
 
-const DEFAULT_HERO_TRACK: Song = {
-  id: "hero_curated_lossless",
-  name: "Blinding Lights",
-  title: "Blinding Lights",
-  primaryArtists: "The Weeknd • Lossless Master",
-  album: "After Hours",
-  duration: 200,
-  imageUrl: "https://c.saavncdn.com/649/After-Hours-English-2020-20200320011002-500x500.jpg",
-  audioUrl: "",
-};
+  if (!featuredSong) return null;
 
-export default function HeroVisualizer({
-  featuredTrack,
-  onPlay,
-  badgeLabel = "DISCOVER WEEKLY",
-}: HeroVisualizerProps) {
-  const { currentTrack, isPlaying, togglePlay, playSong, toggleLike, likedSongIds } =
-    usePlayerStore();
-
-  const activeTrack = featuredTrack || currentTrack || DEFAULT_HERO_TRACK;
-  const isCurrentActive = Boolean(
-    currentTrack && activeTrack && currentTrack.id === activeTrack.id
-  );
-  const trackIsPlaying = isCurrentActive && isPlaying;
-  const isLiked = Boolean(likedSongIds[activeTrack.id]);
-
-  const songTitle = decodeHtmlEntities(activeTrack.name || activeTrack.title || "Featured Track");
-  const songArtist = decodeHtmlEntities(activeTrack.primaryArtists || "Curated Audio");
-  const coverUrl = getSongCover(activeTrack);
-
-  const handleAction = () => {
-    if (isCurrentActive) {
-      togglePlay();
-    } else {
-      if (onPlay) {
-        onPlay(activeTrack);
-      } else {
-        playSong(activeTrack);
-      }
-    }
-  };
+  const isLiked = likedSongs?.some((s) => s.id === featuredSong.id);
 
   return (
-    <section className="w-full select-none gpu-layer">
-      {/* Purple/Indigo gradient card matching Reference 1 */}
-      <div className="rounded-3xl p-5 mx-4 my-2 flex justify-between items-center bg-gradient-to-br from-[#3B0764] to-[#1E1B4B] border border-white/10 shadow-xl relative overflow-hidden min-h-[170px]">
-        {/* Soft Ambient Radial Lights */}
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-purple-500/25 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#D4FF00]/15 rounded-full blur-2xl pointer-events-none" />
+    <section className="px-4 py-2">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-white font-bold text-sm tracking-wide">Curated &amp; trending</h2>
+      </div>
 
-        {/* Left column (60%) */}
-        <div className="relative z-10 w-[60%] flex flex-col justify-between h-full pr-2">
+      <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#401258] via-[#210D3D] to-[#0E061E] border border-white/10 p-4 h-48 flex items-center justify-between shadow-2xl">
+        <div className="absolute -top-10 -left-10 w-36 h-36 bg-purple-600/30 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex-1 pr-3 z-10 flex flex-col justify-between h-full py-1">
           <div>
-            {/* Pill badge: "DISCOVER WEEKLY" in lime */}
-            <span className="text-[9px] uppercase font-bold tracking-widest text-[#D4FF00] bg-white/10 px-2.5 py-0.5 rounded-full inline-block border border-white/5">
-              {badgeLabel}
+            <span className="inline-block px-2.5 py-0.5 rounded-full bg-white/10 text-[9px] font-bold tracking-wider text-purple-200 uppercase">
+              Discover weekly
             </span>
-
-            {/* Prominent Track Title */}
-            <h3 className="text-base sm:text-lg font-bold text-white line-clamp-1 mt-1.5 leading-tight">
-              {songTitle}
+            <h3 className="text-white font-extrabold text-base line-clamp-1 mt-2 leading-tight">
+              {featuredSong.name}
             </h3>
-
-            {/* Artist / Lossless Subtitle */}
-            <p className="text-[11px] text-gray-300 line-clamp-1 mt-0.5">
-              By {songArtist} • 320kbps Lossless
+            <p className="text-gray-300 text-[11px] line-clamp-1 mt-0.5">
+              By {featuredSong.primaryArtists}
+            </p>
+            <p className="text-gray-400 text-[10px] line-clamp-1 mt-0.5">
+              The original high-fidelity sound curated for you.
             </p>
           </div>
 
-          {/* Action row (mt-3 flex items-center gap-3) */}
-          <div className="mt-3 flex items-center gap-3">
-            {/* 38px Circular Play Button */}
+          <div className="flex items-center gap-3.5 mt-2">
             <button
-              onClick={handleAction}
-              className="w-[38px] h-[38px] rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-lg flex-shrink-0 cursor-pointer"
-              aria-label={trackIsPlaying ? "Pause" : "Play"}
+              onClick={() => playTrack(featuredSong)}
+              className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-lg cursor-pointer"
             >
-              {trackIsPlaying ? (
-                <Pause className="w-4 h-4 fill-black stroke-black" />
-              ) : (
-                <Play className="w-4 h-4 fill-black stroke-black ml-0.5" />
-              )}
+              <Play className="w-5 h-5 fill-black translate-x-0.5" />
             </button>
-
-            {/* Heart Icon (♡) */}
             <button
-              onClick={() => toggleLike(activeTrack)}
-              className="text-gray-300 hover:text-white transition active:scale-95 cursor-pointer"
-              aria-label="Like"
+              onClick={() => toggleLike(featuredSong)}
+              className="text-white/80 hover:text-white transition cursor-pointer"
             >
-              <Heart
-                className={`w-4 h-4 ${
-                  isLiked ? "fill-[#D4FF00] text-[#D4FF00]" : ""
-                }`}
-              />
+              <Heart className={`w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
             </button>
-
-            {/* Plus Icon (+) */}
-            <button
-              onClick={() => playSong(activeTrack)}
-              className="text-gray-300 hover:text-white transition active:scale-95 cursor-pointer"
-              aria-label="Add to Queue"
-            >
-              <Plus className="w-4 h-4" />
+            <button className="text-white/80 hover:text-white transition cursor-pointer">
+              <Plus className="w-5 h-5" />
             </button>
-
-            {/* Context Menu (···) */}
-            <button
-              onClick={() => togglePlay()}
-              className="text-gray-300 hover:text-white transition active:scale-95 cursor-pointer"
-              aria-label="Options"
-            >
-              <MoreHorizontal className="w-4 h-4" />
+            <button className="text-white/80 hover:text-white transition cursor-pointer">
+              <MoreHorizontal className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Right column (40%): Large rounded-2xl album art of the featured song */}
-        <div className="relative z-10 w-[40%] flex justify-end">
-          <div className="w-[105px] h-[105px] rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative flex-shrink-0 bg-neutral-900">
-            <img
-              src={coverUrl}
-              alt={songTitle}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = FALLBACK_VINYL;
-              }}
-            />
-          </div>
+        <div className="relative w-28 h-28 flex-shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 z-10">
+          <img
+            src={featuredSong.imageUrl}
+            alt={featuredSong.name}
+            className="w-full h-full object-cover"
+          />
         </div>
       </div>
     </section>
   );
-}
+};
+
+export default HeroVisualizer;

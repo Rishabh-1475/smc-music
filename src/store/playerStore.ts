@@ -82,6 +82,8 @@ const CLEAN_VINYL_COVER =
  */
 const sanitizeSong = (s: Song): Song => {
   if (!s) return s;
+  const audio = String(s.audioUrl || (s as any).streamUrl || "");
+  const img = String(s.imageUrl || (s as any).image || CLEAN_VINYL_COVER);
   return {
     id: String(s.id || ""),
     name: String(s.name || s.title || ""),
@@ -89,8 +91,10 @@ const sanitizeSong = (s: Song): Song => {
     album: String(s.album || ""),
     primaryArtists: String(s.primaryArtists || ""),
     duration: s.duration || 0,
-    imageUrl: String(s.imageUrl || CLEAN_VINYL_COVER),
-    audioUrl: String(s.audioUrl || ""),
+    imageUrl: img,
+    image: img,
+    audioUrl: audio,
+    streamUrl: audio,
     year: s.year ? String(s.year) : "",
     isLiked: Boolean(s.isLiked),
   };
@@ -245,6 +249,7 @@ export interface PlayerStore {
 
   // Actions
   playSong: (song: Song, context?: Song[]) => void;
+  playTrack: (song: Song, context?: Song[]) => void;
   togglePlay: () => void;
   playNext: () => void;
   playPrev: () => void;
@@ -670,8 +675,13 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
       persistUserData({ recentlyPlayed: updated });
     },
 
+    playTrack: (song: Song, context?: Song[]) => {
+      get().playSong(song, context);
+    },
+
     playSong: (song: Song, context?: Song[]) => {
-      if (!song || !song.audioUrl) return;
+      const songAudio = song?.audioUrl || (song as any)?.streamUrl;
+      if (!song || !songAudio) return;
 
       const state = get();
       let newQueue = state.queue;
@@ -750,7 +760,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
       });
 
       if (globalAudio) {
-        globalAudio.src = song.audioUrl;
+        globalAudio.src = songAudio;
         globalAudio.currentTime = 0;
         globalAudio
           .play()

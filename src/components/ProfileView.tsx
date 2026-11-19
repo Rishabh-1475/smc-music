@@ -106,3 +106,5 @@ export default function ProfileView({ onBackToHome }: ProfileViewProps) {
     </div>
   );
 }
+
+export { ProfileView };

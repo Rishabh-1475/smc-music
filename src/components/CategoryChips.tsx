@@ -59,3 +59,5 @@ export default function CategoryChips({
     </nav>
   );
 }
+
+export { CategoryChips };
