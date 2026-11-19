@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { Song, CategoryMood, UserTasteProfile } from "@/types/music";
-import { getRadioForTrack } from "@/services/api";
+import { getRadioForTrack, getDynamicAutoplayQueue } from "@/services/api";
 
 declare global {
   interface Window {
@@ -480,9 +480,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
 
       // Dynamically load contextual radio behind single tracks if queue is small
       if (newQueue.length <= 1) {
-        const queryTarget =
-          song.primaryArtists?.split(",")[0]?.trim() || song.name;
-        getRadioForTrack(queryTarget).then((radioTracks) => {
+        getDynamicAutoplayQueue(song).then((radioTracks) => {
           if (radioTracks.length > 0) {
             const currentQueue = get().queue;
             const updated = [
@@ -530,6 +528,22 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
       if (nextIndex >= queue.length) {
         if (repeatMode === "all") {
           nextIndex = 0;
+        } else if (state.autoplay && currentTrack) {
+          // Endless radio autoplay: fetch dynamic queue matching current track
+          getDynamicAutoplayQueue(currentTrack).then((nextTracks) => {
+            if (nextTracks.length > 0) {
+              const freshQueue = [
+                ...queue,
+                ...nextTracks.filter((t) => !queue.some((q) => q.id === t.id)),
+              ];
+              set({ queue: freshQueue, originalQueue: freshQueue });
+              state.playSong(freshQueue[currentIndex + 1] || nextTracks[0], freshQueue);
+            } else {
+              set({ isPlaying: false });
+              if (globalAudio) globalAudio.pause();
+            }
+          });
+          return;
         } else {
           set({ isPlaying: false });
           if (globalAudio) globalAudio.pause();
