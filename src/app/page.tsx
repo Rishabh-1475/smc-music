@@ -6,6 +6,8 @@ import { NowPlayingView } from '@/components/NowPlayingView';
 import { GalaxyVisualizer } from '@/components/GalaxyVisualizer';
 import { LibraryView } from '@/components/LibraryView';
 import { MiniPlayer } from '@/components/MiniPlayer';
+import { TiltCard3D } from '@/components/TiltCard3D';
+import { Hero3DVisualizer } from '@/components/Hero3DVisualizer';
 import { fetchSongsByQuery, Song, FALLBACK_CATALOG } from '@/services/api';
 import { usePlayerStore } from '@/store/playerStore';
 
@@ -168,70 +170,51 @@ export default function App() {
             </div>
 
             {/* 3D Quick-Access Grid (Spotify 6-Tile Feature with 3D Depth) */}
-            <div className="grid grid-cols-2 gap-2 mt-3 perspective-[1000px]">
+            <div className="grid grid-cols-2 gap-2.5 mt-3 perspective-stage">
               {quickAccessSongs.map((song) => {
                 const isCurrent = currentTrack?.id === song.id;
                 return (
-                  <div
+                  <TiltCard3D
                     key={`tile_${song.id}`}
+                    depth={10}
                     onClick={() => playTrack(song)}
-                    className={`flex items-center rounded-xl overflow-hidden cursor-pointer transition-all duration-300 border ${
+                    className={`rounded-xl overflow-hidden transition-all duration-300 border ${
                       isCurrent
-                        ? 'bg-[#1C1822] border-[#EF4444] shadow-[0_5px_15px_rgba(239,68,68,0.25)]'
-                        : 'bg-[#121217] border-white/5 hover:border-white/15'
+                        ? 'bg-[#180A0E] border-[#EF4444] shadow-[0_0_20px_rgba(239,68,68,0.35)]'
+                        : 'bg-[#0E0E14] border-white/5 hover:border-[#EF4444]/30'
                     }`}
                   >
-                    <img src={song.imageUrl} alt={song.name} className="w-12 h-12 object-cover flex-shrink-0" />
-                    <p className={`text-xs font-bold px-2.5 truncate flex-1 ${isCurrent ? 'text-[#EF4444]' : 'text-white'}`}>
-                      {song.name}
-                    </p>
-                  </div>
+                    <div className="flex items-center p-1.5">
+                      <img src={song.imageUrl} alt={song.name} className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
+                      <p className={`text-xs font-bold px-2.5 truncate flex-1 ${isCurrent ? 'text-[#EF4444]' : 'text-white'}`}>
+                        {song.name}
+                      </p>
+                    </div>
+                  </TiltCard3D>
                 );
               })}
             </div>
 
             {/* 3D Curated Hero Showcase Card */}
             {!searchQuery && (
-              <div className="py-4 perspective-[1000px]">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Curated &amp; trending</p>
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#2E0B14] via-[#16080E] to-[#0A0A0E] border border-[#EF4444]/30 p-5 flex items-center justify-between shadow-[0_20px_40px_rgba(0,0,0,0.8),0_0_25px_rgba(239,68,68,0.2)]">
-                  <div className="flex-1 pr-3">
-                    <span className="text-[9px] font-bold text-rose-300 bg-white/10 px-2 py-0.5 rounded-full uppercase">
-                      DISCOVER WEEKLY
-                    </span>
-                    <h3 className="text-base font-extrabold text-white mt-2 line-clamp-1">{featuredSong.name}</h3>
-                    <p className="text-[11px] text-gray-300 line-clamp-1 mt-0.5">By {featuredSong.primaryArtists}</p>
-                    <p className="text-[10px] text-gray-400 mt-0.5">Lossless 3D spatial staging.</p>
-                    <button
-                      onClick={() => playTrack(featuredSong)}
-                      className="mt-3.5 w-10 h-10 rounded-full bg-gradient-to-r from-[#EF4444] to-rose-600 text-white flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-[0_0_15px_rgba(239,68,68,0.5)] cursor-pointer"
-                    >
-                      <Play className="w-5 h-5 fill-white translate-x-0.5" />
-                    </button>
-                  </div>
-                  <img
-                    src={featuredSong.imageUrl}
-                    alt={featuredSong.name}
-                    className="w-24 h-24 rounded-2xl object-cover border border-white/10 shadow-2xl flex-shrink-0"
-                  />
-                </div>
-              </div>
+              <Hero3DVisualizer song={featuredSong} />
             )}
 
             {/* Jump Back In Shelf (Horizontal 3D Carousel) */}
             <div className="mt-2">
               <h2 className="text-sm font-bold text-white mb-3">Jump Back In</h2>
-              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-3 perspective-stage">
                 {songs.slice(0, 8).map((song) => (
-                  <div
+                  <TiltCard3D
                     key={`shelf_${song.id}`}
+                    depth={12}
                     onClick={() => playTrack(song)}
-                    className="w-32 flex-shrink-0 bg-[#121217] p-2.5 rounded-xl border border-white/5 hover:border-[#EF4444]/40 transition cursor-pointer"
+                    className="w-32 flex-shrink-0 bg-[#0E0E14] p-2.5 rounded-2xl border border-white/5 hover:border-[#EF4444]/40"
                   >
-                    <img src={song.imageUrl} alt={song.name} className="w-full h-28 object-cover rounded-lg" />
+                    <img src={song.imageUrl} alt={song.name} className="w-full h-28 object-cover rounded-xl shadow-lg" />
                     <p className="text-xs font-bold text-white truncate mt-2">{song.name}</p>
-                    <p className="text-[10px] text-gray-400 truncate mt-0.5">{song.primaryArtists}</p>
-                  </div>
+                    <p className="text-[10px] text-zinc-400 truncate mt-0.5">{song.primaryArtists}</p>
+                  </TiltCard3D>
                 ))}
               </div>
             </div>

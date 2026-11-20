@@ -56,18 +56,23 @@ export const NowPlayingView: React.FC<Props> = ({ onClose }) => {
       </div>
 
       {/* 3D Floating Stage with Tilted Vinyl Turntable */}
-      <div className="relative z-10 flex flex-col items-center justify-center my-auto px-6 py-4">
+      <div className="relative z-10 flex flex-col items-center justify-center my-auto px-6 py-6 perspective-[1200px]">
         <div
-          style={{ transform: 'rotateX(20deg) rotateZ(-6deg)' }}
-          className="relative w-64 h-64 rounded-full p-2.5 bg-gradient-to-tr from-white/10 via-zinc-800 to-white/5 border-2 border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.9),0_0_40px_rgba(239,68,68,0.35)] transition-transform duration-500"
+          style={{
+            transform: 'rotateX(22deg) rotateY(-8deg) translateZ(40px)',
+            transformStyle: 'preserve-3d'
+          }}
+          className="relative w-64 h-64 sm:w-[272px] sm:h-[272px] rounded-full p-2.5 bg-gradient-to-tr from-white/10 via-zinc-800 to-white/5 border-2 border-[#EF4444]/40 shadow-[0_35px_70px_rgba(0,0,0,0.95),0_0_50px_rgba(239,68,68,0.4)] transition-transform duration-700 hover:rotate-x-[15deg]"
         >
           <img
             src={currentTrack.imageUrl}
             alt={currentTrack.name}
             className={`w-full h-full rounded-full object-cover shadow-2xl ${isPlaying ? 'animate-[spin_20s_linear_infinite]' : ''}`}
           />
-          <div className="absolute inset-0 rounded-full border-4 border-black/50 pointer-events-none" />
-          <div className="absolute w-10 h-10 rounded-full bg-[#040406] border-2 border-[#EF4444]/60 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-inner pointer-events-none" />
+          {/* Concentric Vinyl Grooves */}
+          <div className="absolute inset-3 rounded-full border border-black/40 pointer-events-none" />
+          <div className="absolute inset-8 rounded-full border border-white/5 pointer-events-none" />
+          <div className="absolute w-12 h-12 rounded-full bg-[#040406] border-2 border-[#EF4444] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-inner pointer-events-none" />
         </div>
       </div>
 
