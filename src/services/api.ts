@@ -3,21 +3,17 @@ export interface Song {
   name: string;
   album: string;
   year: string;
-  duration: number; // in seconds
+  duration: number;
   label: string;
   primaryArtists: string;
-  imageUrl: string; // Guaranteed 500x500 CDN URL
-  streamUrl: string; // High-bitrate 320kbps HTTPS URL
+  imageUrl: string;
+  streamUrl: string;
   language: string;
-  title?: string;
-  audioUrl?: string;
-  image?: any;
-  [key: string]: any;
 }
 
 export const FALLBACK_CATALOG: Song[] = [
   {
-    id: "sp_1",
+    id: "rx_3d_1",
     name: "Tu Mil Jaaye (From \"KING\")",
     album: "KING",
     year: "2026",
@@ -29,7 +25,7 @@ export const FALLBACK_CATALOG: Song[] = [
     language: "hindi"
   },
   {
-    id: "sp_2",
+    id: "rx_3d_2",
     name: "295",
     album: "Moosetape",
     year: "2021",
@@ -41,7 +37,7 @@ export const FALLBACK_CATALOG: Song[] = [
     language: "punjabi"
   },
   {
-    id: "sp_3",
+    id: "rx_3d_3",
     name: "Lollipop Lagelu",
     album: "Superhit Bhojpuri",
     year: "2015",
@@ -53,7 +49,7 @@ export const FALLBACK_CATALOG: Song[] = [
     language: "bhojpuri"
   },
   {
-    id: "sp_4",
+    id: "rx_3d_4",
     name: "Apna Bana Le",
     album: "Bhediya",
     year: "2022",
@@ -65,66 +61,44 @@ export const FALLBACK_CATALOG: Song[] = [
     language: "hindi"
   },
   {
-    id: "sp_5",
+    id: "rx_3d_5",
     name: "Gehra Hua",
     album: "Dhurandhar",
     year: "2025",
     duration: 198,
     label: "T-Series",
     primaryArtists: "Shashwat Sachdev, Arijit Singh",
-    imageUrl: "https://c.saavncdn.com/450/Gehra-Hua-From-Dhurandhar-Hindi-2025-20251205154217-500x500.jpg",
-    streamUrl: "https://aac.saavncdn.com/450/fbkJws0PfUuV6q6J9ejr8RC0xbeonCIF_320.mp4",
-    language: "hindi"
-  },
-  {
-    id: "sp_6",
-    name: "Kalyani Remix",
-    album: "Kalyani Special Edition",
-    year: "2024",
-    duration: 220,
-    label: "Singh Music",
-    primaryArtists: "DJ Chetas, Lijo George",
-    imageUrl: "https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg",
-    streamUrl: "https://aac.saavncdn.com/179/ee99b14844e2699aad400fa1e946c0ed_320.mp4",
+    imageUrl: "https://c.saavncdn.com/264/Dhurandhar-Hindi-2025-20250108151234-500x500.jpg",
+    streamUrl: "https://aac.saavncdn.com/264/Gehra-Hua-320.mp4",
     language: "hindi"
   }
 ];
 
-export const BACKUP_SONGS = FALLBACK_CATALOG;
-export const DEFAULT_FALLBACK_TRACKS = FALLBACK_CATALOG;
-
-export const decodeHtml = (str: string): string => {
+const decodeHtml = (str: string): string => {
   if (typeof window === 'undefined') return str || '';
   const txt = document.createElement('textarea');
   txt.innerHTML = str;
   return txt.value;
 };
 
-export const decodeText = decodeHtml;
-
-export const extract500Image = (item: any): string => {
+const extract500Image = (item: any): string => {
   const images = item.image || item.images || item.album_image;
   if (Array.isArray(images) && images.length > 0) {
     const highest = images[images.length - 1];
     const url = typeof highest === 'string' ? highest : highest?.url || highest?.link || '';
-    if (url) return url.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
+    if (url) return url.replace('50x50', '500x500').replace('150x150', '500x500');
   }
   if (typeof images === 'string' && images.startsWith('http')) {
-    return images.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
+    return images.replace('50x50', '500x500').replace('150x150', '500x500');
   }
-  if (item.imageUrl && typeof item.imageUrl === 'string') {
-    return item.imageUrl.replace('50x50', '500x500').replace('150x150', '500x500').replace('http://', 'https://');
-  }
-  return 'https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg';
+  return 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80';
 };
 
-export const extractRealCover = extract500Image;
-
-export const extractStream = (down: any, fallback?: string): string => {
+const extractStream = (down: any, fallback?: string): string => {
   if (Array.isArray(down) && down.length > 0) {
-    const q320 = down.find((d: any) => d.quality === '320kbps' || d.bitrate === '320kbps' || d.quality === '320');
+    const q320 = down.find((d: any) => d.quality === '320kbps' || d.bitrate === '320kbps');
     if (q320?.url || q320?.link) return (q320.url || q320.link).replace('http://', 'https://');
-    const q160 = down.find((d: any) => d.quality === '160kbps' || d.bitrate === '160kbps' || d.quality === '160');
+    const q160 = down.find((d: any) => d.quality === '160kbps' || d.bitrate === '160kbps');
     if (q160?.url || q160?.link) return (q160.url || q160.link).replace('http://', 'https://');
     const last = down[down.length - 1];
     return (last?.url || last?.link || '').replace('http://', 'https://');
@@ -132,31 +106,20 @@ export const extractStream = (down: any, fallback?: string): string => {
   return (fallback || '').replace('http://', 'https://');
 };
 
-const parseDuration = (raw: any): number => {
-  if (typeof raw === 'number' && raw > 0) return raw;
-  if (typeof raw === 'string') {
-    const parsed = parseInt(raw, 10);
-    if (!isNaN(parsed) && parsed > 0) return parsed;
-  }
-  return 210;
-};
-
-export const fetchSongsByQuery = async (query: string, page: number = 1): Promise<Song[]> => {
+export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
   if (!query || !query.trim()) return FALLBACK_CATALOG;
 
   const clean = encodeURIComponent(query.trim());
   const endpoints = [
-    `https://saavnapi-beta.vercel.app/search/songs?query=${clean}&page=${page}&limit=40`,
-    `https://jiosaavn-api.vercel.app/search?query=${clean}&page=${page}`,
-    `https://saavn.dev/api/search/songs?query=${clean}&page=${page}&limit=40`,
-    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${clean}&page=${page}&limit=40`
+    `https://saavnapi-beta.vercel.app/search/songs?query=${clean}&page=1&limit=40`,
+    `https://saavn.dev/api/search/songs?query=${clean}&page=1&limit=40`,
+    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${clean}&page=1&limit=40`
   ];
 
   for (const url of endpoints) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
-
       const res = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
 
@@ -170,7 +133,7 @@ export const fetchSongsByQuery = async (query: string, page: number = 1): Promis
           name: decodeHtml(item.name || item.title || item.song || 'Song'),
           album: decodeHtml(item.album?.name || item.album || 'Single'),
           year: String(item.year || '2026'),
-          duration: parseDuration(item.duration),
+          duration: Number(item.duration) || 210,
           label: item.label || '',
           primaryArtists: decodeHtml(item.primaryArtists || item.singers || item.artist || 'Various Artists'),
           imageUrl: extract500Image(item),
@@ -181,19 +144,9 @@ export const fetchSongsByQuery = async (query: string, page: number = 1): Promis
         if (parsed.length > 0) return parsed;
       }
     } catch {
-      // try next mirror
+      // try next
     }
   }
 
   return FALLBACK_CATALOG;
 };
-
-export const fetchRecommendations = async (artistOrGenre: string): Promise<Song[]> => {
-  if (!artistOrGenre || !artistOrGenre.trim()) return FALLBACK_CATALOG;
-  const primary = artistOrGenre.split(',')[0].trim();
-  const query = `${primary} Hits`;
-  return fetchSongsByQuery(query);
-};
-
-export const fetchArtistRadio = fetchRecommendations;
-export const searchSongs = fetchSongsByQuery;

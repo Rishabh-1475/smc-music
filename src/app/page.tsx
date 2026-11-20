@@ -1,62 +1,26 @@
 'use client';
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Heart, Play, Pause, ExternalLink, Settings } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Heart, Play, User, Compass, Music, Home as HomeIcon } from 'lucide-react';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { NowPlayingView } from '@/components/NowPlayingView';
 import { GalaxyVisualizer } from '@/components/GalaxyVisualizer';
 import { LibraryView } from '@/components/LibraryView';
-import { ProfileView } from '@/components/ProfileView';
 import { MiniPlayer } from '@/components/MiniPlayer';
-import { BottomNav, NavTab } from '@/components/BottomNav';
 import { fetchSongsByQuery, Song, FALLBACK_CATALOG } from '@/services/api';
 import { usePlayerStore } from '@/store/playerStore';
 
-export default function Home() {
+export default function App() {
   const [userName, setUserName] = useState('Rishabh');
-  const [activeTab, setActiveTab] = useState<NavTab>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'galaxy' | 'library' | 'profile'>('home');
   const [category, setCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [songs, setSongs] = useState<Song[]>(FALLBACK_CATALOG);
+  const [loading, setLoading] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
   const { currentTrack, isPlaying, playTrack, setQueue, recents } = usePlayerStore();
 
   const filterChips = ['All', 'Music', 'Podcasts', 'Gym Phonk', 'Punjabi', 'Bhojpuri'];
-
-  const categoryQueries: Record<string, string> = {
-    All: 'Bollywood Trending Hits',
-    Music: 'Top Hindi Movie Songs',
-    Podcasts: 'Best Motivation Podcasts',
-    'Gym Phonk': 'Phonk Gym Workout',
-    Punjabi: 'Punjabi Top Hits',
-    Bhojpuri: 'Bhojpuri Superhits'
-  };
-
-  // Dynamic Time-of-Day Greeting
-  const greeting = useMemo(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
-  }, []);
-
-  // Format Duration Helper
-  const formatDuration = (sec: number | string) => {
-    const num = typeof sec === 'number' ? sec : parseInt(String(sec), 10) || 210;
-    const m = Math.floor(num / 60);
-    const s = Math.floor(num % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-  };
-
-  // Quick Access Tiles: LRU Recents from playerStore, fallback to first 6 songs
-  const quickAccessSongs = useMemo(() => {
-    if (recents && recents.length >= 6) {
-      return recents.slice(0, 6);
-    }
-    const combined = [...(recents || []), ...songs];
-    const unique = Array.from(new Map(combined.map((s) => [s.id, s])).values());
-    return unique.slice(0, 6);
-  }, [recents, songs]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -72,322 +36,289 @@ export default function Home() {
 
   useEffect(() => {
     let active = true;
-    const q = searchQuery.trim() || (categoryQueries[category] || `${category} Hits`);
-
-    fetchSongsByQuery(q)
-      .then((res) => {
-        if (active) {
-          const list = res.length > 0 ? res : FALLBACK_CATALOG;
-          setSongs(list);
-          setQueue(list);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setSongs(FALLBACK_CATALOG);
-          setQueue(FALLBACK_CATALOG);
-        }
-      });
-
+    setLoading(true);
+    const q = searchQuery.trim() || (category === 'All' ? 'Trending India Hits 2026' : `${category} Songs 2026`);
+    fetchSongsByQuery(q).then((res) => {
+      if (active) {
+        const list = res.length > 0 ? res : FALLBACK_CATALOG;
+        setSongs(list);
+        setQueue(list);
+        setLoading(false);
+      }
+    });
     return () => {
       active = false;
     };
   }, [category, searchQuery, setQueue]);
 
+  const featuredSong = songs[0] || FALLBACK_CATALOG[0];
+  const quickAccessSongs = recents.length >= 6 ? recents.slice(0, 6) : songs.slice(0, 6);
+
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex justify-center selection:bg-[#E11D48] selection:text-white">
+    <div className="min-h-screen bg-[#040406] text-white flex justify-center selection:bg-[#EF4444] selection:text-white select-none">
       <OnboardingModal onComplete={(name) => setUserName(name)} />
 
-      {/* 430px Mobile Shell */}
-      <div className="w-full max-w-[430px] min-h-screen bg-[#070709] border-x border-[#262633] pb-36 relative select-none overflow-x-hidden flex flex-col">
-        {/* Dynamic Header */}
-        <header className="px-4 pt-6 pb-2 flex items-center justify-between">
+      {/* 3D Mobile Shell Frame */}
+      <div className="w-full max-w-[430px] md:max-w-md min-h-screen bg-[#070709] border-x border-[#1F1F2A] relative flex flex-col pb-36">
+        
+        {/* Top App Bar with Crimson Aura */}
+        <header className="px-5 pt-8 pb-3 flex items-center justify-between border-b border-white/5 relative z-10">
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setActiveTab('profile')}
-              className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-[#E11D48] to-[#EF4444] shadow-[0_0_15px_rgba(225,29,72,0.4)] cursor-pointer transition hover:scale-105 active:scale-95"
-              title="View Profile"
-            >
+            <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-[#EF4444] via-rose-600 to-amber-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]">
               <img
                 src="/creator.jpg"
                 alt="Profile"
-                className="w-full h-full rounded-full object-cover bg-neutral-900"
+                className="w-full h-full rounded-full object-cover"
                 onError={(e) => {
-                  e.currentTarget.src =
-                    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100';
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100';
                 }}
               />
-            </button>
+            </div>
             <div>
-              <h1 className="text-base font-bold text-white leading-tight">
-                {greeting}, {userName}
-              </h1>
-              <p className="text-[10px] font-mono tracking-wider text-[#94A3B8] uppercase">
-                RHYTHMX LOSSLESS
-              </p>
+              <h1 className="text-base font-extrabold text-white">Hi, {userName}</h1>
+              <p className="text-[11px] text-[#EF4444] font-mono tracking-wider">RHYTHMX 3D LOSSLESS</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[#94A3B8]">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab('library')}
-              className="p-2 hover:text-[#E11D48] transition active:scale-90 cursor-pointer"
-              title="Liked Songs"
+              className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-[#EF4444] transition cursor-pointer"
             >
-              <Heart className="w-5 h-5" />
+              <Heart className="w-4 h-4" />
             </button>
             <button
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.open('https://www.instagram.com/rish4bhsiingh/', '_blank');
-                }
-              }}
-              className="p-2 hover:text-white transition active:scale-90 cursor-pointer"
-              title="Settings & Instagram"
+              onClick={() => setActiveTab('profile')}
+              className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-[#EF4444] transition cursor-pointer"
             >
-              <Settings className="w-5 h-5" />
+              <User className="w-4 h-4" />
             </button>
           </div>
         </header>
 
-        {/* TAB 1: HOME */}
+        {/* 3D Holographic Search Box */}
+        <div className="px-5 py-3 relative z-10">
+          <div className="relative flex items-center">
+            <Search className="absolute left-3.5 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search 50+ songs, artists, Punjabi, Bhojpuri, Phonk..."
+              className="w-full pl-10 pr-10 py-2.5 rounded-full bg-[#121217] border border-[#EF4444]/25 text-white placeholder-gray-500 text-xs focus:outline-none focus:border-[#EF4444] focus:shadow-[0_0_15px_rgba(239,68,68,0.25)] transition"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-3.5 text-xs text-gray-400 hover:text-white cursor-pointer">✕</button>
+            )}
+          </div>
+        </div>
+
+        {/* TAB 1: HOME FEED */}
         {activeTab === 'home' && (
-          <div className="flex-1 px-4">
-            {/* Live Search Input */}
-            <div className="relative flex items-center my-2.5">
-              <Search className="absolute left-3.5 w-4 h-4 text-[#94A3B8]" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search songs, artists, or albums..."
-                className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-[#121217] border border-[#262633] text-white text-xs placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#E11D48] transition"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 text-xs text-[#94A3B8] hover:text-white cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {/* Filter Chips */}
+          <div className="flex-1 px-5">
+            {/* Filter Pills */}
             <div className="py-2 flex gap-2 overflow-x-auto no-scrollbar">
-              {filterChips.map((chip) => {
-                const isActive = category === chip && !searchQuery;
-                return (
-                  <button
-                    key={chip}
-                    onClick={() => {
-                      setSearchQuery('');
-                      setCategory(chip);
-                    }}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
-                      isActive
-                        ? 'bg-[#E11D48] text-white font-bold shadow-[0_0_15px_rgba(225,29,72,0.4)]'
-                        : 'bg-[#181822] text-[#94A3B8] hover:bg-[#1E1E26] hover:text-white border border-[#262633]'
-                    }`}
-                  >
-                    {chip}
-                  </button>
-                );
-              })}
+              {filterChips.map((chip) => (
+                <button
+                  key={chip}
+                  onClick={() => { setSearchQuery(''); setCategory(chip); }}
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                    category === chip && !searchQuery
+                      ? 'bg-gradient-to-r from-[#EF4444] to-rose-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]'
+                      : 'bg-white/5 text-gray-300 border border-white/5 hover:bg-white/10'
+                  }`}
+                >
+                  {chip}
+                </button>
+              ))}
             </div>
 
-            {/* Spotify 2-Column Quick Access Grid (6 Tiles, h-14) */}
-            <div className="grid grid-cols-2 gap-2 mt-2.5">
+            {/* 3D Quick-Access Grid (Spotify 6-Tile Feature with 3D Depth) */}
+            <div className="grid grid-cols-2 gap-2 mt-3 perspective-[1000px]">
               {quickAccessSongs.map((song) => {
                 const isCurrent = currentTrack?.id === song.id;
                 return (
                   <div
-                    key={`qa_${song.id}`}
+                    key={`tile_${song.id}`}
                     onClick={() => playTrack(song)}
-                    className="flex items-center h-14 bg-[#121217] hover:bg-[#1E1E26] border border-[#262633]/60 rounded-lg overflow-hidden cursor-pointer transition shadow group relative"
+                    className={`flex items-center rounded-xl overflow-hidden cursor-pointer transition-all duration-300 border ${
+                      isCurrent
+                        ? 'bg-[#1C1822] border-[#EF4444] shadow-[0_5px_15px_rgba(239,68,68,0.25)]'
+                        : 'bg-[#121217] border-white/5 hover:border-white/15'
+                    }`}
                   >
-                    <img
-                      src={song.imageUrl}
-                      alt={song.name}
-                      className="w-14 h-14 object-cover flex-shrink-0 bg-[#050505]"
-                      onError={(e) => {
-                        e.currentTarget.src =
-                          'https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg';
-                      }}
-                    />
-                    <div className="px-2.5 min-w-0 flex-1">
-                      <p
-                        className={`text-xs font-bold truncate ${
-                          isCurrent ? 'text-[#E11D48]' : 'text-white'
-                        }`}
-                      >
-                        {song.name}
-                      </p>
-                    </div>
-
-                    {/* Animated Crimson 3-bar equalizer indicator */}
-                    {isCurrent && isPlaying && (
-                      <div className="absolute right-2 flex items-end gap-0.5 h-3">
-                        <span className="w-0.5 bg-[#E11D48] h-full animate-[bounce_0.8s_infinite]" />
-                        <span className="w-0.5 bg-[#E11D48] h-2/3 animate-[bounce_0.6s_infinite]" />
-                        <span className="w-0.5 bg-[#E11D48] h-4/5 animate-[bounce_0.7s_infinite]" />
-                      </div>
-                    )}
+                    <img src={song.imageUrl} alt={song.name} className="w-12 h-12 object-cover flex-shrink-0" />
+                    <p className={`text-xs font-bold px-2.5 truncate flex-1 ${isCurrent ? 'text-[#EF4444]' : 'text-white'}`}>
+                      {song.name}
+                    </p>
                   </div>
                 );
               })}
             </div>
 
-            {/* Shelf: Recently Played (Horizontal Carousel, 130px cards) */}
-            {recents && recents.length > 0 && (
-              <div className="mt-6">
-                <h2 className="text-sm font-bold text-white mb-2.5 tracking-tight flex items-center justify-between">
-                  <span>Recently Played</span>
-                  <span className="text-[10px] font-mono text-[#94A3B8]">LRU CACHE</span>
-                </h2>
-                <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
-                  {recents.slice(0, 10).map((song) => (
-                    <div
-                      key={`recent_${song.id}`}
-                      onClick={() => playTrack(song)}
-                      className="w-[130px] flex-shrink-0 bg-[#121217] hover:bg-[#1E1E26] border border-[#262633]/50 p-2.5 rounded-xl transition cursor-pointer shadow-md"
+            {/* 3D Curated Hero Showcase Card */}
+            {!searchQuery && (
+              <div className="py-4 perspective-[1000px]">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Curated &amp; trending</p>
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#2E0B14] via-[#16080E] to-[#0A0A0E] border border-[#EF4444]/30 p-5 flex items-center justify-between shadow-[0_20px_40px_rgba(0,0,0,0.8),0_0_25px_rgba(239,68,68,0.2)]">
+                  <div className="flex-1 pr-3">
+                    <span className="text-[9px] font-bold text-rose-300 bg-white/10 px-2 py-0.5 rounded-full uppercase">
+                      DISCOVER WEEKLY
+                    </span>
+                    <h3 className="text-base font-extrabold text-white mt-2 line-clamp-1">{featuredSong.name}</h3>
+                    <p className="text-[11px] text-gray-300 line-clamp-1 mt-0.5">By {featuredSong.primaryArtists}</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Lossless 3D spatial staging.</p>
+                    <button
+                      onClick={() => playTrack(featuredSong)}
+                      className="mt-3.5 w-10 h-10 rounded-full bg-gradient-to-r from-[#EF4444] to-rose-600 text-white flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-[0_0_15px_rgba(239,68,68,0.5)] cursor-pointer"
                     >
-                      <img
-                        src={song.imageUrl}
-                        alt={song.name}
-                        className="w-full h-[110px] object-cover rounded-lg bg-[#050505] shadow"
-                        onError={(e) => {
-                          e.currentTarget.src =
-                            'https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg';
-                        }}
-                      />
-                      <p className="text-xs font-bold text-white truncate mt-2">{song.name}</p>
-                      <p className="text-[10px] text-[#94A3B8] truncate mt-0.5">
-                        {song.primaryArtists}
-                      </p>
-                    </div>
-                  ))}
+                      <Play className="w-5 h-5 fill-white translate-x-0.5" />
+                    </button>
+                  </div>
+                  <img
+                    src={featuredSong.imageUrl}
+                    alt={featuredSong.name}
+                    className="w-24 h-24 rounded-2xl object-cover border border-white/10 shadow-2xl flex-shrink-0"
+                  />
                 </div>
               </div>
             )}
 
-            {/* Shelf: Made For You (Horizontal Carousel, 130px cards) */}
-            <div className="mt-6">
-              <h2 className="text-sm font-bold text-white mb-2.5 tracking-tight flex items-center justify-between">
-                <span>Made For You</span>
-                <span className="text-[10px] font-mono text-[#E11D48]">LOSSLESS 320</span>
-              </h2>
-              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+            {/* Jump Back In Shelf (Horizontal 3D Carousel) */}
+            <div className="mt-2">
+              <h2 className="text-sm font-bold text-white mb-3">Jump Back In</h2>
+              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
                 {songs.slice(0, 8).map((song) => (
                   <div
                     key={`shelf_${song.id}`}
                     onClick={() => playTrack(song)}
-                    className="w-[130px] flex-shrink-0 bg-[#121217] hover:bg-[#1E1E26] border border-[#262633]/50 p-2.5 rounded-xl transition cursor-pointer shadow-md"
+                    className="w-32 flex-shrink-0 bg-[#121217] p-2.5 rounded-xl border border-white/5 hover:border-[#EF4444]/40 transition cursor-pointer"
                   >
-                    <img
-                      src={song.imageUrl}
-                      alt={song.name}
-                      className="w-full h-[110px] object-cover rounded-lg bg-[#050505] shadow"
-                      onError={(e) => {
-                        e.currentTarget.src =
-                          'https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg';
-                      }}
-                    />
+                    <img src={song.imageUrl} alt={song.name} className="w-full h-28 object-cover rounded-lg" />
                     <p className="text-xs font-bold text-white truncate mt-2">{song.name}</p>
-                    <p className="text-[10px] text-[#94A3B8] truncate mt-0.5">
-                      {song.primaryArtists}
-                    </p>
+                    <p className="text-[10px] text-gray-400 truncate mt-0.5">{song.primaryArtists}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Top Playlist Feed ("Jump Back In") */}
-            <div className="mt-6 mb-4">
-              <h2 className="text-sm font-bold text-white mb-3 tracking-tight">
-                {searchQuery ? `Search Results for "${searchQuery}"` : 'Jump Back In'}
-              </h2>
-              <div className="flex flex-col gap-2">
-                {songs.map((song, idx) => {
-                  const isCurrent = currentTrack?.id === song.id;
-                  return (
-                    <div
-                      key={`list_${song.id}_${idx}`}
-                      onClick={() => playTrack(song)}
-                      className={`flex items-center justify-between p-2 rounded-xl transition cursor-pointer border ${
-                        isCurrent
-                          ? 'bg-[#181822] border-[#262633]'
-                          : 'bg-[#121217]/60 hover:bg-[#121217] border-transparent hover:border-[#262633]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <img
-                          src={song.imageUrl}
-                          alt={song.name}
-                          className="w-11 h-11 rounded-lg object-cover flex-shrink-0 bg-[#050505] border border-white/5"
-                          onError={(e) => {
-                            e.currentTarget.src =
-                              'https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg';
-                          }}
-                        />
-                        <div className="min-w-0 flex-1 pr-2">
-                          <p
-                            className={`text-xs font-semibold truncate ${
-                              isCurrent ? 'text-[#E11D48]' : 'text-white'
-                            }`}
-                          >
+            {/* Vertical Playlist Feed */}
+            <div className="mt-4 mb-4">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-sm font-bold text-white tracking-wide">
+                  {searchQuery ? `Results for "${searchQuery}"` : (category === 'All' ? 'Top daily playlists' : `${category} Feed`)}
+                </h2>
+                <span className="text-xs text-[#EF4444] font-mono">{songs.length} Tracks</span>
+              </div>
+
+              {loading ? (
+                <div className="py-12 text-center text-xs text-gray-500 font-mono">
+                  RETRIEVING SPATIAL FEEDS...
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {songs.map((song) => {
+                    const isCurrent = currentTrack?.id === song.id;
+                    return (
+                      <div
+                        key={song.id}
+                        onClick={() => playTrack(song)}
+                        className={`flex items-center justify-between p-2.5 rounded-xl transition cursor-pointer border ${
+                          isCurrent
+                            ? 'bg-[#181218] border-[#EF4444]/60 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+                            : 'bg-[#121217]/70 border-white/5 hover:border-white/15'
+                        }`}
+                      >
+                        <img src={song.imageUrl} alt={song.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                        <div className="flex-1 px-3 min-w-0">
+                          <p className={`text-xs font-semibold truncate ${isCurrent ? 'text-[#EF4444]' : 'text-white'}`}>
                             {song.name}
                           </p>
-                          <p className="text-[11px] text-[#94A3B8] truncate mt-0.5">
-                            {song.primaryArtists}
-                          </p>
+                          <p className="text-[10px] text-gray-400 truncate mt-0.5">By {song.primaryArtists}</p>
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="text-[10px] font-mono text-[#94A3B8]">
-                          {formatDuration(song.duration)}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            playTrack(song);
-                          }}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer ${
-                            isCurrent && isPlaying ? 'text-[#E11D48]' : 'text-[#94A3B8] hover:text-white'
-                          }`}
-                        >
-                          {isCurrent && isPlaying ? (
-                            <Pause className="w-4 h-4 fill-current stroke-current" />
-                          ) : (
-                            <Play className="w-4 h-4 fill-current stroke-current translate-x-0.5" />
-                          )}
+                        <button className={`w-8 h-8 rounded-full flex items-center justify-center ${isCurrent && isPlaying ? 'text-[#EF4444]' : 'text-gray-400'}`}>
+                          <Play className="w-4 h-4 fill-current" />
                         </button>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* TAB 2: GALAXY */}
+        {/* TAB 2: 3D MUSIC GALAXY */}
         {activeTab === 'galaxy' && <GalaxyVisualizer songs={songs} />}
 
-        {/* TAB 3: LIBRARY */}
+        {/* TAB 3: LIKED SONGS */}
         {activeTab === 'library' && <LibraryView />}
 
         {/* TAB 4: PROFILE */}
-        {activeTab === 'profile' && <ProfileView />}
+        {activeTab === 'profile' && (
+          <div className="p-6 flex flex-col items-center">
+            <div className="w-20 h-20 rounded-full border-2 border-[#EF4444] overflow-hidden mb-3 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+              <img src="/creator.jpg" alt="Profile" className="w-full h-full object-cover" />
+            </div>
+            <h2 className="text-lg font-bold text-white">{userName}</h2>
+            <p className="text-xs text-gray-400 mt-1">Lead Developer &amp; Architect</p>
+            <div className="w-full mt-6 bg-[#121217] border border-white/10 rounded-2xl p-4 flex justify-around text-center">
+              <div>
+                <p className="text-lg font-extrabold text-[#EF4444]">320 KBPS</p>
+                <p className="text-[10px] text-gray-400">Audio Fidelity</p>
+              </div>
+              <div className="w-px bg-white/10" />
+              <div>
+                <p className="text-lg font-extrabold text-white">Lossless 3D</p>
+                <p className="text-[10px] text-gray-400">Spatial Stage</p>
+              </div>
+            </div>
+            <a
+              href="https://www.instagram.com/rish4bhsiingh/"
+              target="_blank"
+              rel="noreferrer"
+              className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-[#EF4444] to-rose-600 text-white font-bold text-xs text-center shadow-[0_0_20px_rgba(239,68,68,0.4)] active:scale-95 transition"
+            >
+              Follow on Instagram (@rish4bhsiingh)
+            </a>
+          </div>
+        )}
 
-        {/* Carlos Han MiniPlayer */}
+        {/* Suspended 3D MiniPlayer Dock */}
         <MiniPlayer onOpenNowPlaying={() => setIsPlayerOpen(true)} />
 
-        {/* Bottom Navigation Dock */}
-        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* Floating 3D Navigation Bar */}
+        <nav className="fixed bottom-0 left-0 right-0 max-w-[430px] md:max-w-md mx-auto h-16 bg-[#070709]/95 backdrop-blur-xl border-t border-[#1F1F2A] flex items-center justify-around z-30 px-4">
+          <button
+            onClick={() => setActiveTab('home')}
+            className={`text-xs flex flex-col items-center gap-1 transition cursor-pointer ${activeTab === 'home' ? 'text-[#EF4444]' : 'text-gray-400'}`}
+          >
+            <HomeIcon className="w-4 h-4" />
+            <span className="text-[10px]">Home</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('galaxy')}
+            className={`text-xs flex flex-col items-center gap-1 transition cursor-pointer ${activeTab === 'galaxy' ? 'text-[#EF4444]' : 'text-gray-400'}`}
+          >
+            <Compass className="w-4 h-4" />
+            <span className="text-[10px]">Galaxy</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('library')}
+            className={`text-xs flex flex-col items-center gap-1 transition cursor-pointer ${activeTab === 'library' ? 'text-[#EF4444]' : 'text-gray-400'}`}
+          >
+            <Music className="w-4 h-4" />
+            <span className="text-[10px]">Library</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`text-xs flex flex-col items-center gap-1 transition cursor-pointer ${activeTab === 'profile' ? 'text-[#EF4444]' : 'text-gray-400'}`}
+          >
+            <User className="w-4 h-4" />
+            <span className="text-[10px]">Profile</span>
+          </button>
+        </nav>
 
-        {/* Full-Screen Now Playing View Modal */}
         {isPlayerOpen && <NowPlayingView onClose={() => setIsPlayerOpen(false)} />}
       </div>
     </div>
