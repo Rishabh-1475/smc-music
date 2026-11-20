@@ -17,7 +17,7 @@ export interface Song {
 
 export const FALLBACK_CATALOG: Song[] = [
   {
-    id: "rx_1",
+    id: "sp_1",
     name: "Tu Mil Jaaye (From \"KING\")",
     album: "KING",
     year: "2026",
@@ -29,7 +29,7 @@ export const FALLBACK_CATALOG: Song[] = [
     language: "hindi"
   },
   {
-    id: "rx_2",
+    id: "sp_2",
     name: "295",
     album: "Moosetape",
     year: "2021",
@@ -41,7 +41,7 @@ export const FALLBACK_CATALOG: Song[] = [
     language: "punjabi"
   },
   {
-    id: "rx_3",
+    id: "sp_3",
     name: "Lollipop Lagelu",
     album: "Superhit Bhojpuri",
     year: "2015",
@@ -53,7 +53,7 @@ export const FALLBACK_CATALOG: Song[] = [
     language: "bhojpuri"
   },
   {
-    id: "rx_4",
+    id: "sp_4",
     name: "Apna Bana Le",
     album: "Bhediya",
     year: "2022",
@@ -65,7 +65,7 @@ export const FALLBACK_CATALOG: Song[] = [
     language: "hindi"
   },
   {
-    id: "rx_5",
+    id: "sp_5",
     name: "Gehra Hua",
     album: "Dhurandhar",
     year: "2025",
@@ -75,6 +75,18 @@ export const FALLBACK_CATALOG: Song[] = [
     imageUrl: "https://c.saavncdn.com/450/Gehra-Hua-From-Dhurandhar-Hindi-2025-20251205154217-500x500.jpg",
     streamUrl: "https://aac.saavncdn.com/450/fbkJws0PfUuV6q6J9ejr8RC0xbeonCIF_320.mp4",
     language: "hindi"
+  },
+  {
+    id: "sp_6",
+    name: "Blinding Lights",
+    album: "The Highlights",
+    year: "2020",
+    duration: "200",
+    label: "Republic Records",
+    primaryArtists: "The Weeknd",
+    imageUrl: "https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.jpg",
+    streamUrl: "https://aac.saavncdn.com/179/ee99b14844e2699aad400fa1e946c0ed_320.mp4",
+    language: "english"
   }
 ];
 
@@ -110,9 +122,9 @@ export const extractRealCover = extract500Image;
 
 const extractStream = (down: any, fallback?: string): string => {
   if (Array.isArray(down) && down.length > 0) {
-    const q320 = down.find((d: any) => d.quality === '320kbps' || d.bitrate === '320kbps');
+    const q320 = down.find((d: any) => d.quality === '320kbps' || d.bitrate === '320kbps' || d.quality === '320');
     if (q320?.url || q320?.link) return (q320.url || q320.link).replace('http://', 'https://');
-    const q160 = down.find((d: any) => d.quality === '160kbps' || d.bitrate === '160kbps');
+    const q160 = down.find((d: any) => d.quality === '160kbps' || d.bitrate === '160kbps' || d.quality === '160');
     if (q160?.url || q160?.link) return (q160.url || q160.link).replace('http://', 'https://');
     const last = down[down.length - 1];
     return (last?.url || last?.link || '').replace('http://', 'https://');
@@ -165,6 +177,13 @@ export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
   }
 
   return FALLBACK_CATALOG;
+};
+
+export const fetchArtistRadio = async (artistName: string): Promise<Song[]> => {
+  if (!artistName || !artistName.trim()) return FALLBACK_CATALOG;
+  const primary = artistName.split(',')[0].trim();
+  const query = `${primary} Hits`;
+  return fetchSongsByQuery(query);
 };
 
 export const searchSongs = fetchSongsByQuery;

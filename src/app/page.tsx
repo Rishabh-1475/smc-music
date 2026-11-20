@@ -1,6 +1,6 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { Search, Heart, Play, Pause, Settings } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Heart, Play, Pause, Settings, BarChart2 } from 'lucide-react';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { NowPlayingView } from '@/components/NowPlayingView';
 import { GalaxyVisualizer } from '@/components/GalaxyVisualizer';
@@ -18,7 +18,7 @@ export default function Home() {
   const [songs, setSongs] = useState<Song[]>(FALLBACK_CATALOG);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
-  const { currentTrack, isPlaying, playTrack, setQueue } = usePlayerStore();
+  const { currentTrack, isPlaying, playTrack, setQueue, history } = usePlayerStore();
 
   const filterChips = ['All', 'Music', 'Podcasts', 'Gym Phonk', 'Punjabi', 'Bhojpuri'];
 
@@ -30,6 +30,24 @@ export default function Home() {
     Punjabi: 'Punjabi Top Hits',
     Bhojpuri: 'Bhojpuri Superhits'
   };
+
+  // Dynamic Time-of-Day Greeting
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  }, []);
+
+  // Quick Access Tiles: LRU Recents from playerStore, fallback to first 6 songs
+  const quickAccessSongs = useMemo(() => {
+    if (history && history.length >= 6) {
+      return history.slice(0, 6);
+    }
+    const combined = [...(history || []), ...songs];
+    const unique = Array.from(new Map(combined.map((s) => [s.id, s])).values());
+    return unique.slice(0, 6);
+  }, [history, songs]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -58,6 +76,7 @@ export default function Home() {
         setQueue(FALLBACK_CATALOG);
       }
     });
+
     return () => {
       active = false;
     };
@@ -67,10 +86,10 @@ export default function Home() {
     <div className="min-h-screen bg-[#121212] text-white flex justify-center selection:bg-[#1DB954] selection:text-black">
       <OnboardingModal onComplete={(name) => setUserName(name)} />
 
-      {/* Strict Carlos Han Spotify Frame */}
-      <div className="w-full max-w-[430px] md:max-w-md min-h-screen bg-[#121212] border-x border-[#292929] relative flex flex-col pb-36 select-none">
+      {/* Strict Carlos Han Spotify Centered Mobile Shell */}
+      <div className="w-full max-w-[430px] md:max-w-md min-h-screen bg-[#121212] border-x border-[#292929] relative flex flex-col pb-36 select-none overflow-x-hidden">
         
-        {/* Top App Bar */}
+        {/* Top App Bar with Time-Based Greeting */}
         <header className="px-4 pt-6 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full p-0.5 bg-gradient-to-tr from-[#1DB954] to-emerald-400">
@@ -84,22 +103,32 @@ export default function Home() {
               />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white leading-tight">Hi, {userName}</h1>
+              <h1 className="text-lg font-bold text-white leading-tight">
+                {greeting}, {userName}
+              </h1>
               <p className="text-[11px] text-[#B3B3B3]">RhythmX Premium</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 text-[#B3B3B3]">
-            <button onClick={() => setActiveTab('library')} className="p-2 hover:text-white transition">
+            <button
+              onClick={() => setActiveTab('library')}
+              className="p-2 hover:text-white transition active:scale-90"
+              title="Liked Songs"
+            >
               <Heart className="w-5 h-5" />
             </button>
-            <button className="p-2 hover:text-white transition">
+            <button
+              onClick={() => setActiveTab('profile' as any)}
+              className="p-2 hover:text-white transition active:scale-90"
+              title="Settings"
+            >
               <Settings className="w-5 h-5" />
             </button>
           </div>
         </header>
 
-        {/* Tab 1: HOME (Carlos Han Spotify Feed) */}
+        {/* TAB 1: HOME (Carlos Han Spotify Feed) */}
         {activeTab === 'home' && (
           <div className="flex-1 px-4">
             {/* Filter Chips */}
@@ -107,10 +136,13 @@ export default function Home() {
               {filterChips.map((chip) => (
                 <button
                   key={chip}
-                  onClick={() => { setSearchQuery(''); setCategory(chip); }}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
+                  onClick={() => {
+                    setSearchQuery('');
+                    setCategory(chip);
+                  }}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                     category === chip && !searchQuery
-                      ? 'bg-[#1DB954] text-black font-bold'
+                      ? 'bg-[#1DB954] text-black font-bold shadow-md'
                       : 'bg-[#282828] text-white hover:bg-[#333333]'
                   }`}
                 >
@@ -119,36 +151,74 @@ export default function Home() {
               ))}
             </div>
 
-            {/* 2-Column Quick Access Grid (Carlos Han Concept Signature) */}
+            {/* 2-Column Quick Access Grid (The Spotify Signature, h-14, 56px art) */}
             <div className="grid grid-cols-2 gap-2 mt-3">
-              {songs.slice(0, 6).map((song) => {
+              {quickAccessSongs.map((song) => {
                 const isCurrent = currentTrack?.id === song.id;
                 return (
                   <div
-                    key={song.id}
+                    key={`qa_${song.id}`}
                     onClick={() => playTrack(song)}
-                    className="flex items-center bg-[#282828]/80 hover:bg-[#333333] rounded-md overflow-hidden cursor-pointer transition shadow group"
+                    className="flex items-center h-14 bg-[#282828]/85 hover:bg-[#333333] rounded-md overflow-hidden cursor-pointer transition shadow group relative"
                   >
                     <img
                       src={song.imageUrl}
                       alt={song.name}
-                      className="w-12 h-12 object-cover flex-shrink-0 bg-[#181818]"
+                      className="w-14 h-14 object-cover flex-shrink-0 bg-[#181818]"
                       onError={(e) => {
                         e.currentTarget.src = 'https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg';
                       }}
                     />
-                    <p className={`text-xs font-bold px-2.5 truncate flex-1 ${isCurrent ? 'text-[#1DB954]' : 'text-white'}`}>
-                      {song.name}
-                    </p>
+                    <div className="px-2.5 min-w-0 flex-1">
+                      <p className={`text-xs font-bold truncate ${isCurrent ? 'text-[#1DB954]' : 'text-white'}`}>
+                        {song.name}
+                      </p>
+                    </div>
+
+                    {/* Equalizer Wave Indicator if playing */}
+                    {isCurrent && isPlaying && (
+                      <div className="absolute right-2 flex items-end gap-0.5 h-3">
+                        <span className="w-0.5 bg-[#1DB954] h-full animate-[bounce_0.8s_infinite]" />
+                        <span className="w-0.5 bg-[#1DB954] h-2/3 animate-[bounce_0.6s_infinite]" />
+                        <span className="w-0.5 bg-[#1DB954] h-4/5 animate-[bounce_0.7s_infinite]" />
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
 
+            {/* Shelf: Recently Played (Horizontal Carousel, 120px cards) */}
+            {history && history.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-base font-bold text-white mb-3">Recently Played</h2>
+                <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+                  {history.slice(0, 10).map((song) => (
+                    <div
+                      key={`recent_${song.id}`}
+                      onClick={() => playTrack(song)}
+                      className="w-[120px] flex-shrink-0 bg-[#181818] p-2 rounded-lg hover:bg-[#282828] transition cursor-pointer"
+                    >
+                      <img
+                        src={song.imageUrl}
+                        alt={song.name}
+                        className="w-full h-[104px] object-cover rounded-md bg-[#242424]"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg';
+                        }}
+                      />
+                      <p className="text-xs font-bold text-white truncate mt-2">{song.name}</p>
+                      <p className="text-[10px] text-[#B3B3B3] truncate mt-0.5">{song.primaryArtists}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Shelf: Made For You (Horizontal Carousel) */}
             <div className="mt-6">
               <h2 className="text-base font-bold text-white mb-3">Made For You</h2>
-              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
                 {songs.slice(0, 8).map((song) => (
                   <div
                     key={`shelf_${song.id}`}
@@ -170,8 +240,8 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Shelf: Trending Tracks (Vertical Feed) */}
-            <div className="mt-4 mb-4">
+            {/* Shelf: Jump Back In (Vertical Feed) */}
+            <div className="mt-6 mb-4">
               <h2 className="text-base font-bold text-white mb-3">Jump Back In</h2>
               <div className="flex flex-col gap-2">
                 {songs.slice(6).map((song) => {
@@ -203,7 +273,9 @@ export default function Home() {
                           e.stopPropagation();
                           playTrack(song);
                         }}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center ${isCurrent && isPlaying ? 'text-[#1DB954]' : 'text-[#B3B3B3]'}`}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          isCurrent && isPlaying ? 'text-[#1DB954]' : 'text-[#B3B3B3]'
+                        }`}
                       >
                         {isCurrent && isPlaying ? (
                           <Pause className="w-4 h-4 fill-current stroke-current" />
@@ -219,10 +291,10 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab 2: SEARCH */}
+        {/* TAB 2: SEARCH */}
         {activeTab === 'search' && (
           <div className="flex-1 px-4 pt-2">
-            <h1 className="text-xl font-bold text-white mb-3">Search</h1>
+            <h1 className="text-xl font-bold text-white mb-3 tracking-tight">Search</h1>
             <div className="relative flex items-center mb-4">
               <Search className="absolute left-3.5 w-4 h-4 text-black" />
               <input
@@ -257,15 +329,19 @@ export default function Home() {
                         }}
                       />
                       <div className="min-w-0 flex-1 pr-2">
-                        <p className={`text-xs font-semibold truncate ${isCurrent ? 'text-[#1DB954]' : 'text-white'}`}>{song.name}</p>
+                        <p className={`text-xs font-semibold truncate ${isCurrent ? 'text-[#1DB954]' : 'text-white'}`}>
+                          {song.name}
+                        </p>
                         <p className="text-[11px] text-[#B3B3B3] truncate mt-0.5">{song.primaryArtists}</p>
                       </div>
                     </div>
-                    <button className={`w-8 h-8 rounded-full flex items-center justify-center ${isCurrent && isPlaying ? 'text-[#1DB954]' : 'text-[#B3B3B3]'}`}>
+                    <button className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      isCurrent && isPlaying ? 'text-[#1DB954]' : 'text-[#B3B3B3]'
+                    }`}>
                       {isCurrent && isPlaying ? (
-                        <Pause className="w-4 h-4 fill-current" />
+                        <Pause className="w-4 h-4 fill-current stroke-current" />
                       ) : (
-                        <Play className="w-4 h-4 fill-current ml-0.5" />
+                        <Play className="w-4 h-4 fill-current stroke-current ml-0.5" />
                       )}
                     </button>
                   </div>
@@ -275,19 +351,19 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab 3: GALAXY */}
+        {/* TAB 3: GALAXY */}
         {activeTab === 'galaxy' && <GalaxyVisualizer songs={songs} />}
 
-        {/* Tab 4: YOUR LIBRARY */}
+        {/* TAB 4: YOUR LIBRARY */}
         {activeTab === 'library' && <LibraryView />}
 
         {/* Floating Carlos Han MiniPlayer */}
         <MiniPlayer onOpenNowPlaying={() => setIsPlayerOpen(true)} />
 
-        {/* Carlos Han Bottom Navigation */}
+        {/* Bottom Navigation Dock */}
         <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Carlos Han Now Playing Drawer */}
+        {/* Full-Screen Now Playing View Modal */}
         {isPlayerOpen && <NowPlayingView onClose={() => setIsPlayerOpen(false)} />}
       </div>
     </div>

@@ -1,17 +1,21 @@
 import { create } from 'zustand';
-import { Song, FALLBACK_CATALOG, fetchSongsByQuery } from '@/services/api';
+import { Song, FALLBACK_CATALOG, fetchArtistRadio, fetchSongsByQuery } from '@/services/api';
 import { audioEngine } from '@/services/audioService';
 
 interface PlayerState {
   currentTrack: Song | null;
   isPlaying: boolean;
   queue: Song[];
-  historyIds: Set<string>;
+  history: Song[];
   likedSongs: Song[];
   volume: number;
   currentTime: number;
   duration: number;
-  playTrack: (song: Song) => void;
+  repeatMode: 'off' | 'all' | 'one';
+  isShuffle: boolean;
+
+  // Actions
+  playTrack: (song: Song, newQueue?: Song[]) => void;
   togglePlay: () => void;
   playNext: () => void;
   playPrev: () => void;
@@ -19,10 +23,13 @@ interface PlayerState {
   setVolume: (vol: number) => void;
   toggleLike: (song: Song) => void;
   setQueue: (songs: Song[]) => void;
-  checkAndExpandQueue: () => Promise<void>;
+  cycleRepeatMode: () => void;
+  toggleShuffle: () => void;
+  autoPopulateRadio: (song: Song) => Promise<void>;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => {
+  // Attach Audio Engine Subscriptions
   if (typeof window !== 'undefined') {
     audioEngine.subscribeState(() => {
       set({ isPlaying: audioEngine.isPlaying() });
@@ -35,26 +42,69 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     });
   }
 
-  const initialLiked = typeof window !== 'undefined'
-    ? JSON.parse(localStorage.getItem('rhythmx_liked_songs') || '[]')
+  // Load Persisted Local Storage State safely
+  const initialLiked: Song[] = typeof window !== 'undefined'
+    ? (() => {
+        try {
+          return JSON.parse(localStorage.getItem('rhythmx_liked_songs') || '[]');
+        } catch {
+          return [];
+        }
+      })()
+    : [];
+
+  const initialRecents: Song[] = typeof window !== 'undefined'
+    ? (() => {
+        try {
+          return JSON.parse(localStorage.getItem('rhythmx_recents') || '[]');
+        } catch {
+          return [];
+        }
+      })()
     : [];
 
   return {
     currentTrack: null,
     isPlaying: false,
     queue: FALLBACK_CATALOG,
-    historyIds: new Set<string>(),
+    history: initialRecents,
     likedSongs: initialLiked,
     volume: 1,
     currentTime: 0,
     duration: 0,
+    repeatMode: 'all',
+    isShuffle: false,
 
-    playTrack: (song: Song) => {
-      const { historyIds } = get();
-      const updatedHistory = new Set(historyIds).add(song.id);
-      set({ currentTrack: song, isPlaying: true, historyIds: updatedHistory });
+    playTrack: (song: Song, newQueue?: Song[]) => {
+      const { history, queue } = get();
+
+      // LRU Recents Management: Prepend and deduplicate, max 30 items
+      const filtered = history.filter((s) => s.id !== song.id);
+      const updatedHistory = [song, ...filtered].slice(0, 30);
+
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('rhythmx_recents', JSON.stringify(updatedHistory));
+        } catch {}
+      }
+
+      // Update queue if provided, or append song if not already in queue
+      let activeQueue = newQueue || queue;
+      if (!newQueue && !queue.some((s) => s.id === song.id)) {
+        activeQueue = [...queue, song];
+      }
+
+      set({
+        currentTrack: song,
+        isPlaying: true,
+        history: updatedHistory,
+        queue: activeQueue
+      });
+
       audioEngine.playTrack(song.streamUrl, song.name, song.primaryArtists, song.imageUrl);
-      get().checkAndExpandQueue();
+
+      // Check autoplay recommendation queue
+      get().autoPopulateRadio(song);
     },
 
     togglePlay: () => {
@@ -68,19 +118,52 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     },
 
     playNext: () => {
-      const { queue, currentTrack } = get();
+      const { queue, currentTrack, repeatMode, isShuffle, currentTime } = get();
       if (queue.length === 0) return;
+
+      if (repeatMode === 'one' && currentTrack) {
+        audioEngine.seek(0);
+        set({ currentTime: 0 });
+        audioEngine.playTrack(currentTrack.streamUrl, currentTrack.name, currentTrack.primaryArtists, currentTrack.imageUrl);
+        return;
+      }
+
+      if (isShuffle && queue.length > 1) {
+        let randIdx = Math.floor(Math.random() * queue.length);
+        if (currentTrack && queue[randIdx].id === currentTrack.id) {
+          randIdx = (randIdx + 1) % queue.length;
+        }
+        get().playTrack(queue[randIdx]);
+        return;
+      }
+
       const idx = queue.findIndex((s) => s.id === currentTrack?.id);
+      if (idx === -1) {
+        get().playTrack(queue[0]);
+        return;
+      }
+
+      if (idx === queue.length - 1 && repeatMode === 'off') {
+        set({ isPlaying: false });
+        return;
+      }
+
       const nextSong = queue[(idx + 1) % queue.length];
       get().playTrack(nextSong);
     },
 
     playPrev: () => {
-      const { queue, currentTrack } = get();
+      const { queue, currentTrack, currentTime } = get();
+      if (currentTime > 3) {
+        audioEngine.seek(0);
+        set({ currentTime: 0 });
+        return;
+      }
+
       if (queue.length === 0) return;
       const idx = queue.findIndex((s) => s.id === currentTrack?.id);
-      const prevSong = queue[(idx - 1 + queue.length) % queue.length];
-      get().playTrack(prevSong);
+      const prevIdx = idx > 0 ? idx - 1 : queue.length - 1;
+      get().playTrack(queue[prevIdx]);
     },
 
     seek: (secs: number) => {
@@ -96,28 +179,48 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     toggleLike: (song: Song) => {
       const { likedSongs } = get();
       const exists = likedSongs.some((s) => s.id === song.id);
-      const updated = exists ? likedSongs.filter((s) => s.id !== song.id) : [...likedSongs, song];
+      const updated = exists ? likedSongs.filter((s) => s.id !== song.id) : [song, ...likedSongs];
       set({ likedSongs: updated });
+
       if (typeof window !== 'undefined') {
-        localStorage.setItem('rhythmx_liked_songs', JSON.stringify(updated));
+        try {
+          localStorage.setItem('rhythmx_liked_songs', JSON.stringify(updated));
+        } catch {}
       }
     },
 
     setQueue: (songs: Song[]) => set({ queue: songs }),
 
-    checkAndExpandQueue: async () => {
-      const { queue, currentTrack, historyIds } = get();
-      if (!currentTrack) return;
-      const currentIndex = queue.findIndex((s) => s.id === currentTrack.id);
+    cycleRepeatMode: () => {
+      const { repeatMode } = get();
+      const nextMode = repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off';
+      set({ repeatMode: nextMode });
+    },
 
-      // When 2 or fewer songs remain in queue, fetch recommendations based on artist
-      if (currentIndex >= queue.length - 2) {
-        const query = currentTrack.primaryArtists.split(',')[0] || currentTrack.language || 'Trending India';
-        const freshSongs = await fetchSongsByQuery(query);
-        const deduplicated = freshSongs.filter((s) => !historyIds.has(s.id) && !queue.some((q) => q.id === s.id));
+    toggleShuffle: () => {
+      set({ isShuffle: !get().isShuffle });
+    },
 
-        if (deduplicated.length > 0) {
-          set({ queue: [...queue, ...deduplicated] });
+    autoPopulateRadio: async (song: Song) => {
+      const { queue, history } = get();
+      if (!song) return;
+
+      const currentIndex = queue.findIndex((s) => s.id === song.id);
+
+      // Trigger recommendation fetch when <= 2 songs remain
+      if (currentIndex === -1 || currentIndex >= queue.length - 2) {
+        try {
+          const fresh = await fetchArtistRadio(song.primaryArtists || song.name);
+          const historyIds = new Set(history.map((h) => h.id));
+          const queueIds = new Set(queue.map((q) => q.id));
+
+          const deduplicated = fresh.filter((s) => !historyIds.has(s.id) && !queueIds.has(s.id));
+
+          if (deduplicated.length > 0) {
+            set({ queue: [...queue, ...deduplicated.slice(0, 15)] });
+          }
+        } catch (err) {
+          console.warn('Auto radio error:', err);
         }
       }
     }
