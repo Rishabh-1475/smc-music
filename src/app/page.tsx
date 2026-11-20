@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Heart, Play, User, Compass, Music, Home as HomeIcon } from 'lucide-react';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { NowPlayingView } from '@/components/NowPlayingView';
-import { GalaxyVisualizer } from '@/components/GalaxyVisualizer';
+import { AstraSphere3D } from '@/components/AstraSphere3D';
 import { LibraryView } from '@/components/LibraryView';
 import { MiniPlayer } from '@/components/MiniPlayer';
 import { TiltCard3D } from '@/components/TiltCard3D';
@@ -265,8 +265,8 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 2: 3D MUSIC GALAXY */}
-        {activeTab === 'galaxy' && <GalaxyVisualizer songs={songs} />}
+        {/* TAB 2: ASTRA 3D HOLOGRAPHIC SPHERE */}
+        {activeTab === 'galaxy' && <AstraSphere3D />}
 
         {/* TAB 3: LIKED SONGS */}
         {activeTab === 'library' && <LibraryView />}
