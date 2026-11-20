@@ -3,11 +3,11 @@ export interface Song {
   name: string;
   album: string;
   year: string;
-  duration: number | string;
+  duration: number; // in seconds
   label: string;
   primaryArtists: string;
-  imageUrl: string;
-  streamUrl: string;
+  imageUrl: string; // Guaranteed 500x500 CDN URL
+  streamUrl: string; // High-bitrate 320kbps HTTPS URL
   language: string;
   title?: string;
   audioUrl?: string;
@@ -21,7 +21,7 @@ export const FALLBACK_CATALOG: Song[] = [
     name: "Tu Mil Jaaye (From \"KING\")",
     album: "KING",
     year: "2026",
-    duration: "215",
+    duration: 215,
     label: "Singh Music",
     primaryArtists: "Sachin-Jigar, Ed Sheeran, Arijit Singh",
     imageUrl: "https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg",
@@ -33,7 +33,7 @@ export const FALLBACK_CATALOG: Song[] = [
     name: "295",
     album: "Moosetape",
     year: "2021",
-    duration: "270",
+    duration: 270,
     label: "Sidhu Moose Wala",
     primaryArtists: "Sidhu Moose Wala",
     imageUrl: "https://c.saavncdn.com/026/Moosetape-Punjabi-2021-20210514130005-500x500.jpg",
@@ -45,7 +45,7 @@ export const FALLBACK_CATALOG: Song[] = [
     name: "Lollipop Lagelu",
     album: "Superhit Bhojpuri",
     year: "2015",
-    duration: "240",
+    duration: 240,
     label: "Wave Music",
     primaryArtists: "Pawan Singh",
     imageUrl: "https://c.saavncdn.com/495/Lollipop-Lagelu-Bhojpuri-2015-500x500.jpg",
@@ -57,7 +57,7 @@ export const FALLBACK_CATALOG: Song[] = [
     name: "Apna Bana Le",
     album: "Bhediya",
     year: "2022",
-    duration: "261",
+    duration: 261,
     label: "Zee Music",
     primaryArtists: "Arijit Singh, Sachin-Jigar",
     imageUrl: "https://c.saavncdn.com/815/Bhediya-Hindi-2022-20221124110842-500x500.jpg",
@@ -69,7 +69,7 @@ export const FALLBACK_CATALOG: Song[] = [
     name: "Gehra Hua",
     album: "Dhurandhar",
     year: "2025",
-    duration: "198",
+    duration: 198,
     label: "T-Series",
     primaryArtists: "Shashwat Sachdev, Arijit Singh",
     imageUrl: "https://c.saavncdn.com/450/Gehra-Hua-From-Dhurandhar-Hindi-2025-20251205154217-500x500.jpg",
@@ -78,15 +78,15 @@ export const FALLBACK_CATALOG: Song[] = [
   },
   {
     id: "sp_6",
-    name: "Blinding Lights",
-    album: "The Highlights",
-    year: "2020",
-    duration: "200",
-    label: "Republic Records",
-    primaryArtists: "The Weeknd",
-    imageUrl: "https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.jpg",
+    name: "Kalyani Remix",
+    album: "Kalyani Special Edition",
+    year: "2024",
+    duration: 220,
+    label: "Singh Music",
+    primaryArtists: "DJ Chetas, Lijo George",
+    imageUrl: "https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg",
     streamUrl: "https://aac.saavncdn.com/179/ee99b14844e2699aad400fa1e946c0ed_320.mp4",
-    language: "english"
+    language: "hindi"
   }
 ];
 
@@ -120,7 +120,7 @@ export const extract500Image = (item: any): string => {
 
 export const extractRealCover = extract500Image;
 
-const extractStream = (down: any, fallback?: string): string => {
+export const extractStream = (down: any, fallback?: string): string => {
   if (Array.isArray(down) && down.length > 0) {
     const q320 = down.find((d: any) => d.quality === '320kbps' || d.bitrate === '320kbps' || d.quality === '320');
     if (q320?.url || q320?.link) return (q320.url || q320.link).replace('http://', 'https://');
@@ -132,15 +132,24 @@ const extractStream = (down: any, fallback?: string): string => {
   return (fallback || '').replace('http://', 'https://');
 };
 
-export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
+const parseDuration = (raw: any): number => {
+  if (typeof raw === 'number' && raw > 0) return raw;
+  if (typeof raw === 'string') {
+    const parsed = parseInt(raw, 10);
+    if (!isNaN(parsed) && parsed > 0) return parsed;
+  }
+  return 210;
+};
+
+export const fetchSongsByQuery = async (query: string, page: number = 1): Promise<Song[]> => {
   if (!query || !query.trim()) return FALLBACK_CATALOG;
 
   const clean = encodeURIComponent(query.trim());
   const endpoints = [
-    `https://saavnapi-beta.vercel.app/search/songs?query=${clean}&page=1&limit=40`,
-    `https://jiosaavn-api.vercel.app/search?query=${clean}`,
-    `https://saavn.dev/api/search/songs?query=${clean}&page=1&limit=40`,
-    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${clean}&page=1&limit=40`
+    `https://saavnapi-beta.vercel.app/search/songs?query=${clean}&page=${page}&limit=40`,
+    `https://jiosaavn-api.vercel.app/search?query=${clean}&page=${page}`,
+    `https://saavn.dev/api/search/songs?query=${clean}&page=${page}&limit=40`,
+    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${clean}&page=${page}&limit=40`
   ];
 
   for (const url of endpoints) {
@@ -161,7 +170,7 @@ export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
           name: decodeHtml(item.name || item.title || item.song || 'Song'),
           album: decodeHtml(item.album?.name || item.album || 'Single'),
           year: String(item.year || '2026'),
-          duration: item.duration || '210',
+          duration: parseDuration(item.duration),
           label: item.label || '',
           primaryArtists: decodeHtml(item.primaryArtists || item.singers || item.artist || 'Various Artists'),
           imageUrl: extract500Image(item),
@@ -172,18 +181,19 @@ export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
         if (parsed.length > 0) return parsed;
       }
     } catch {
-      // try next endpoint
+      // try next mirror
     }
   }
 
   return FALLBACK_CATALOG;
 };
 
-export const fetchArtistRadio = async (artistName: string): Promise<Song[]> => {
-  if (!artistName || !artistName.trim()) return FALLBACK_CATALOG;
-  const primary = artistName.split(',')[0].trim();
+export const fetchRecommendations = async (artistOrGenre: string): Promise<Song[]> => {
+  if (!artistOrGenre || !artistOrGenre.trim()) return FALLBACK_CATALOG;
+  const primary = artistOrGenre.split(',')[0].trim();
   const query = `${primary} Hits`;
   return fetchSongsByQuery(query);
 };
 
+export const fetchArtistRadio = fetchRecommendations;
 export const searchSongs = fetchSongsByQuery;

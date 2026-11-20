@@ -17,7 +17,7 @@ export default function RootLayout({
         <meta name="referrer" content="no-referrer" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </head>
-      <body className="bg-[#070709] text-white antialiased selection:bg-[#CCFF00] selection:text-black">
+      <body className="bg-[#050505] text-white antialiased selection:bg-[#E11D48] selection:text-white">
         {children}
       </body>
     </html>
