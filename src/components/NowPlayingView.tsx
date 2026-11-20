@@ -31,15 +31,15 @@ export const NowPlayingView: React.FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#08080B] flex flex-col justify-between max-w-[430px] mx-auto select-none overflow-hidden">
-      {/* VIVID AMBIENT GLOW */}
+    <div className="fixed inset-0 z-50 bg-[#08080B] flex flex-col justify-between max-w-[430px] md:max-w-md mx-auto select-none overflow-hidden">
+      {/* VIVID AMBIENT COVER BLUR */}
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-45 blur-2xl scale-125 transition-all duration-700 pointer-events-none"
+        className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl scale-125 transition-all duration-700 pointer-events-none"
         style={{ backgroundImage: `url(${currentTrack.imageUrl})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-[#08080B] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-[#08080B] pointer-events-none" />
 
-      {/* Top Bar */}
+      {/* Top Header */}
       <div className="relative z-10 flex items-center justify-between px-6 pt-10 pb-2">
         <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-95 transition">
           <ChevronDown className="w-5 h-5" />
@@ -53,13 +53,16 @@ export const NowPlayingView: React.FC<Props> = ({ onClose }) => {
         </button>
       </div>
 
-      {/* Rotating Vinyl Disc Visual */}
+      {/* Center Rotating Vinyl Disc Visual */}
       <div className="relative z-10 flex flex-col items-center justify-center my-auto px-6">
         <div className="relative w-64 h-64 rounded-full p-2 bg-gradient-to-tr from-white/20 via-transparent to-white/10 border border-white/20 shadow-[0_25px_60px_rgba(0,0,0,0.9)]">
           <img
             src={currentTrack.imageUrl}
             alt={currentTrack.name}
             className={`w-full h-full rounded-full object-cover shadow-2xl ${isPlaying ? 'animate-[spin_20s_linear_infinite]' : ''}`}
+            onError={(e) => {
+              e.currentTarget.src = 'https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg';
+            }}
           />
           <div className="absolute inset-0 rounded-full border-4 border-black/40 pointer-events-none" />
           <div className="absolute w-8 h-8 rounded-full bg-black/90 border border-white/20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
@@ -131,3 +134,5 @@ export const NowPlayingView: React.FC<Props> = ({ onClose }) => {
     </div>
   );
 };
+
+export default NowPlayingView;

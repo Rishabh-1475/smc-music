@@ -1,11 +1,12 @@
 import { create } from 'zustand';
-import { Song, BACKUP_SONGS } from '@/services/api';
+import { Song, FALLBACK_CATALOG, fetchSongsByQuery } from '@/services/api';
 import { audioEngine } from '@/services/audioService';
 
 interface PlayerState {
   currentTrack: Song | null;
   isPlaying: boolean;
   queue: Song[];
+  historyIds: Set<string>;
   likedSongs: Song[];
   volume: number;
   currentTime: number;
@@ -18,6 +19,7 @@ interface PlayerState {
   setVolume: (vol: number) => void;
   toggleLike: (song: Song) => void;
   setQueue: (songs: Song[]) => void;
+  checkAndExpandQueue: () => Promise<void>;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => {
@@ -28,6 +30,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     audioEngine.subscribeTime((current, dur) => {
       set({ currentTime: current, duration: dur });
     });
+    audioEngine.setOnEnded(() => {
+      get().playNext();
+    });
   }
 
   const initialLiked = typeof window !== 'undefined'
@@ -37,15 +42,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
   return {
     currentTrack: null,
     isPlaying: false,
-    queue: BACKUP_SONGS,
+    queue: FALLBACK_CATALOG,
+    historyIds: new Set<string>(),
     likedSongs: initialLiked,
     volume: 1,
     currentTime: 0,
     duration: 0,
 
     playTrack: (song: Song) => {
-      set({ currentTrack: song, isPlaying: true });
+      const { historyIds } = get();
+      const updatedHistory = new Set(historyIds).add(song.id);
+      set({ currentTrack: song, isPlaying: true, historyIds: updatedHistory });
       audioEngine.playTrack(song.streamUrl, song.name, song.primaryArtists, song.imageUrl);
+      get().checkAndExpandQueue();
     },
 
     togglePlay: () => {
@@ -94,6 +103,23 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       }
     },
 
-    setQueue: (songs: Song[]) => set({ queue: songs })
+    setQueue: (songs: Song[]) => set({ queue: songs }),
+
+    checkAndExpandQueue: async () => {
+      const { queue, currentTrack, historyIds } = get();
+      if (!currentTrack) return;
+      const currentIndex = queue.findIndex((s) => s.id === currentTrack.id);
+
+      // When 2 or fewer songs remain in queue, fetch recommendations based on artist
+      if (currentIndex >= queue.length - 2) {
+        const query = currentTrack.primaryArtists.split(',')[0] || currentTrack.language || 'Trending India';
+        const freshSongs = await fetchSongsByQuery(query);
+        const deduplicated = freshSongs.filter((s) => !historyIds.has(s.id) && !queue.some((q) => q.id === s.id));
+
+        if (deduplicated.length > 0) {
+          set({ queue: [...queue, ...deduplicated] });
+        }
+      }
+    }
   };
 });

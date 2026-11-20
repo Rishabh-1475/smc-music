@@ -1,10 +1,11 @@
 export type AudioCallback = () => void;
 export type TimeCallback = (current: number, duration: number) => void;
 
-class GlobalAudioService {
+class GlobalAudioEngine {
   private audio: HTMLAudioElement | null = null;
-  private onTimeUpdateCbs: Set<TimeCallback> = new Set();
-  private onStateChangeCbs: Set<AudioCallback> = new Set();
+  private timeCbs: Set<TimeCallback> = new Set();
+  private stateCbs: Set<AudioCallback> = new Set();
+  private onEndCb: (() => void) | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -14,42 +15,42 @@ class GlobalAudioService {
 
       this.audio.addEventListener('timeupdate', () => {
         if (!this.audio) return;
-        this.onTimeUpdateCbs.forEach((cb) =>
-          cb(this.audio!.currentTime, this.audio!.duration || 0)
-        );
+        this.timeCbs.forEach((cb) => cb(this.audio!.currentTime, this.audio!.duration || 0));
       });
 
       this.audio.addEventListener('play', () => this.notifyState());
       this.audio.addEventListener('pause', () => this.notifyState());
-      this.audio.addEventListener('ended', () => this.notifyState());
+      this.audio.addEventListener('ended', () => {
+        this.notifyState();
+        if (this.onEndCb) this.onEndCb();
+      });
       this.audio.addEventListener('error', (e) => {
-        console.warn('Audio stream error, attempting fallback recovery:', e);
+        console.warn('Audio stream playback error:', e);
       });
     }
   }
 
   private notifyState() {
-    this.onStateChangeCbs.forEach((cb) => cb());
+    this.stateCbs.forEach((cb) => cb());
+  }
+
+  public setOnEnded(cb: () => void) {
+    this.onEndCb = cb;
   }
 
   public playTrack(url: string, title?: string, artist?: string, art?: string) {
     if (!this.audio) return;
-    
-    // Ensure clean HTTPS protocol
     const secureUrl = url.replace('http://', 'https://');
     if (this.audio.src !== secureUrl) {
       this.audio.src = secureUrl;
       this.audio.load();
     }
-
-    this.audio.play().catch((err) => {
-      console.warn('Playback error (waiting for user interaction):', err);
-    });
+    this.audio.play().catch(console.warn);
 
     if ('mediaSession' in navigator && title) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title,
-        artist: artist || 'RhythmX Lossless',
+        artist: artist || 'RhythmX',
         artwork: art ? [{ src: art, sizes: '512x512', type: 'image/jpeg' }] : []
       });
     }
@@ -64,15 +65,15 @@ class GlobalAudioService {
     }
   }
 
-  public seek(seconds: number) {
-    if (this.audio && Number.isFinite(seconds)) {
-      this.audio.currentTime = seconds;
+  public seek(secs: number) {
+    if (this.audio && Number.isFinite(secs)) {
+      this.audio.currentTime = secs;
     }
   }
 
-  public setVolume(val: number) {
+  public setVolume(vol: number) {
     if (this.audio) {
-      this.audio.volume = Math.max(0, Math.min(1, val));
+      this.audio.volume = Math.max(0, Math.min(1, vol));
     }
   }
 
@@ -81,14 +82,14 @@ class GlobalAudioService {
   }
 
   public subscribeTime(cb: TimeCallback) {
-    this.onTimeUpdateCbs.add(cb);
-    return () => this.onTimeUpdateCbs.delete(cb);
+    this.timeCbs.add(cb);
+    return () => this.timeCbs.delete(cb);
   }
 
   public subscribeState(cb: AudioCallback) {
-    this.onStateChangeCbs.add(cb);
-    return () => this.onStateChangeCbs.delete(cb);
+    this.stateCbs.add(cb);
+    return () => this.stateCbs.delete(cb);
   }
 }
 
-export const audioEngine = new GlobalAudioService();
+export const audioEngine = new GlobalAudioEngine();
