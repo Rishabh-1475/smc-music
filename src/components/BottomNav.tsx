@@ -1,54 +1,46 @@
 'use client';
 import React from 'react';
-import { Home, Compass, Library, User } from 'lucide-react';
+import { Home as HomeIcon, Search, Compass, Library } from 'lucide-react';
 
-export type NavTab = 'home' | 'galaxy' | 'library' | 'profile';
-
-export interface BottomNavProps {
-  activeTab: NavTab;
-  onTabChange: (tab: NavTab) => void;
+interface Props {
+  activeTab: 'home' | 'search' | 'galaxy' | 'library';
+  onTabChange: (tab: 'home' | 'search' | 'galaxy' | 'library') => void;
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
-  const tabs = [
-    { id: 'home' as NavTab, label: 'Songs', icon: Home },
-    { id: 'galaxy' as NavTab, label: 'Galaxy', icon: Compass },
-    { id: 'library' as NavTab, label: 'Library', icon: Library },
-    { id: 'profile' as NavTab, label: 'Profile', icon: User },
-  ];
-
+export const BottomNav: React.FC<Props> = ({ activeTab, onTabChange }) => {
   return (
-    <nav
-      aria-label="Philomela Navigation Dock"
-      className="h-16 fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto z-40 bg-[#050505]/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-4 select-none"
-    >
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = activeTab === tab.id;
-        return (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`flex flex-col items-center justify-center gap-1 py-1 px-3 rounded-xl transition-all duration-200 cursor-pointer ${
-              isActive ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
-            }`}
-            title={tab.label}
-          >
-            <Icon
-              className={`w-5 h-5 transition-transform duration-200 ${
-                isActive ? 'scale-110 stroke-[2.2] text-white' : 'stroke-[1.6]'
-              }`}
-            />
-            <span
-              className={`text-[9px] tracking-widest uppercase font-mono transition-colors ${
-                isActive ? 'text-white font-bold' : 'text-zinc-500'
-              }`}
-            >
-              {tab.label}
-            </span>
-          </button>
-        );
-      })}
+    <nav className="fixed bottom-0 left-0 right-0 max-w-[430px] md:max-w-md mx-auto h-16 bg-[#121212]/95 backdrop-blur-xl border-t border-[#292929] flex items-center justify-around z-30 px-2 select-none">
+      <button
+        onClick={() => onTabChange('home')}
+        className={`flex flex-col items-center gap-1 transition ${activeTab === 'home' ? 'text-white font-bold' : 'text-[#B3B3B3] hover:text-white'}`}
+      >
+        <HomeIcon className="w-5 h-5" />
+        <span className="text-[10px] font-medium">Home</span>
+      </button>
+
+      <button
+        onClick={() => onTabChange('search')}
+        className={`flex flex-col items-center gap-1 transition ${activeTab === 'search' ? 'text-white font-bold' : 'text-[#B3B3B3] hover:text-white'}`}
+      >
+        <Search className="w-5 h-5" />
+        <span className="text-[10px] font-medium">Search</span>
+      </button>
+
+      <button
+        onClick={() => onTabChange('galaxy')}
+        className={`flex flex-col items-center gap-1 transition ${activeTab === 'galaxy' ? 'text-[#1DB954] font-bold' : 'text-[#B3B3B3] hover:text-white'}`}
+      >
+        <Compass className="w-5 h-5" />
+        <span className="text-[10px] font-medium">Galaxy</span>
+      </button>
+
+      <button
+        onClick={() => onTabChange('library')}
+        className={`flex flex-col items-center gap-1 transition ${activeTab === 'library' ? 'text-white font-bold' : 'text-[#B3B3B3] hover:text-white'}`}
+      >
+        <Library className="w-5 h-5" />
+        <span className="text-[10px] font-medium">Your Library</span>
+      </button>
     </nav>
   );
 };
