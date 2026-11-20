@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Heart, Play, User, Compass, Music, Home as HomeIcon } from 'lucide-react';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { NowPlayingView } from '@/components/NowPlayingView';
@@ -22,6 +22,15 @@ export default function App() {
 
   const filterChips = ['All', 'Music', 'Podcasts', 'Gym Phonk', 'Punjabi', 'Bhojpuri'];
 
+  const CATEGORY_MAP: Record<string, string> = {
+    All: 'Top Bollywood India Trending Hits',
+    Music: 'Latest Hindi Superhits 2026',
+    Podcasts: 'Hindi Podcast Horror Stories Crime Motivation Audio Shows',
+    'Gym Phonk': 'Aggressive Drift Phonk Gym Workout',
+    Punjabi: 'Latest Trending Punjabi Hits',
+    Bhojpuri: 'Top Trending Bhojpuri Hits'
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('rhythmx_user_profile');
@@ -37,22 +46,47 @@ export default function App() {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    const q = searchQuery.trim() || (category === 'All' ? 'Trending India Hits 2026' : `${category} Songs 2026`);
-    fetchSongsByQuery(q).then((res) => {
+
+    // If user typed in search bar, prioritize live user search; otherwise pull from curated category map
+    const query = searchQuery.trim() 
+      ? searchQuery.trim() 
+      : (CATEGORY_MAP[category] || 'Top Bollywood India Trending Hits');
+
+    fetchSongsByQuery(query).then((res) => {
       if (active) {
-        const list = res.length > 0 ? res : FALLBACK_CATALOG;
+        const list = res && res.length > 0 ? res : FALLBACK_CATALOG;
         setSongs(list);
         setQueue(list);
         setLoading(false);
       }
+    }).catch(() => {
+      if (active) {
+        setSongs(FALLBACK_CATALOG);
+        setLoading(false);
+      }
     });
+
     return () => {
       active = false;
     };
   }, [category, searchQuery, setQueue]);
 
   const featuredSong = songs[0] || FALLBACK_CATALOG[0];
-  const quickAccessSongs = recents.length >= 6 ? recents.slice(0, 6) : songs.slice(0, 6);
+
+  const quickAccessSongs = React.useMemo(() => {
+    if (recents && recents.length >= 6) return recents.slice(0, 6);
+    // Pick tracks with unique album covers
+    const seenCovers = new Set<string>();
+    const diverse: typeof songs = [];
+    for (const s of songs) {
+      if (!seenCovers.has(s.imageUrl)) {
+        seenCovers.add(s.imageUrl);
+        diverse.push(s);
+      }
+      if (diverse.length === 6) break;
+    }
+    return diverse.length >= 4 ? diverse : songs.slice(0, 6);
+  }, [recents, songs]);
 
   return (
     <div className="min-h-screen bg-[#040406] text-white flex justify-center selection:bg-[#EF4444] selection:text-white select-none">
