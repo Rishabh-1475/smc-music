@@ -1,43 +1,100 @@
 'use client';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
-import { Mic, MicOff, Volume2 } from 'lucide-react';
+import { Mic, MicOff, Volume2, Sparkles, Radio } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { fetchSongsByQuery, Song } from '@/services/api';
 
 export const AstraSphere3D: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const uniformsRef = useRef<any>(null);
+  const recognitionRef = useRef<any>(null);
+  const isListeningRef = useRef(false);
 
-  const { isPlaying, currentTrack, playTrack } = usePlayerStore();
+  const { isPlaying, currentTrack, playTrack, togglePlay, playNext, playPrev, setVolume, volume } = usePlayerStore();
   const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [statusText, setStatusText] = useState('TAP SPHERE OR MIC TO SPEAK');
-  const [voiceSupported, setVoiceSupported] = useState(true);
+  const [userName, setUserName] = useState('there');
 
-  // --- Popularity Selection Engine ---
+  // --- Alexa / GPT Style Text-to-Speech Engine ---
+  const speakAI = useCallback((text: string, onDone?: () => void) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      if (onDone) onDone();
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+
+    // Select natural AI assistant voices
+    const targetVoice = voices.find(v => 
+      (v.name.includes('Google') && v.name.includes('US English')) ||
+      v.name.includes('Samantha') ||
+      v.name.includes('Jenny') ||
+      v.name.includes('Zira') ||
+      (v.lang === 'en-US' && v.name.includes('Natural'))
+    ) || voices.find(v => v.lang.startsWith('en')) || null;
+
+    if (targetVoice) utterance.voice = targetVoice;
+    utterance.rate = 1.02;
+    utterance.pitch = 1.05;
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      if (onDone) onDone();
+    };
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      if (onDone) onDone();
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  // --- Initial Personalized Greeting ---
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const profile = localStorage.getItem('rhythmx_user_profile');
+    let name = 'there';
+    if (profile) {
+      try {
+        const parsed = JSON.parse(profile);
+        if (parsed.name) name = parsed.name;
+      } catch {}
+    }
+    setUserName(name);
+
+    const timer = setTimeout(() => {
+      speakAI(`Hi ${name}, I am Astra. What would you like to listen to?`);
+    }, 600);
+
+    return () => {
+      clearTimeout(timer);
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [speakAI]);
+
+  // --- Popularity & Relevance Filter ---
   const selectMostPopularTrack = (results: Song[], targetQuery: string): Song => {
     if (!results || results.length === 0) return results[0];
-
     const cleanTarget = targetQuery.toLowerCase().trim();
 
-    // Score and rank candidates
-    const scored = [...results].map((song) => {
+    const scored = results.map((song) => {
       let score = 0;
       const cleanName = song.name.toLowerCase();
 
-      // Exact title match gets massive boost
-      if (cleanName === cleanTarget) score += 50;
-      else if (cleanName.startsWith(cleanTarget)) score += 30;
-      else if (cleanName.includes(cleanTarget)) score += 15;
+      if (cleanName === cleanTarget) score += 60;
+      else if (cleanName.startsWith(cleanTarget)) score += 35;
+      else if (cleanName.includes(cleanTarget)) score += 20;
 
-      // Penalize fan covers / karaoke / remixes unless explicitly asked
-      if (!cleanTarget.includes('remix') && cleanName.includes('remix')) score -= 10;
-      if (cleanName.includes('cover') || cleanName.includes('tribute') || cleanName.includes('instrumental')) {
-        score -= 25;
-      }
-
-      // Bonus for having primary artists metadata populated
-      if (song.primaryArtists && song.primaryArtists.length > 3) score += 10;
+      if (!cleanTarget.includes('remix') && cleanName.includes('remix')) score -= 15;
+      if (cleanName.includes('cover') || cleanName.includes('tribute') || cleanName.includes('karaoke')) score -= 30;
+      if (song.primaryArtists && song.primaryArtists.length > 2) score += 10;
 
       return { song, score };
     });
@@ -46,119 +103,181 @@ export const AstraSphere3D: React.FC = () => {
     return scored[0].song;
   };
 
-  // --- Voice Command Execution ---
+  // --- Continuous Voice Command Dispatcher ---
   const handleVoiceCommand = useCallback(async (transcript: string) => {
-    setStatusText(`PROCESSING: "${transcript}"`);
+    const raw = transcript.toLowerCase().trim();
+    setStatusText(`HEARD: "${transcript}"`);
 
-    // Clean trigger keywords: "Astra play X", "play X", "listen to X"
+    // Transport command checks
+    if (raw.includes('pause') || raw.includes('stop')) {
+      if (isPlaying) togglePlay();
+      speakAI('Paused playback');
+      setStatusText('PAUSED');
+      return;
+    }
+    if (raw.includes('resume') || raw.includes('continue') || (raw === 'play' && currentTrack)) {
+      if (!isPlaying) togglePlay();
+      speakAI('Resuming playback');
+      setStatusText('PLAYING');
+      return;
+    }
+    if (raw.includes('next song') || raw.includes('skip') || raw.includes('next track')) {
+      playNext();
+      speakAI('Playing next track');
+      setStatusText('SKIPPED TO NEXT');
+      return;
+    }
+    if (raw.includes('previous song') || raw.includes('go back')) {
+      playPrev();
+      speakAI('Playing previous track');
+      setStatusText('PREVIOUS TRACK');
+      return;
+    }
+    if (raw.includes('mute')) {
+      setVolume(0);
+      speakAI('Muted audio');
+      return;
+    }
+    if (raw.includes('volume up')) {
+      setVolume(Math.min(1, volume + 0.2));
+      speakAI('Volume increased');
+      return;
+    }
+    if (raw.includes('volume down')) {
+      setVolume(Math.max(0, volume - 0.2));
+      speakAI('Volume decreased');
+      return;
+    }
+    if (raw.includes('who are you')) {
+      speakAI('I am Astra, your 3D spatial intelligence system inside RhythmX.');
+      return;
+    }
+
+    // Music Search & Play Execution
     let cleanQuery = transcript
-      .replace(/^(astra|hey astra|ok astra|alexa|siri)\s+/i, '')
-      .replace(/^(play|stream|listen to|put on|start)\s+/i, '')
+      .replace(/^(astra|hey astra|ok astra|alexa|siri|google)\s+/i, '')
+      .replace(/^(play|stream|listen to|search for|find|put on)\s+/i, '')
       .replace(/\s+(song|track|audio|music)$/i, '')
       .trim();
 
     if (!cleanQuery) {
-      setStatusText('COULD NOT HEAR SONG NAME');
-      setTimeout(() => setStatusText('TAP SPHERE OR MIC TO SPEAK'), 2500);
+      speakAI("I didn't catch the song name. Please try again.");
+      setStatusText('TRY AGAIN: "PLAY [SONG]"');
       return;
     }
 
-    setStatusText(`SEARCHING POPULAR MASTER: "${cleanQuery}"...`);
-
+    setStatusText(`SEARCHING: "${cleanQuery.toUpperCase()}"`);
     try {
       const results = await fetchSongsByQuery(cleanQuery);
       if (results && results.length > 0) {
         const topSong = selectMostPopularTrack(results, cleanQuery);
-        setStatusText(`PLAYING: ${topSong.name.toUpperCase()}`);
-        playTrack(topSong, results);
-
-        // Flash Shader intensity on success
-        if (uniformsRef.current) {
-          uniformsRef.current.uAudioIntensity.value = 1.0;
-        }
-
-        setTimeout(() => {
-          setStatusText(`NOW STREAMING 3D: ${topSong.name}`);
-        }, 3000);
+        speakAI(`Playing ${topSong.name}`, () => {
+          playTrack(topSong, results);
+        });
+        setStatusText(`STREAMING 3D: ${topSong.name.toUpperCase()}`);
       } else {
-        setStatusText(`NO TRACKS FOUND FOR "${cleanQuery}"`);
-        setTimeout(() => setStatusText('TAP SPHERE OR MIC TO SPEAK'), 3000);
+        speakAI(`Sorry, I couldn't find ${cleanQuery} right now.`);
+        setStatusText('NO TRACK FOUND');
       }
     } catch {
-      setStatusText('VOICE ENGINE TIMEOUT - TRY AGAIN');
-      setTimeout(() => setStatusText('TAP SPHERE OR MIC TO SPEAK'), 2500);
+      speakAI('Error connecting to the stream servers.');
+      setStatusText('NETWORK ERROR');
     }
-  }, [playTrack]);
+  }, [isPlaying, currentTrack, volume, togglePlay, playNext, playPrev, setVolume, playTrack, speakAI]);
 
-  // --- Speech Recognition Trigger ---
-  const toggleListening = () => {
+  // --- Resilient Continuous Speech Recognition ---
+  const stopListening = useCallback(() => {
+    isListeningRef.current = false;
+    setIsListening(false);
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch {}
+    }
+    setStatusText('TAP SPHERE OR MIC TO SPEAK');
+  }, []);
+
+  const startListening = useCallback(() => {
     if (typeof window === 'undefined') return;
-
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      setVoiceSupported(false);
-      setStatusText('SPEECH RECOGNITION NOT SUPPORTED ON THIS BROWSER');
+      setStatusText('SPEECH RECOGNITION NOT AVAILABLE IN THIS BROWSER');
+      speakAI('Speech recognition is not supported in this browser.');
       return;
     }
 
-    if (isListening) {
-      setIsListening(false);
-      setStatusText('TAP SPHERE OR MIC TO SPEAK');
-      return;
-    }
+    window.speechSynthesis.cancel();
+    stopListening();
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = false;
-      recognition.lang = 'en-IN'; // Optimized for Indian English & Hindi Phonetics
+      recognition.lang = 'en-IN';
 
       recognition.onstart = () => {
+        isListeningRef.current = true;
         setIsListening(true);
-        setStatusText('LISTENING... SAY "PLAY [SONG NAME]"');
+        setStatusText('LISTENING... SAY "PLAY [SONG]" OR "NEXT"');
       };
 
       recognition.onresult = (event: any) => {
-        const command = event.results[0][0].transcript;
-        setIsListening(false);
-        handleVoiceCommand(command);
+        const lastIdx = event.results.length - 1;
+        const transcript = event.results[lastIdx][0].transcript;
+        stopListening();
+        handleVoiceCommand(transcript);
       };
 
-      recognition.onerror = () => {
-        setIsListening(false);
-        setStatusText('MICROPHONE ACCESS DENIED OR TIMED OUT');
-        setTimeout(() => setStatusText('TAP SPHERE OR MIC TO SPEAK'), 2500);
+      recognition.onerror = (e: any) => {
+        if (e.error !== 'no-speech') {
+          console.warn('Speech error:', e.error);
+        }
       };
 
       recognition.onend = () => {
-        setIsListening(false);
+        // Watchdog: auto-restart if user still intended to keep listening
+        if (isListeningRef.current) {
+          try {
+            recognition.start();
+          } catch {}
+        } else {
+          setIsListening(false);
+        }
       };
 
+      recognitionRef.current = recognition;
       recognition.start();
     } catch (err) {
-      console.warn('Speech recognition init error:', err);
+      console.error('Failed to start speech recognition:', err);
       setIsListening(false);
+    }
+  }, [stopListening, handleVoiceCommand, speakAI]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
     }
   };
 
-  // --- WebGL Shader Canvas Setup ---
+  // --- Real-time WebGL Astra Sphere ---
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    if (!containerRef.current) return;
 
-    const width = container.clientWidth || 340;
-    const height = container.clientHeight || 360;
+    const width = containerRef.current.clientWidth || 340;
+    const height = containerRef.current.clientHeight || 360;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
     camera.position.z = 6;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
+    containerRef.current.appendChild(renderer.domElement);
 
     const vertexShader = `
       uniform float uTime;
@@ -221,7 +340,7 @@ export const AstraSphere3D: React.FC = () => {
         vPosition = position;
         float noise = snoise(position * 1.6 + vec3(uTime * 0.45));
         vDistortion = noise;
-        vec3 newPosition = position + normal * (noise * (0.18 + uAudioIntensity * 0.5));
+        vec3 newPosition = position + normal * (noise * (0.18 + uAudioIntensity * 0.55));
         gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
       }
     `;
@@ -238,12 +357,12 @@ export const AstraSphere3D: React.FC = () => {
         float fresnel = 1.0 - dot(viewDir, vNormal);
         fresnel = pow(fresnel, 2.5);
 
-        vec3 coreColor = vec3(0.06, 0.02, 0.03);
+        vec3 coreColor = vec3(0.04, 0.01, 0.02);
         vec3 glowColor = vec3(0.94, 0.11, 0.28);
         vec3 edgeColor = vec3(1.0, 0.45, 0.55);
 
         vec3 color = mix(coreColor, glowColor, fresnel + (vDistortion * 0.35));
-        color += edgeColor * pow(fresnel, 3.2) * (1.3 + uAudioIntensity * 1.5);
+        color += edgeColor * pow(fresnel, 3.2) * (1.3 + uAudioIntensity * 1.6);
 
         gl_FragColor = vec4(color, 0.95);
       }
@@ -266,7 +385,7 @@ export const AstraSphere3D: React.FC = () => {
     const sphereMesh = new THREE.Mesh(geometry, material);
     scene.add(sphereMesh);
 
-    // Particle Halo
+    // Orbital Halo Ring & Particles
     const particleCount = 180;
     const particleGeometry = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
@@ -285,7 +404,7 @@ export const AstraSphere3D: React.FC = () => {
       color: 0xef4444,
       size: 0.035,
       transparent: true,
-      opacity: 0.7
+      opacity: 0.75
     });
 
     const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
@@ -301,19 +420,21 @@ export const AstraSphere3D: React.FC = () => {
       uniforms.uTime.value = elapsedTime;
 
       let targetIntensity = 0.08;
-      if (isListening) {
-        targetIntensity = 0.8 + Math.sin(elapsedTime * 12) * 0.3; // High vibration when listening
+      if (isSpeaking) {
+        targetIntensity = 0.65 + Math.sin(elapsedTime * 14) * 0.35;
+      } else if (isListening) {
+        targetIntensity = 0.85 + Math.sin(elapsedTime * 10) * 0.3;
       } else if (isPlaying) {
-        targetIntensity = 0.45 + Math.sin(elapsedTime * 6) * 0.25; // Bass ripple
+        targetIntensity = 0.45 + Math.sin(elapsedTime * 6) * 0.25;
       }
 
       uniforms.uAudioIntensity.value = THREE.MathUtils.lerp(
         uniforms.uAudioIntensity.value,
         targetIntensity,
-        0.06
+        0.08
       );
 
-      sphereMesh.rotation.y += isListening ? 0.02 : 0.005;
+      sphereMesh.rotation.y += isListening ? 0.025 : (isSpeaking ? 0.018 : 0.005);
       particleSystem.rotation.y -= 0.002;
 
       renderer.render(scene, camera);
@@ -324,53 +445,53 @@ export const AstraSphere3D: React.FC = () => {
     return () => {
       cancelAnimationFrame(animationFrameId);
       renderer.dispose();
-      if (container && container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
+      if (containerRef.current?.contains(renderer.domElement)) {
+        containerRef.current.removeChild(renderer.domElement);
       }
     };
-  }, [isPlaying, isListening]);
+  }, [isPlaying, isListening, isSpeaking]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 select-none relative overflow-hidden">
       {/* Top Status */}
       <div className="text-center z-10 mb-2">
-        <span className="text-[10px] font-mono font-bold tracking-widest text-[#EF4444] bg-[#EF4444]/15 px-3 py-1 rounded-full uppercase border border-[#EF4444]/30">
-          ASTRA SPATIAL VOICE AI
+        <span className="text-[10px] font-mono font-bold tracking-widest text-[#EF4444] bg-[#EF4444]/15 px-3 py-1 rounded-full uppercase border border-[#EF4444]/30 inline-flex items-center gap-1.5 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+          <Sparkles className="w-3 h-3 text-[#EF4444]" /> ASTRA SPATIAL INTELLIGENCE
         </span>
         <h2 className="text-base font-black text-white tracking-wide mt-2">
-          {currentTrack ? currentTrack.name : 'Voice Navigation Active'}
+          {currentTrack ? currentTrack.name : `Welcome, ${userName}`}
         </h2>
         <p className="text-[11px] font-mono text-[#EF4444] tracking-wider mt-1 drop-shadow-md">
           {statusText}
         </p>
       </div>
 
-      {/* 3D Sphere Interactive Canvas */}
+      {/* 3D Interactive WebGL Sphere Canvas */}
       <div
         onClick={toggleListening}
         ref={containerRef}
         className="w-[340px] h-[350px] relative z-10 flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95"
       />
 
-      {/* Bottom Voice Action Bar */}
-      <div className="z-10 flex items-center gap-4 bg-[#121217]/90 backdrop-blur-2xl border border-white/10 px-6 py-3 rounded-full shadow-[0_15px_35px_rgba(0,0,0,0.9)] mt-2">
+      {/* Action Controls HUD */}
+      <div className="z-10 flex items-center gap-4 bg-[#121217]/90 backdrop-blur-2xl border border-white/10 px-6 py-3 rounded-full shadow-[0_15px_35px_rgba(0,0,0,0.95)] mt-2">
         <button
           onClick={toggleListening}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg cursor-pointer ${
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg ${
             isListening
-              ? 'bg-[#EF4444] text-white animate-pulse shadow-[0_0_25px_rgba(239,68,68,0.7)]'
+              ? 'bg-[#EF4444] text-white animate-pulse shadow-[0_0_25px_rgba(239,68,68,0.8)]'
               : 'bg-white/10 text-white hover:bg-[#EF4444]'
           }`}
         >
-          {isListening ? <Mic className="w-6 h-6" /> : <MicOff className="w-5 h-5 text-gray-400" />}
+          {isListening ? <Mic className="w-6 h-6" /> : <MicOff className="w-5 h-5 text-zinc-400" />}
         </button>
 
         <div className="flex flex-col">
           <span className="text-xs font-bold text-white">
-            {isListening ? 'Listening for command...' : 'Tap Mic or Sphere'}
+            {isListening ? 'Listening continuously...' : (isSpeaking ? 'Astra is speaking...' : 'Tap Mic or Sphere to Command')}
           </span>
-          <span className="text-[10px] text-gray-400 font-mono">
-            Try: &quot;Astra play 295&quot; or &quot;Play Preet Re&quot;
+          <span className="text-[10px] text-zinc-400 font-mono">
+            Commands: &quot;Play [song]&quot;, &quot;Pause&quot;, &quot;Next&quot;, &quot;Volume up&quot;
           </span>
         </div>
       </div>
