@@ -30,7 +30,7 @@ export const AstraPlanet3D: React.FC<Props> = ({ state = 'idle', onTap }) => {
       powerPreference: 'high-performance'
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.3;
     container.appendChild(renderer.domElement);
@@ -338,10 +338,13 @@ export const AstraPlanet3D: React.FC<Props> = ({ state = 'idle', onTap }) => {
 
     // Animation Loop with 5 States
     let animId = 0;
+    let isVisible = true;
+    let isIntersecting = true;
     const clock = new THREE.Clock();
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
+      if (!isVisible || !isIntersecting) return;
       const t = clock.getElapsedTime();
       const st = stateRef.current;
 
@@ -410,11 +413,26 @@ export const AstraPlanet3D: React.FC<Props> = ({ state = 'idle', onTap }) => {
       renderer.setSize(w, h);
     };
 
+    const handleVisibility = () => {
+      isVisible = !document.hidden;
+    };
+
     window.addEventListener('resize', handleResize);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(([entry]) => {
+        isIntersecting = entry.isIntersecting;
+      }, { threshold: 0.05 });
+      observer.observe(container);
+    }
 
     return () => {
       cancelAnimationFrame(animId);
+      if (observer) observer.disconnect();
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibility);
       renderer.dispose();
       coreGeo.dispose();
       coreMat.dispose();

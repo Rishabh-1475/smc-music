@@ -5,6 +5,7 @@ import Cover from '../components/ui/Cover';
 import { usePlayerStore } from '@/store/playerStore';
 import { fetchSongsByQuery } from '@/services/api';
 import { astraVoice, AstraMode } from '@/services/astraVoice';
+import { astraWakeWord } from '@/services/astraWakeWord';
 import {
   SUPPORTED_LANGUAGES,
   LanguageOption,
@@ -43,6 +44,7 @@ export default function AstraView() {
 
   const [mode, setMode] = useState<AstraMode>('idle');
   const [selectedLang, setSelectedLang] = useState('hi-IN');
+  const [wakeEnabled, setWakeEnabled] = useState(astraWakeWord.getState().isEnabled);
   const [transcript, setTranscript] = useState('');
   const [textInput, setTextInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -250,6 +252,36 @@ export default function AstraView() {
             aria-label={mode === 'listening' ? 'Stop listening' : 'Start voice recognition'}
           >
             <Icon name="mic" size={26} />
+          </button>
+        </div>
+
+        {/* Hands-Free "Hey Astra" Wake-Word Toggle */}
+        <div className="z-10 mt-3 flex items-center justify-center">
+          <button
+            type="button"
+            className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 border transition-all ${
+              wakeEnabled
+                ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                : 'bg-white/5 border-white/10 text-white/60 hover:text-white'
+            }`}
+            onClick={() => {
+              const next = !wakeEnabled;
+              setWakeEnabled(next);
+              astraWakeWord.setEnabled(next);
+              addToast(
+                next
+                  ? 'Hands-Free "Hey Astra" Wake-Word Activated!'
+                  : 'Hands-Free Wake-Word Paused',
+                next ? 'success' : 'info'
+              );
+            }}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                wakeEnabled ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'
+              }`}
+            />
+            Hands-Free "Hey Astra": {wakeEnabled ? 'ALWAYS-ON' : 'OFF'}
           </button>
         </div>
       </section>

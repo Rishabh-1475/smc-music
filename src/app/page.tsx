@@ -9,6 +9,7 @@ import Toasts from '@/components/ui/Toasts';
 import FullPlayerModal from '@/components/modals/FullPlayerModal';
 import CreatorModal from '@/components/modals/CreatorModal';
 import CreatePlaylistModal from '@/components/modals/CreatePlaylistModal';
+import AstraGlobalHUD from '@/components/astra/AstraGlobalHUD';
 
 import HomeView from '@/views/HomeView';
 import SearchView from '@/views/SearchView';
@@ -19,9 +20,20 @@ import PlaylistView from '@/views/PlaylistView';
 import ArtistView from '@/views/ArtistView';
 
 import { usePlayerStore } from '@/store/playerStore';
+import { astraWakeWord } from '@/services/astraWakeWord';
 
 export default function App() {
-  const { currentView, togglePlay, playNext, playPrev, seek, currentTime } = usePlayerStore();
+  // Narrow selectors: Avoid root App re-renders on 4 Hz currentTime ticks
+  const currentView = usePlayerStore((s) => s.currentView);
+  const togglePlay = usePlayerStore((s) => s.togglePlay);
+  const playNext = usePlayerStore((s) => s.playNext);
+  const playPrev = usePlayerStore((s) => s.playPrev);
+  const seek = usePlayerStore((s) => s.seek);
+
+  // Initialize hands-free wake word engine
+  useEffect(() => {
+    astraWakeWord.init();
+  }, []);
 
   // Keyboard navigation & playback shortcuts
   useEffect(() => {
@@ -42,14 +54,18 @@ export default function App() {
           e.preventDefault();
           togglePlay();
           break;
-        case 'ArrowRight':
+        case 'ArrowRight': {
           e.preventDefault();
-          seek(currentTime + 5);
+          const cur = usePlayerStore.getState().currentTime;
+          seek(cur + 5);
           break;
-        case 'ArrowLeft':
+        }
+        case 'ArrowLeft': {
           e.preventDefault();
-          seek(Math.max(0, currentTime - 5));
+          const cur = usePlayerStore.getState().currentTime;
+          seek(Math.max(0, cur - 5));
           break;
+        }
         case 'KeyJ':
           playPrev();
           break;
@@ -66,7 +82,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [togglePlay, playNext, playPrev, seek, currentTime]);
+  }, [togglePlay, playNext, playPrev, seek]);
 
   return (
     <div className="app">
@@ -101,6 +117,7 @@ export default function App() {
       <FullPlayerModal />
       <CreatorModal />
       <CreatePlaylistModal />
+      <AstraGlobalHUD />
       <Toasts />
     </div>
   );

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">RhythmX</string>
-    <string name="title_activity_main">RhythmX</string>
+    <string name="app_name">RythemX</string>
+    <string name="title_activity_main">RythemX</string>
     <string name="package_name">co.singhsmusic.rhythmx</string>
     <string name="custom_url_scheme">co.singhsmusic.rhythmx</string>
 </resources>

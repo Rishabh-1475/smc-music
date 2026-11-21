@@ -22,7 +22,8 @@ export default function TopBar() {
     activeCategory,
     setCategory,
     navigate,
-    addToast
+    addToast,
+    setCreatorOpen
   } = usePlayerStore();
 
   const [astraMode, setAstraMode] = useState<AstraMode>('idle');
@@ -66,11 +67,15 @@ export default function TopBar() {
         {/* Mobile Brand Button */}
         <button
           type="button"
-          className="topbar__brand"
+          className="topbar__brand !p-0 overflow-hidden flex items-center justify-center shrink-0"
           onClick={() => navigate('home')}
           aria-label="RythemX Home"
         >
-          <BrandMark size={36} />
+          <img
+            src="/icon-192.png"
+            alt="RythemX"
+            className="w-9 h-9 rounded-xl object-cover shadow-[0_2px_12px_rgba(181,9,37,0.4)] border border-white/10"
+          />
         </button>
 
         {/* Global Search Bar */}
@@ -132,6 +137,22 @@ export default function TopBar() {
             <b>ASTRA</b>
             <small>{astraMode === 'idle' ? 'ONLINE' : astraMode.toUpperCase()}</small>
           </span>
+        </button>
+
+        {/* Creator Avatar Button */}
+        <button
+          type="button"
+          className="w-9 h-9 rounded-full overflow-hidden border border-[var(--ruby)]/60 shrink-0 hover:scale-105 active:scale-95 transition-all shadow-[0_0_12px_rgba(255,35,72,0.3)] bg-neutral-900 ml-1"
+          onClick={() => setCreatorOpen(true)}
+          aria-label="View Creator Dossier — Rishabh Singh"
+          title="Creator Dossier — Rishabh Singh"
+        >
+          <img
+            src="/creator.jpg?v=3"
+            alt="Rishabh Singh"
+            className="w-full h-full object-cover object-[50%_18%]"
+            referrerPolicy="no-referrer"
+          />
         </button>
       </div>
 

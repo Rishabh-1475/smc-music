@@ -28,7 +28,7 @@ export const HeroModel3D: React.FC<Props> = ({ coverUrl, isPlaying = false }) =>
       powerPreference: 'high-performance'
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.25;
     container.appendChild(renderer.domElement);
@@ -255,12 +255,16 @@ export const HeroModel3D: React.FC<Props> = ({ coverUrl, isPlaying = false }) =>
 
     window.addEventListener('mousemove', handlePointerMove);
 
-    // Animation Loop
+    // Animation Loop with Visibility & Intersection Culling
     let animId = 0;
+    let isVisible = true;
+    let isIntersecting = true;
     const clock = new THREE.Clock();
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
+      if (!isVisible || !isIntersecting) return;
+
       const t = clock.getElapsedTime();
       const active = isPlayingRef.current;
 
@@ -312,12 +316,27 @@ export const HeroModel3D: React.FC<Props> = ({ coverUrl, isPlaying = false }) =>
       renderer.setSize(w, h);
     };
 
+    const handleVisibility = () => {
+      isVisible = !document.hidden;
+    };
+
     window.addEventListener('resize', handleResize);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(([entry]) => {
+        isIntersecting = entry.isIntersecting;
+      }, { threshold: 0.05 });
+      observer.observe(container);
+    }
 
     return () => {
       cancelAnimationFrame(animId);
+      if (observer) observer.disconnect();
       window.removeEventListener('mousemove', handlePointerMove);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibility);
       renderer.dispose();
       vinylGeo.dispose();
       vinylMat.dispose();

@@ -47,8 +47,13 @@ class AudioEngineSingleton {
     // NOTE: Saavn CDN audio does not provide CORS headers. DO NOT set crossOrigin = 'anonymous'
     // Doing so triggers MEDIA_ERR_SRC_NOT_SUPPORTED and infinite loop skips.
 
+    let lastTimeNotify = 0;
     this.audio.addEventListener('timeupdate', () => {
       if (!this.audio) return;
+      const now = performance.now();
+      // Throttle time updates to max 4 Hz (~250ms) to ensure smooth 60 FPS rendering
+      if (now - lastTimeNotify < 250) return;
+      lastTimeNotify = now;
       const cur = this.audio.currentTime || 0;
       const dur = this.audio.duration || 0;
       this.timeListeners.forEach((cb) => cb(cur, dur));

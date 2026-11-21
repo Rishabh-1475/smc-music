@@ -44,7 +44,11 @@ export default function Sidebar() {
         onClick={() => navigate('home')}
         title="RythemX — ASTRA 3D Spatial Audio"
       >
-        <BrandMark />
+        <img
+          src="/icon-192.png"
+          alt="RythemX"
+          className="w-10 h-10 rounded-[12px] object-cover shadow-[0_4px_18px_rgba(181,9,37,0.45)] border border-white/10 shrink-0"
+        />
         <div className="brand__text">
           <strong>
             RYTHEM <em>//</em> X
@@ -175,39 +179,36 @@ export default function Sidebar() {
 
       {/* Creator Dossier Card */}
       <div
-        className="dossier cursor-pointer hover:border-[var(--ruby)]/40 transition-all duration-300 group"
+        className="dossier !p-3 !gap-3 cursor-pointer hover:border-[var(--ruby)]/40 transition-all duration-300 group"
         onClick={() => setCreatorOpen(true)}
         title="View Creator Dossier — Rishabh Singh"
       >
-        <div className="relative w-9 h-9 rounded-full overflow-hidden border border-[var(--ruby)]/40 flex-shrink-0 bg-neutral-900">
+        <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden shrink-0 border-2 border-[#FF2348]/85 shadow-[0_0_18px_rgba(255,35,72,0.4)] bg-neutral-900">
           {!avatarBroken ? (
             <img
-              src="/creator.jpeg"
+              src="/creator.jpg?v=3"
               alt="Rishabh Singh"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover object-[50%_18%] group-hover:scale-105 transition-transform duration-300"
               referrerPolicy="no-referrer"
               onError={() => {
-                // try fallback to creator.jpg
                 const img = new Image();
-                img.src = '/creator.jpg';
-                img.onload = () => {
-                  // if jpg exists, let it be
-                };
+                img.src = '/creator.jpeg';
+                img.onload = () => {};
                 img.onerror = () => setAvatarBroken(true);
               }}
             />
           ) : (
-            <span className="dossier__avatar" aria-hidden="true">
+            <span className="dossier__avatar font-bold text-sm text-[var(--ruby)]" aria-hidden="true">
               RS
             </span>
           )}
-          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#111114]" />
+          <span className="absolute bottom-0 right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#111114] shadow-[0_0_8px_#10b981]" />
         </div>
-        <div className="dossier__text">
-          <strong className="group-hover:text-[var(--ruby)] transition-colors">
+        <div className="dossier__text min-w-0">
+          <strong className="group-hover:text-[var(--ruby)] transition-colors truncate block">
             Rishabh Singh
           </strong>
-          <small>Lead Systems Architect</small>
+          <small className="truncate block text-white/60">Lead Systems Architect</small>
         </div>
       </div>
     </aside>

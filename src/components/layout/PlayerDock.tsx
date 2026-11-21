@@ -1,48 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Cover from '../ui/Cover';
 import Icon from '../ui/Icon';
 import Visualizer from './Visualizer';
 import QueuePanel from './QueuePanel';
-import { fmtTime } from '../ui/TrackRow';
+import SeekBar from './SeekBar';
 import { usePlayerStore } from '@/store/playerStore';
-
-function ProgressBar({ disabled }: { disabled: boolean }) {
-  const { currentTime, duration, seek } = usePlayerStore();
-  const [drag, setDrag] = useState<number | null>(null);
-
-  const shown = drag ?? currentTime;
-  const pct = duration > 0 ? Math.min(100, (shown / duration) * 100) : 0;
-
-  const commit = () => {
-    if (drag != null) {
-      seek(drag);
-      setDrag(null);
-    }
-  };
-
-  return (
-    <div className="progress">
-      <span className="progress__time">{fmtTime(shown)}</span>
-      <input
-        type="range"
-        className="range range--progress"
-        min={0}
-        max={duration || 0}
-        step={0.1}
-        value={Math.min(shown, duration || 0)}
-        disabled={disabled || !duration}
-        style={{ '--p': `${pct}%` } as React.CSSProperties}
-        onChange={(e) => setDrag(Number(e.target.value))}
-        onPointerUp={commit}
-        onKeyUp={commit}
-        onBlur={commit}
-        aria-label="Seek"
-        aria-valuetext={`${fmtTime(shown)} of ${fmtTime(duration)}`}
-      />
-      <span className="progress__time">{fmtTime(duration)}</span>
-    </div>
-  );
-}
 
 export default function PlayerDock() {
   const {
@@ -186,7 +148,7 @@ export default function PlayerDock() {
             </button>
           </div>
 
-          <ProgressBar disabled={idle} />
+          <SeekBar disabled={idle} />
         </div>
 
         {/* Right: Visualizer, Expand, Queue & Volume */}

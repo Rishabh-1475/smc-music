@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Cover from '../ui/Cover';
 import Icon from '../ui/Icon';
 import Visualizer from '../layout/Visualizer';
-import { fmtTime } from '../ui/TrackRow';
+import SeekBar from '../layout/SeekBar';
 import { usePlayerStore } from '@/store/playerStore';
 
 export default function FullPlayerModal() {
@@ -15,21 +15,17 @@ export default function FullPlayerModal() {
     isShuffle,
     repeatMode,
     volume,
-    currentTime,
-    duration,
     togglePlay,
     playNext,
     playPrev,
     toggleShuffle,
     cycleRepeat,
-    seek,
     setVolume,
     toggleLike,
     isLiked
   } = usePlayerStore();
 
   const [showLyrics, setShowLyrics] = useState(false);
-  const [dragTime, setDragTime] = useState<number | null>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -45,15 +41,6 @@ export default function FullPlayerModal() {
   const artist = currentTrack.primaryArtists || (currentTrack as any)?.artist || 'RhythmX';
   const album = currentTrack.album || 'Single';
   const liked = isLiked(currentTrack.id);
-  const shownTime = dragTime ?? currentTime;
-  const progressPct = duration > 0 ? (shownTime / duration) * 100 : 0;
-
-  const commitSeek = () => {
-    if (dragTime !== null) {
-      seek(dragTime);
-      setDragTime(null);
-    }
-  };
 
   return (
     <div
@@ -176,27 +163,8 @@ export default function FullPlayerModal() {
         </div>
 
         {/* Progress Slider */}
-        <div>
-          <div className="progress !p-0">
-            <input
-              type="range"
-              className="range range--progress w-full"
-              min={0}
-              max={duration || 0}
-              step={0.1}
-              value={Math.min(shownTime, duration || 0)}
-              style={{ '--p': `${progressPct}%` } as React.CSSProperties}
-              onChange={(e) => setDragTime(Number(e.target.value))}
-              onPointerUp={commitSeek}
-              onKeyUp={commitSeek}
-              onBlur={commitSeek}
-              aria-label="Seek"
-            />
-          </div>
-          <div className="flex items-center justify-between text-xs text-white/50 font-mono mt-1.5">
-            <span>{fmtTime(shownTime)}</span>
-            <span>{fmtTime(duration)}</span>
-          </div>
+        <div className="w-full">
+          <SeekBar className="!p-0" />
         </div>
 
         {/* Playback Transport Buttons */}

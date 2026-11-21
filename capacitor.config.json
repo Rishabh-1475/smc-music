@@ -1,6 +1,6 @@
 {
   "appId": "co.singhsmusic.rhythmx",
-  "appName": "RhythmX",
+  "appName": "RythemX",
   "webDir": "out",
   "android": {
     "allowMixedContent": true,
