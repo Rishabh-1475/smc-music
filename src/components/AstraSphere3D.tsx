@@ -40,16 +40,16 @@ export const AstraSphere3D: React.FC = () => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       const voices = window.speechSynthesis.getVoices();
-      const naturalVoice = voices.find(v => 
+      const assistantVoice = voices.find(v => 
         (v.name.includes('Google') && v.name.includes('US English')) ||
         v.name.includes('Samantha') ||
         v.name.includes('Jenny') ||
         v.lang.startsWith('en')
       ) || null;
 
-      if (naturalVoice) utterance.voice = naturalVoice;
-      utterance.rate = 1.05;
-      utterance.pitch = 1.02;
+      if (assistantVoice) utterance.voice = assistantVoice;
+      utterance.rate = 1.04;
+      utterance.pitch = 1.05;
 
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => {
@@ -68,11 +68,11 @@ export const AstraSphere3D: React.FC = () => {
     }
   }, []);
 
-  const executeCommand = useCallback(async (rawText: string) => {
+  const executeVoiceIntent = useCallback(async (rawText: string) => {
     const text = rawText.toLowerCase().trim();
     if (!text) return;
 
-    setStatusText(`PARSING: "${text.toUpperCase()}"`);
+    setStatusText(`HEARD: "${text.toUpperCase()}"`);
 
     if (text.includes('pause') || text.includes('stop')) {
       if (isPlaying) togglePlay();
@@ -90,7 +90,7 @@ export const AstraSphere3D: React.FC = () => {
 
     if (text.includes('next') || text.includes('skip')) {
       playNext();
-      speakAI('Playing next track');
+      speakAI('Skipping to next track');
       setStatusText('SKIPPED');
       return;
     }
@@ -103,7 +103,7 @@ export const AstraSphere3D: React.FC = () => {
     }
 
     let query = text
-      .replace(/^(astra|hey astra|ok astra|alexa|siri|google)\s+/i, '')
+      .replace(/^(astra|hey astra|ok astra|alexa|siri|computer)\s+/i, '')
       .replace(/^(play|stream|listen to|find|put on|start)\s+/i, '')
       .replace(/\s+(song|track|audio|music)$/i, '')
       .trim();
@@ -114,7 +114,7 @@ export const AstraSphere3D: React.FC = () => {
       return;
     }
 
-    setStatusText(`SEARCHING: "${query.toUpperCase()}"...`);
+    setStatusText(`SEARCHING MASTER: "${query.toUpperCase()}"...`);
 
     try {
       const results = await fetchSongsByQuery(query);
@@ -125,11 +125,11 @@ export const AstraSphere3D: React.FC = () => {
           playTrack(topSong, results);
         });
       } else {
-        speakAI(`Sorry, I couldn't find ${query}.`);
+        speakAI(`Sorry, I could not find ${query}.`);
         setStatusText('NO TRACK FOUND');
       }
     } catch {
-      speakAI('Network connection issue.');
+      speakAI('Network error while searching.');
       setStatusText('SEARCH FAILED');
     }
   }, [isPlaying, togglePlay, playNext, playPrev, playTrack, speakAI]);
@@ -195,13 +195,13 @@ export const AstraSphere3D: React.FC = () => {
             if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
             debounceTimerRef.current = setTimeout(() => {
               stopListening();
-              executeCommand(candidate);
+              executeVoiceIntent(candidate);
             }, 600);
           } else {
             if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
             debounceTimerRef.current = setTimeout(() => {
               stopListening();
-              executeCommand(candidate);
+              executeVoiceIntent(candidate);
             }, 1400);
           }
         }
@@ -221,14 +221,13 @@ export const AstraSphere3D: React.FC = () => {
     } catch {
       setIsListening(false);
     }
-  }, [userName, stopListening, executeCommand, speakAI]);
+  }, [userName, stopListening, executeVoiceIntent, speakAI]);
 
   const toggleListening = () => {
     if (isListening) stopListening();
     else startListening();
   };
 
-  // Three.js Luminescent Plasma Shader
   useEffect(() => {
     if (!containerRef.current) return;
     const width = containerRef.current.clientWidth || 360;
@@ -246,9 +245,8 @@ export const AstraSphere3D: React.FC = () => {
     const astraGroup = new THREE.Group();
     scene.add(astraGroup);
 
-    // Dynamic Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambient);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    scene.add(ambientLight);
 
     const redPoint = new THREE.PointLight(0xff2348, 8, 15);
     redPoint.position.set(0, 0, 2);
@@ -314,7 +312,7 @@ export const AstraSphere3D: React.FC = () => {
         vPos = position;
         float noise = snoise(position * 2.0 + vec3(uTime * 0.5));
         vNoise = noise;
-        vec3 displaced = position + normal * (noise * (0.15 + uAudio * 0.45));
+        vec3 displaced = position + normal * (noise * (0.16 + uAudio * 0.45));
         gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
       }
     `;
@@ -331,15 +329,14 @@ export const AstraSphere3D: React.FC = () => {
         float fresnel = 1.0 - max(dot(viewDir, vNormal), 0.0);
         fresnel = pow(fresnel, 2.2);
 
-        // Emissive Ruby & Crimson Glow Core
-        vec3 deepRed = vec3(0.71, 0.04, 0.15); // #B50925
-        vec3 brightRuby = vec3(1.0, 0.14, 0.28); // #FF2348
-        vec3 hotWhite = vec3(1.0, 0.8, 0.85);
+        vec3 deepCrimson = vec3(0.71, 0.04, 0.15); // #B50925
+        vec3 glowingRuby = vec3(1.0, 0.14, 0.28);  // #FF2348
+        vec3 coreWhite = vec3(1.0, 0.85, 0.9);
 
-        vec3 color = mix(deepRed, brightRuby, vNoise * 0.5 + 0.5);
-        color = mix(color, hotWhite, fresnel * 0.7 + (uAudio * 0.5));
+        vec3 color = mix(deepCrimson, glowingRuby, vNoise * 0.5 + 0.5);
+        color = mix(color, coreWhite, fresnel * 0.7 + (uAudio * 0.5));
 
-        gl_FragColor = vec4(color, 0.95);
+        gl_FragColor = vec4(color, 0.96);
       }
     `;
 
@@ -351,7 +348,6 @@ export const AstraSphere3D: React.FC = () => {
     const coreMesh = new THREE.Mesh(coreGeo, coreMat);
     astraGroup.add(coreMesh);
 
-    // Glowing Orbital Rings
     const ring1Geo = new THREE.TorusGeometry(1.9, 0.02, 16, 120);
     const ring1Mat = new THREE.MeshBasicMaterial({ color: 0xFF2348 });
     const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);

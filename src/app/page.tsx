@@ -1,262 +1,213 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Search, Compass, Music, Disc, Home as HomeIcon, Heart, User, Radio, Settings, Play } from 'lucide-react';
-import { OnboardingModal } from '@/components/OnboardingModal';
-import { NowPlayingView } from '@/components/NowPlayingView';
+import { Search, Compass, Music, Disc, Home as HomeIcon, Play, Pause, Sparkles, ExternalLink } from 'lucide-react';
+import { fetchSongsByQuery, Song, FALLBACK_CATALOG } from '@/services/api';
+import { usePlayerStore } from '@/store/playerStore';
 import { AstraSphere3D } from '@/components/AstraSphere3D';
-import { LibraryView } from '@/components/LibraryView';
-import { MiniPlayer } from '@/components/MiniPlayer';
 import { Hero3DVisualizer } from '@/components/Hero3DVisualizer';
 import { CreatorModal } from '@/components/CreatorModal';
-import { fetchSongsByQuery, fetchDynamicRadio, Song, FALLBACK_CATALOG } from '@/services/api';
-import { usePlayerStore } from '@/store/playerStore';
+import { LibraryView } from '@/components/LibraryView';
+import { NowPlayingView } from '@/components/NowPlayingView';
 
 export default function App() {
-  const [userName, setUserName] = useState('Rishabh');
-  const [activeTab, setActiveTab] = useState<'home' | 'galaxy' | 'library' | 'radio'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'galaxy' | 'library'>('home');
   const [category, setCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [songs, setSongs] = useState<Song[]>(FALLBACK_CATALOG);
-  const [loading, setLoading] = useState(false);
-  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
+  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
-  const { currentTrack, playTrack, setQueue, recents, isPlaying } = usePlayerStore();
-
-  const filterChips = ['All', 'Music', 'Podcasts', 'Gym Phonk', 'Punjabi', 'Bhojpuri'];
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('rhythmx_user_profile');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (parsed.name) setUserName(parsed.name);
-        } catch {}
-      }
-    }
-  }, []);
+  const { currentTrack, playTrack, togglePlay, isPlaying, setQueue } = usePlayerStore();
+  const chips = ['All', 'Music', 'Podcasts', 'Gym Phonk', 'Punjabi', 'Bhojpuri'];
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-
-    const q = searchQuery.trim() || (category === 'All' ? 'Trending India Hits 2026' : `${category} Hits`);
+    const q = searchQuery.trim() || (category === 'All' ? 'Trending Indian Hits 2026' : `${category} Hits`);
     fetchSongsByQuery(q).then((res) => {
       if (active) {
         const list = res.length > 0 ? res : FALLBACK_CATALOG;
         setSongs(list);
         setQueue(list);
-        setLoading(false);
       }
     });
-
     return () => { active = false; };
   }, [category, searchQuery, setQueue]);
 
   const featuredSong = songs[0] || FALLBACK_CATALOG[0];
 
   return (
-    <div className="min-h-screen bg-[#080809] text-white flex select-none">
-      <OnboardingModal onComplete={(name) => setUserName(name)} />
+    <div className="bg-[#070708] text-[#f4f0f2] min-h-screen">
+      <div className="ambient" />
 
-      {/* DESKTOP SIDEBAR (BLUEPRINT PAGE 03) */}
-      <aside className="hidden md:flex w-64 bg-[#080809] border-r border-white/10 flex-col justify-between p-6 h-screen sticky top-0">
-        <div>
-          {/* Logo */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#B50925] to-[#FF2348] flex items-center justify-center font-black text-white shadow-lg">
-              R
-            </div>
+      <div className="shell">
+        {/* DESKTOP SIDEBAR CONSOLE (BLUEPRINT PAGE 03) */}
+        <aside className="sidebar glass">
+          <div className="brand">
+            <div className="brand-mark">R</div>
             <div>
-              <span className="text-sm font-black tracking-widest text-white uppercase">NOIR//SOUND</span>
-              <p className="text-[10px] font-mono text-[#FF2348]">ASTRA 3D ENGINE</p>
+              NOIR<span>//</span>SOUND
+              <small>ASTRA 3D ENGINE</small>
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="flex flex-col gap-2">
-            <button
-              onClick={() => setActiveTab('home')}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition ${
-                activeTab === 'home' ? 'bg-[#151518] text-[#FF2348] border border-white/10' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <HomeIcon className="w-4 h-4" /> Home / Discover
-            </button>
-            <button
-              onClick={() => setActiveTab('galaxy')}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition ${
-                activeTab === 'galaxy' ? 'bg-[#151518] text-[#FF2348] border border-white/10' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Compass className="w-4 h-4" /> ASTRA AI Spatial
-            </button>
-            <button
-              onClick={() => setActiveTab('library')}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition ${
-                activeTab === 'library' ? 'bg-[#151518] text-[#FF2348] border border-white/10' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Music className="w-4 h-4" /> Library & Liked
-            </button>
-          </nav>
-        </div>
+          <div className="nav-label">Navigation</div>
+          <button
+            onClick={() => setActiveTab('home')}
+            className={`nav-btn ${activeTab === 'home' ? 'active' : ''}`}
+          >
+            <HomeIcon className="w-4 h-4" />
+            <span>Home / Discover</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('galaxy')}
+            className={`nav-btn ${activeTab === 'galaxy' ? 'active' : ''}`}
+          >
+            <Compass className="w-4 h-4" />
+            <span>ASTRA Spatial AI</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('library')}
+            className={`nav-btn ${activeTab === 'library' ? 'active' : ''}`}
+          >
+            <Music className="w-4 h-4" />
+            <span>Library & Liked</span>
+          </button>
 
-        {/* User Card - Open Creator Dossier Modal */}
-        <div
-          onClick={() => setIsCreatorOpen(true)}
-          className="pt-4 border-t border-white/10 flex items-center gap-3 cursor-pointer group hover:opacity-95 transition"
-        >
-          <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-[#B50925] to-[#FF2348] group-hover:scale-105 transition shadow-[0_0_15px_rgba(255,35,72,0.4)]">
-            <img
-              src="/creator.jpeg"
-              alt="Rishabh Singh"
-              className="w-full h-full rounded-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = '/creator.jpg';
-              }}
-            />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-white truncate group-hover:text-[#FF2348] transition">Rishabh Singh</p>
-            <p className="text-[10px] text-gray-400 font-mono">View Dossier</p>
-          </div>
-        </div>
-      </aside>
-
-      {/* MAIN CONTENT AREA */}
-      <main className="flex-1 min-h-screen flex flex-col pb-32">
-        {/* Top Bar */}
-        <header className="px-6 py-4 flex items-center justify-between border-b border-white/5 sticky top-0 bg-[#080809]/90 backdrop-blur-xl z-30">
-          <div className="flex-1 max-w-xl relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search artists, tracks, or soundscapes..."
-              className="w-full pl-11 pr-4 py-2.5 rounded-full bg-[#151518] border border-white/10 text-white placeholder-gray-500 text-xs focus:outline-none focus:border-[#FF2348] transition"
-            />
-          </div>
-
-          <div className="flex items-center gap-3 ml-4">
-            <button
-              onClick={() => setActiveTab('galaxy')}
-              className="px-3.5 py-1.5 rounded-full bg-[#B50925]/20 border border-[#B50925]/40 text-[#FF2348] text-xs font-bold flex items-center gap-1.5 hover:bg-[#B50925]/30 transition"
-            >
-              <Compass className="w-3.5 h-3.5" /> ASTRA
-            </button>
-            <button
-              onClick={() => setIsCreatorOpen(true)}
-              className="w-8 h-8 rounded-full p-0.5 bg-gradient-to-tr from-[#B50925] to-[#FF2348] flex-shrink-0 cursor-pointer hover:scale-105 transition shadow-[0_0_12px_rgba(255,35,72,0.4)]"
-              title="Creator Dossier"
-            >
+          {/* RISHABH SINGH CREATOR DOSSIER TRIGGER */}
+          <div onClick={() => setIsCreatorOpen(true)} className="side-bottom group">
+            <div className="avatar">
               <img
                 src="/creator.jpeg"
                 alt="Rishabh Singh"
-                className="w-full h-full rounded-full object-cover"
                 onError={(e) => { e.currentTarget.src = '/creator.jpg'; }}
               />
+            </div>
+            <div className="min-w-0">
+              <span className="font-bold text-white text-xs group-hover:text-[#ff2447] transition block truncate">
+                Rishabh Singh
+              </span>
+              <small className="text-[10px] text-gray-400 font-mono block">Lead Architect</small>
+            </div>
+          </div>
+        </aside>
+
+        {/* MAIN LUXURY DISPLAY SURFACE */}
+        <main className="main">
+          {/* TOP BAR */}
+          <header className="top">
+            <div className="search">
+              <Search className="w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search artists, tracks, or soundscapes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <button onClick={() => setActiveTab('galaxy')} className="upgrade-btn">
+              <Sparkles className="w-3.5 h-3.5 text-[#ff2447]" />
+              <span>ASTRA 3D</span>
             </button>
-          </div>
-        </header>
+          </header>
 
-        {/* HOME VIEW */}
-        {activeTab === 'home' && (
-          <div className="p-6 max-w-6xl w-full mx-auto">
-            {/* Filter Chips */}
-            <div className="flex gap-2 overflow-x-auto no-scrollbar mb-6">
-              {filterChips.map((chip) => (
-                <button
-                  key={chip}
-                  onClick={() => { setSearchQuery(''); setCategory(chip); }}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wide transition ${
-                    category === chip && !searchQuery
-                      ? 'bg-[#B50925] text-white crimson-glow'
-                      : 'bg-[#151518] text-gray-400 border border-white/5 hover:text-white'
-                  }`}
-                >
-                  {chip}
-                </button>
-              ))}
-            </div>
-
-            {/* Featured Hero */}
-            <Hero3DVisualizer song={featuredSong} />
-
-            {/* Made For You (Horizontal Cards) */}
-            <div className="mb-8">
-              <h2 className="text-base font-extrabold text-white mb-4">Made For You</h2>
-              <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-                {songs.slice(0, 8).map((song) => (
-                  <div
-                    key={`mfy_${song.id}`}
-                    onClick={() => playTrack(song)}
-                    className="w-36 flex-shrink-0 noir-card p-3 rounded-xl cursor-pointer"
+          {activeTab === 'home' && (
+            <div className="p-2 md:p-4 max-w-6xl">
+              {/* FILTER CHIPS */}
+              <div className="flex gap-2 overflow-x-auto no-scrollbar mb-6">
+                {chips.map((chip) => (
+                  <button
+                    key={chip}
+                    onClick={() => { setSearchQuery(''); setCategory(chip); }}
+                    className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${
+                      category === chip && !searchQuery
+                        ? 'bg-[#b20c2b] text-white shadow-[0_0_15px_rgba(255,36,71,0.4)]'
+                        : 'bg-[#151416] text-[#878387] border border-white/5 hover:text-white'
+                    }`}
                   >
-                    <img src={song.imageUrl} alt={song.name} className="w-full h-32 object-cover rounded-lg shadow-md" />
-                    <p className="text-xs font-bold text-white truncate mt-2">{song.name}</p>
-                    <p className="text-[11px] text-gray-400 truncate mt-0.5">{song.primaryArtists}</p>
-                  </div>
+                    {chip}
+                  </button>
                 ))}
               </div>
-            </div>
 
-            {/* Recently Played / Popular Tracks Feed */}
-            <div>
-              <h2 className="text-base font-extrabold text-white mb-4">Jump Back In</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {songs.slice(0, 10).map((song) => (
-                  <div
-                    key={`feed_${song.id}`}
-                    onClick={() => playTrack(song)}
-                    className="flex items-center justify-between p-3 rounded-xl noir-row cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <img src={song.imageUrl} alt={song.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0 shadow-md" />
-                      <div className="min-w-0">
-                        <p className={`text-xs font-bold truncate ${currentTrack?.id === song.id ? 'text-[#FF2348]' : 'text-white'}`}>
-                          {song.name}
-                        </p>
-                        <p className="text-[11px] text-gray-400 truncate mt-0.5">{song.primaryArtists}</p>
+              {/* CINEMATIC HERO STAGE */}
+              <Hero3DVisualizer song={featuredSong} />
+
+              {/* MADE FOR YOU ALBUM TILES */}
+              <div className="mt-8">
+                <h3 className="text-sm font-extrabold tracking-widest text-[#878387] uppercase mb-4">
+                  Made For You
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {songs.slice(0, 12).map((song) => (
+                    <div
+                      key={song.id}
+                      onClick={() => playTrack(song, songs)}
+                      className="card-noir"
+                    >
+                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 bg-[#111114]">
+                        <img src={song.imageUrl} alt={song.name} className="w-full h-full object-cover" />
                       </div>
+                      <p className="text-xs font-bold text-white truncate">{song.name}</p>
+                      <p className="text-[11px] text-[#878387] truncate mt-0.5">{song.primaryArtists}</p>
                     </div>
-                    <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#B50925] transition">
-                      <Play className="w-3.5 h-3.5 fill-current translate-x-0.5" />
-                    </button>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
+          )}
+
+          {activeTab === 'galaxy' && <AstraSphere3D />}
+          {activeTab === 'library' && <LibraryView />}
+        </main>
+      </div>
+
+      {/* NOIR GLASS PLAYER DOCK */}
+      {currentTrack && (
+        <div
+          onClick={() => setIsPlayerOpen(true)}
+          className="player-dock glass cursor-pointer group hover:border-[#ff2447]/40 transition"
+        >
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <img src={currentTrack.imageUrl} alt={currentTrack.name} className="w-12 h-12 rounded-xl object-cover shadow-md" />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-white truncate group-hover:text-[#ff2447] transition">{currentTrack.name}</p>
+              <p className="text-[11px] text-[#878387] truncate">{currentTrack.primaryArtists}</p>
+            </div>
           </div>
-        )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlay();
+            }}
+            className="w-11 h-11 rounded-full bg-gradient-to-r from-[#b20c2b] to-[#ff2447] flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,36,71,0.5)] transition hover:scale-105 active:scale-95 flex-shrink-0"
+          >
+            {isPlaying ? <Pause className="w-5 h-5 fill-white" /> : <Play className="w-5 h-5 fill-white translate-x-0.5" />}
+          </button>
+        </div>
+      )}
 
-        {/* ASTRA GALAXY VIEW */}
-        {activeTab === 'galaxy' && <AstraSphere3D />}
-
-        {/* LIBRARY VIEW */}
-        {activeTab === 'library' && <LibraryView />}
-      </main>
-
-      {/* Persistent MiniPlayer */}
-      <MiniPlayer onOpenNowPlaying={() => setIsPlayerOpen(true)} />
-
-      {/* Mobile Bottom Dock (<768px) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#080809]/95 backdrop-blur-2xl border-t border-white/10 flex items-center justify-around z-30">
-        <button onClick={() => setActiveTab('home')} className={`text-xs flex flex-col items-center gap-1 ${activeTab === 'home' ? 'text-[#FF2348]' : 'text-gray-400'}`}>
+      {/* MOBILE BOTTOM NAVIGATION */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#070708]/95 backdrop-blur-2xl border-t border-white/10 flex items-center justify-around z-30">
+        <button onClick={() => setActiveTab('home')} className={`text-xs flex flex-col items-center gap-1 ${activeTab === 'home' ? 'text-[#ff2447]' : 'text-gray-400'}`}>
           <HomeIcon className="w-4 h-4" /> Home
         </button>
-        <button onClick={() => setActiveTab('galaxy')} className={`text-xs flex flex-col items-center gap-1 ${activeTab === 'galaxy' ? 'text-[#FF2348]' : 'text-gray-400'}`}>
+        <button onClick={() => setActiveTab('galaxy')} className={`text-xs flex flex-col items-center gap-1 ${activeTab === 'galaxy' ? 'text-[#ff2447]' : 'text-gray-400'}`}>
           <Compass className="w-4 h-4" /> ASTRA
         </button>
-        <button onClick={() => setActiveTab('library')} className={`text-xs flex flex-col items-center gap-1 ${activeTab === 'library' ? 'text-[#FF2348]' : 'text-gray-400'}`}>
+        <button onClick={() => setActiveTab('library')} className={`text-xs flex flex-col items-center gap-1 ${activeTab === 'library' ? 'text-[#ff2447]' : 'text-gray-400'}`}>
           <Music className="w-4 h-4" /> Library
+        </button>
+        <button onClick={() => setIsCreatorOpen(true)} className="text-xs flex flex-col items-center gap-1 text-gray-400">
+          <div className="w-5 h-5 rounded-full overflow-hidden border border-[#ff2447]">
+            <img src="/creator.jpeg" alt="Profile" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = '/creator.jpg'; }} />
+          </div>
+          Creator
         </button>
       </nav>
 
-      {isPlayerOpen && <NowPlayingView onClose={() => setIsPlayerOpen(false)} />}
+      {/* RISHABH SINGH CREATOR PROFILE MODAL */}
       <CreatorModal isOpen={isCreatorOpen} onClose={() => setIsCreatorOpen(false)} />
+      {isPlayerOpen && <NowPlayingView onClose={() => setIsPlayerOpen(false)} />}
     </div>
   );
 }
