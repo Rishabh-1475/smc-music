@@ -190,11 +190,11 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
       {/* HUD Header */}
       <div className="flex items-center justify-between mb-2.5 px-1">
         <p className="text-[10px] font-mono font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#EF4444] animate-ping" />
-          ASTRA SPATIAL SHOWCASE
+          <span className="w-2 h-2 rounded-full bg-[#FF2348] animate-ping" />
+          NOIR//SOUND 3D MASTER
         </p>
-        <span className="text-[10px] font-mono text-[#EF4444] bg-[#EF4444]/15 px-2.5 py-0.5 rounded-full border border-[#EF4444]/40 flex items-center gap-1 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
-          <Sparkles className="w-3 h-3 text-[#EF4444]" /> 3D WEBGL CORE
+        <span className="text-[10px] font-mono text-[#FF2348] bg-[#B50925]/20 px-2.5 py-0.5 rounded-full border border-[#B50925]/40 flex items-center gap-1 shadow-[0_0_12px_rgba(181,9,37,0.3)]">
+          <Sparkles className="w-3 h-3 text-[#FF2348]" /> 3D WEBGL CORE
         </span>
       </div>
 
@@ -210,7 +210,7 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
           transformStyle: 'preserve-3d',
           transition: isInteracting ? 'transform 0.08s ease-out' : 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)'
         }}
-        className="relative rounded-[28px] overflow-hidden cursor-pointer border border-[#EF4444]/40 bg-gradient-to-br from-[#1C060B] via-[#09080E] to-[#020204] p-5 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(239,68,68,0.35),inset_0_1px_1px_rgba(255,255,255,0.2)]"
+        className="relative rounded-[28px] overflow-hidden cursor-pointer border border-[#B50925]/35 bg-gradient-to-br from-[#1C060B] via-[#0D0D12] to-[#080809] p-5 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(181,9,37,0.25),inset_0_1px_1px_rgba(255,255,255,0.2)]"
       >
         {/* Specular Liquid Light Sheen */}
         <div
@@ -222,21 +222,21 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
         />
 
         {/* Ambient Volumetric Flare */}
-        <div className="absolute top-0 right-0 w-44 h-44 bg-[#EF4444]/25 blur-3xl rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-rose-950/40 blur-3xl rounded-full pointer-events-none" />
+        <div className="absolute top-0 right-0 w-44 h-44 bg-[#B50925]/20 blur-3xl rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-rose-950/30 blur-3xl rounded-full pointer-events-none" />
 
         <div className="relative z-20 flex items-center justify-between gap-2">
           {/* Left Metadata & Controls on Z-Elevation */}
           <div style={{ transform: 'translateZ(35px)' }} className="flex-1 min-w-0 pr-1">
             <div className="flex items-center gap-2">
-              <span className="text-[9px] font-mono font-black text-[#EF4444] bg-[#EF4444]/20 border border-[#EF4444]/50 px-2.5 py-0.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1">
+              <span className="text-[9px] font-mono font-black text-[#FF2348] bg-[#B50925]/20 border border-[#B50925]/50 px-2.5 py-0.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1">
                 <Radio className="w-2.5 h-2.5" /> FEATURED MASTER
               </span>
               {isCurrent && isPlaying && (
                 <div className="flex items-center gap-0.5 h-3">
-                  <span className="w-1 bg-[#EF4444] rounded-full animate-[bounce_0.6s_ease-in-out_infinite]" />
-                  <span className="w-1 bg-[#EF4444] rounded-full animate-[bounce_0.8s_ease-in-out_0.2s_infinite]" />
-                  <span className="w-1 bg-[#EF4444] rounded-full animate-[bounce_0.5s_ease-in-out_0.4s_infinite]" />
+                  <span className="w-1 bg-[#FF2348] rounded-full animate-[bounce_0.6s_ease-in-out_infinite]" />
+                  <span className="w-1 bg-[#FF2348] rounded-full animate-[bounce_0.8s_ease-in-out_0.2s_infinite]" />
+                  <span className="w-1 bg-[#FF2348] rounded-full animate-[bounce_0.5s_ease-in-out_0.4s_infinite]" />
                 </div>
               )}
             </div>
@@ -249,7 +249,7 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
             <div className="mt-4 flex items-center gap-2.5">
               <button
                 onClick={handleAction}
-                className="px-4 py-2 rounded-full bg-gradient-to-r from-[#EF4444] via-rose-600 to-amber-500 text-white font-black text-xs flex items-center gap-2 shadow-[0_0_25px_rgba(239,68,68,0.7)] hover:scale-105 active:scale-95 transition cursor-pointer"
+                className="px-4 py-2 rounded-full bg-gradient-to-r from-[#B50925] via-[#E11D48] to-[#FF2348] text-white font-black text-xs flex items-center gap-2 shadow-[0_0_20px_rgba(255,35,72,0.5)] hover:scale-105 active:scale-95 transition cursor-pointer"
               >
                 {isCurrent && isPlaying ? (
                   <>
@@ -269,9 +269,9 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
                   e.stopPropagation();
                   toggleLike(song);
                 }}
-                className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:border-[#EF4444] transition shadow-lg cursor-pointer"
+                className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:border-[#FF2348] transition shadow-lg cursor-pointer"
               >
-                <Heart className={`w-4 h-4 ${isLiked ? 'fill-[#EF4444] text-[#EF4444]' : 'text-zinc-300'}`} />
+                <Heart className={`w-4 h-4 ${isLiked ? 'fill-[#FF2348] text-[#FF2348]' : 'text-zinc-300'}`} />
               </button>
             </div>
           </div>

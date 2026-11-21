@@ -92,6 +92,25 @@ body {
 
 /* NOIR SOUND 3D Hardware Accelerated Utilities */
 @layer utilities {
+  .bg-obsidian { background-color: #080809; }
+  .bg-charcoal { background-color: #151518; }
+  .text-ruby { color: #FF2348; }
+  .border-smoked { border: 1px solid rgba(255, 255, 255, 0.1); }
+  .glass-noir {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(21, 21, 24, 0.85) 60%, rgba(8, 8, 9, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  }
+  .card-3d-tilt {
+    transform-style: preserve-3d;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+  }
+  .card-3d-tilt:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.95), 0 0 25px rgba(181, 9, 37, 0.3);
+  }
+
   .perspective-stage {
     perspective: 1200px;
     transform-style: preserve-3d;
