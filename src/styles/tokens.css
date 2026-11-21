@@ -1,0 +1,49 @@
+/* NOIR // SOUND — design tokens */
+:root {
+  /* canvas + surfaces */
+  --obsidian: #080809;
+  --glass: #151518;
+  --glass-bg: rgba(21, 21, 24, 0.72);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  /* accents */
+  --ruby: #b50925;
+  --laser: #ff2348;
+  --glow: 0 0 22px rgba(255, 35, 72, 0.45);
+
+  /* smoked chrome */
+  --chrome: #e2e8f0;
+  --chrome-mid: #94a3b8;
+  --chrome-dim: #64748b;
+
+  /* type */
+  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+
+  /* shape: three radii, used by hierarchy */
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+
+  /* layout */
+  --sidebar-w: 272px;
+  --dock-h: 88px;
+  --nav-h: 64px;
+  --gutter: 12px;
+
+  --ease: cubic-bezier(0.22, 0.8, 0.24, 1);
+  color-scheme: dark;
+}
+
+@media (max-width: 1180px) {
+  :root {
+    --sidebar-w: 84px;
+  }
+}
+@media (max-width: 860px) {
+  :root {
+    --dock-h: 70px;
+    --sidebar-w: 0px;
+  }
+}

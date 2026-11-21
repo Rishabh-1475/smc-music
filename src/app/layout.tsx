@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'RhythmX — NOIR//SOUND 3D Lossless Streaming',
+  title: 'RythemX — 3D Lossless Streaming & ASTRA AI',
   description: 'Spatial 3D audiophile music streaming engine powered by Singh Music Co.',
 };
 
@@ -23,7 +23,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#080809] text-[#f4f0f2] antialiased overflow-x-hidden selection:bg-[#FF2348] selection:text-white">
+      <body className="bg-[#080809] text-[#E2E8F0] antialiased overflow-x-hidden selection:bg-[#FF2348] selection:text-white">
         {children}
       </body>
     </html>
