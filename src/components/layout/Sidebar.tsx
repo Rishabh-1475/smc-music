@@ -28,6 +28,7 @@ export default function Sidebar() {
     recents,
     playTrack,
     userPlaylists,
+    autoPlaylists,
     setCreatorOpen,
     setCreatePlaylistOpen
   } = usePlayerStore();
@@ -74,6 +75,36 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Smart Auto-Mixes */}
+      {autoPlaylists.length > 0 && (
+        <section className="recent !flex-none" aria-label="Smart Auto-Mixes">
+          <div className="flex items-center justify-between mb-1.5 px-2">
+            <h2 className="recent__title !p-0 !m-0 flex items-center gap-1.5 text-[11px] text-[var(--ruby)] font-bold">
+              <Icon name="bolt" size={12} /> Auto-Mixes
+            </h2>
+            <span className="text-[9px] font-mono text-white/40">From likes</span>
+          </div>
+          <ul className="space-y-1">
+            {autoPlaylists.slice(0, 3).map((mix) => (
+              <li key={mix.id}>
+                <button
+                  type="button"
+                  className="w-full text-left py-1 px-2 rounded flex items-center gap-2 hover:bg-white/[0.04] transition-colors"
+                  onClick={() => navigate('playlist', { playlist: mix })}
+                >
+                  <span className="w-5 h-5 rounded overflow-hidden flex-shrink-0 bg-white/5 border border-white/10">
+                    <img src={mix.coverArt} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  </span>
+                  <span className="text-xs text-white/90 truncate font-medium">
+                    {mix.name}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* User Playlists */}
       <section className="recent" aria-label="Playlists">

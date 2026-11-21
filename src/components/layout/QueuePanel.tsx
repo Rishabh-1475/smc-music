@@ -5,7 +5,18 @@ import Equalizer from '../ui/Equalizer';
 import { usePlayerStore } from '@/store/playerStore';
 
 export default function QueuePanel() {
-  const { queue, queueIndex, isPlaying, playTrack, removeFromQueue, clearQueue, setQueueOpen } = usePlayerStore();
+  const {
+    queue,
+    queueIndex,
+    isPlaying,
+    isRadioLoading,
+    queueSourceLabel,
+    playTrack,
+    removeFromQueue,
+    clearQueue,
+    setQueueOpen,
+    refreshRadioQueue
+  } = usePlayerStore();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -18,15 +29,31 @@ export default function QueuePanel() {
   return (
     <section className="queue glass" role="dialog" aria-label="Queue">
       <header className="queue__head">
-        <h2>Queue</h2>
-        <span>{queue.length} tracks</span>
+        <div className="flex items-center gap-2">
+          <h2>Queue</h2>
+          {isRadioLoading && (
+            <span className="w-2 h-2 rounded-full bg-[var(--ruby)] animate-ping" />
+          )}
+        </div>
+        <span className="truncate max-w-[140px] text-[11px] text-white/50" title={queueSourceLabel}>
+          {isRadioLoading ? 'Auto-curating...' : queueSourceLabel}
+        </span>
+        <button
+          type="button"
+          className="ghost-btn !text-xs flex items-center gap-1"
+          onClick={refreshRadioQueue}
+          title="Refresh Related Radio"
+        >
+          <Icon name="retry" size={13} />
+          Refresh
+        </button>
         <button
           type="button"
           className="ghost-btn"
           onClick={clearQueue}
           disabled={queue.length <= 1}
         >
-          Clear queue
+          Clear
         </button>
         <button
           type="button"

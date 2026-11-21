@@ -10,6 +10,7 @@ export default function LibraryView() {
     likedSongs,
     recents,
     userPlaylists,
+    autoPlaylists,
     navigate,
     setCreatePlaylistOpen
   } = usePlayerStore();
@@ -30,6 +31,47 @@ export default function LibraryView() {
           <Icon name="plus" size={16} /> New Playlist
         </button>
       </div>
+
+      {/* Smart Auto-Mixes (Generated From Likes) */}
+      {autoPlaylists.length > 0 && (
+        <section>
+          <SectionHead
+            title="Smart Auto-Mixes"
+            note="AI CURATED • MADE FROM YOUR LIKES"
+          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {autoPlaylists.map((mix) => (
+              <div
+                key={mix.id}
+                onClick={() => navigate('playlist', { playlist: mix })}
+                className="group relative p-4 rounded-2xl bg-gradient-to-br from-[#15151b] to-[#0c0c0e] border border-white/10 hover:border-[var(--ruby)]/50 shadow-xl cursor-pointer transition-all duration-300 flex flex-col justify-between h-44 overflow-hidden hover:scale-[1.02]"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                    <img
+                      src={mix.coverArt}
+                      alt={mix.name}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-[var(--ruby)]/20 text-[var(--ruby)] border border-[var(--ruby)]/30 flex items-center gap-1">
+                    <Icon name="bolt" size={10} /> AUTO
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-white group-hover:text-[var(--ruby)] transition-colors truncate">
+                    {mix.name}
+                  </h2>
+                  <p className="text-xs text-white/50 truncate mt-0.5">
+                    {mix.tracks.length} tracks
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Playlists Grid */}
       <section>

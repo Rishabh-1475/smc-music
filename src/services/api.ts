@@ -291,7 +291,90 @@ export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
   return [];
 };
 
+export const fetchArtistRadio = async (artist: string, limit = 25): Promise<Song[]> => {
+  if (!artist || !artist.trim()) return [];
+  const clean = encodeURIComponent(artist.trim());
+  try {
+    const stationUrl = `https://www.jiosaavn.com/api.php?__call=webradio.createArtistStation&_format=json&_marker=0&api_version=4&ctx=web6dot0&name=${clean}&query=${clean}`;
+    const sRes = await fetch(stationUrl);
+    if (!sRes.ok) return [];
+    const sData = await sRes.json();
+    if (!sData.stationid) return [];
+
+    const getSongUrl = `https://www.jiosaavn.com/api.php?__call=webradio.getSong&_format=json&_marker=0&api_version=4&ctx=web6dot0&stationid=${encodeURIComponent(sData.stationid)}&k=${limit}`;
+    const gRes = await fetch(getSongUrl);
+    if (!gRes.ok) return [];
+    const gData = await gRes.json();
+
+    const songs: Song[] = [];
+    for (const key of Object.keys(gData)) {
+      if (key === 'stationid' || key === 'error') continue;
+      const item = gData[key]?.song;
+      if (!item) continue;
+
+      const enc = item.more_info?.encrypted_media_url || item.encrypted_media_url;
+      const is320 = item.more_info?.['320kbps'] ?? item['320kbps'] ?? true;
+      let decryptedUrl = decryptMediaUrl(enc, is320);
+      if (!decryptedUrl && item.media_url) {
+        decryptedUrl = item.media_url.replace('http://', 'https://');
+      }
+
+      const streamUrls: string[] = [];
+      if (decryptedUrl) {
+        const u320 = decryptedUrl.replace('_96.', '_320.').replace('_160.', '_320.');
+        const u160 = decryptedUrl.replace('_96.', '_160.').replace('_320.', '_160.');
+        const u96 = decryptedUrl.replace('_320.', '_96.').replace('_160.', '_96.');
+        streamUrls.push(u320, u160, u96);
+      }
+
+      const duration = Number(item.more_info?.duration || item.duration) || 210;
+
+      songs.push({
+        id: String(item.id || Math.random().toString(36).substring(2, 9)),
+        name: decodeHtml(item.title || item.song || item.name || 'Radio Track'),
+        title: decodeHtml(item.title || item.song || item.name || 'Radio Track'),
+        album: decodeHtml(item.more_info?.album || item.album || 'Single'),
+        year: String(item.year || '2026'),
+        duration,
+        label: item.more_info?.copyright_text || item.label || 'JioSaavn',
+        primaryArtists: decodeHtml(extractArtists(item)),
+        artist: decodeHtml(extractArtists(item)),
+        imageUrl: extract500Image(item.image || item.images),
+        art: extract500Image(item.image || item.images),
+        streamUrl: streamUrls[0] || '',
+        streamUrls,
+        language: item.language || 'hindi'
+      } as any);
+    }
+    return songs.filter((s) => Boolean(s.streamUrl && s.imageUrl));
+  } catch (err) {
+    console.warn('Artist radio error:', err);
+    return [];
+  }
+};
+
+export const fetchSongSuggestions = async (
+  songId: string,
+  limit = 25,
+  seedSong?: Song
+): Promise<Song[]> => {
+  // If seed song artist is available, query artist radio directly
+  const artist = seedSong?.primaryArtists || (seedSong as any)?.artist;
+  if (artist) {
+    const leadArtist = artist.split(',')[0].replace(/feat\..*$/i, '').trim();
+    if (leadArtist) {
+      const radio = await fetchArtistRadio(leadArtist, limit);
+      if (radio && radio.length > 0) return radio;
+    }
+  }
+
+  // Fallback: search for top tracks by the artist or title
+  const query = artist ? `${artist.split(',')[0]} Hits` : `${songId} Hits`;
+  return fetchSongsByQuery(query);
+};
+
 export const fetchDynamicRadioQueue = async (
+
   current: Song,
   playedIds: string[] = []
 ): Promise<Song[]> => {

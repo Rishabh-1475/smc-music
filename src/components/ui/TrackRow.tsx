@@ -3,7 +3,7 @@ import Cover from './Cover';
 import Icon from './Icon';
 import Equalizer from './Equalizer';
 import { Song } from '@/types/music';
-import { usePlayerStore } from '@/store/playerStore';
+import { usePlayerStore, PlaybackSource } from '@/store/playerStore';
 
 export const fmtTime = (s: number | string): string => {
   const n = typeof s === 'string' ? parseFloat(s) : s;
@@ -17,9 +17,10 @@ interface TrackRowProps {
   track: Song;
   list?: Song[];
   index: number;
+  source?: PlaybackSource;
 }
 
-export default function TrackRow({ track, list, index }: TrackRowProps) {
+export default function TrackRow({ track, list, index, source }: TrackRowProps) {
   const { currentTrack, isPlaying, playTrack, togglePlay, toggleLike, isLiked, addToQueue } = usePlayerStore();
   const active = currentTrack?.id === track.id;
   const liked = isLiked(track.id);
@@ -28,12 +29,24 @@ export default function TrackRow({ track, list, index }: TrackRowProps) {
   const artist = track.primaryArtists || (track as any).artist || 'RhythmX';
   const album = track.album || 'Single';
 
+  const handleClick = () => {
+    if (active) {
+      togglePlay();
+    } else {
+      if (source === 'search') {
+        playTrack(track, { source: 'search' });
+      } else {
+        playTrack(track, { source: source || (list ? 'playlist' : 'single'), queue: list });
+      }
+    }
+  };
+
   return (
     <li className={`row ${active ? 'is-active' : ''}`}>
       <button
         type="button"
         className="row__main"
-        onClick={() => (active ? togglePlay() : playTrack(track, list || [track]))}
+        onClick={handleClick}
         aria-label={`${active && isPlaying ? 'Pause' : 'Play'} ${title} by ${artist}`}
       >
         <span className="row__index">

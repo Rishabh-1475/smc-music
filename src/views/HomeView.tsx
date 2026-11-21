@@ -7,6 +7,7 @@ import { CardSkeletons, EmptyState, SectionHead } from '../components/ui/Section
 import { fetchSongsByQuery } from '@/services/api';
 import { Song } from '@/types/music';
 import { usePlayerStore } from '@/store/playerStore';
+import { tasteEngine, AutoPlaylist } from '@/services/tasteEngine';
 import curatedData from '@/services/curatedTracks.json';
 
 const POPULAR_ARTISTS = [
@@ -21,12 +22,14 @@ const POPULAR_ARTISTS = [
 ];
 
 export default function HomeView() {
-  const { activeCategory, playTrack, navigate } = usePlayerStore();
+  const { activeCategory, playTrack, navigate, autoPlaylists } = usePlayerStore();
   const [loading, setLoading] = useState(true);
   const [heroTrack, setHeroTrack] = useState<Song | null>(null);
   const [madeForYou, setMadeForYou] = useState<Song[]>([]);
   const [trending, setTrending] = useState<Song[]>([]);
   const [quickPicks, setQuickPicks] = useState<Song[]>([]);
+  const [becauseYouLiked, setBecauseYouLiked] = useState<{ title: string; subtitle: string; tracks: Song[] } | null>(null);
+  const [replayFavorites, setReplayFavorites] = useState<Song[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -51,6 +54,7 @@ export default function HomeView() {
 
     const query = getQueryForCategory(activeCategory);
 
+    // Fetch primary feed
     fetchSongsByQuery(query)
       .then((songs) => {
         if (!alive) return;
@@ -60,7 +64,6 @@ export default function HomeView() {
           setMadeForYou(songs.slice(7, 13));
           setTrending(songs.slice(13, 25));
         } else {
-          // Fallback to curated 320kbps tracks
           loadCuratedFallback();
         }
       })
@@ -70,6 +73,13 @@ export default function HomeView() {
       .finally(() => {
         if (alive) setLoading(false);
       });
+
+    // Fetch personalized taste shelves in background
+    tasteEngine.getPersonalizedShelves().then((shelves) => {
+      if (!alive) return;
+      setBecauseYouLiked(shelves.becauseYouLiked);
+      setReplayFavorites(shelves.replayFavorites);
+    }).catch(() => {});
 
     return () => {
       alive = false;
@@ -129,6 +139,47 @@ export default function HomeView() {
       {/* Layered 3D Hero */}
       <Hero track={heroTrack} list={allQueue} />
 
+      {/* Smart Auto-Mixes Shelf (Made from User Likes) */}
+      {autoPlaylists.length > 0 && (
+        <section aria-label="Smart Auto-Mixes">
+          <SectionHead
+            title="Your Auto-Mixes"
+            note="AUTO-CURATED FROM YOUR LIKES"
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {autoPlaylists.map((mix) => (
+              <div
+                key={mix.id}
+                onClick={() => navigate('playlist', { playlist: mix })}
+                className="group relative p-4 rounded-2xl bg-gradient-to-br from-[#15151b] to-[#0c0c0e] border border-white/10 hover:border-[var(--ruby)]/50 shadow-lg cursor-pointer transition-all duration-300 flex flex-col justify-between h-48 overflow-hidden hover:scale-[1.02]"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-14 h-14 rounded-xl overflow-hidden shadow-md border border-white/10 flex-shrink-0">
+                    <img
+                      src={mix.coverArt}
+                      alt={mix.name}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-[var(--ruby)]/20 text-[var(--ruby)] border border-[var(--ruby)]/30 flex items-center gap-1">
+                    <Icon name="bolt" size={10} /> AUTO
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white group-hover:text-[var(--ruby)] transition-colors truncate">
+                    {mix.name}
+                  </h3>
+                  <p className="text-xs text-white/50 truncate mt-0.5">
+                    {mix.subtitle}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 2x3 Quick Picks Speed Dial */}
       {quickPicks.length > 0 && (
         <section aria-label="Quick picks">
@@ -137,7 +188,7 @@ export default function HomeView() {
             {quickPicks.map((t) => (
               <div
                 key={t.id}
-                onClick={() => playTrack(t, quickPicks)}
+                onClick={() => playTrack(t, { source: 'single' })}
                 className="group relative flex items-center gap-3 p-2.5 rounded-xl bg-[#111114]/80 hover:bg-white/[0.08] border border-white/5 hover:border-[var(--ruby)]/40 cursor-pointer transition-all duration-300 shadow-md hover:shadow-[0_4px_20px_rgba(255,35,72,0.15)] overflow-hidden"
               >
                 <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
@@ -158,6 +209,36 @@ export default function HomeView() {
                   320K
                 </span>
               </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Because You Liked Shelf */}
+      {becauseYouLiked && becauseYouLiked.tracks.length > 0 && (
+        <section aria-label="Because You Liked">
+          <SectionHead
+            title={becauseYouLiked.title}
+            note={becauseYouLiked.subtitle}
+          />
+          <div className="grid3d">
+            {becauseYouLiked.tracks.map((t) => (
+              <MusicCard key={t.id} track={t} list={becauseYouLiked.tracks} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Replay Your Favorites */}
+      {replayFavorites.length > 0 && (
+        <section aria-label="Replay Your Favorites">
+          <SectionHead
+            title="Replay Your Favorites"
+            note="TOP REPLAYED & SAVED"
+          />
+          <div className="grid3d">
+            {replayFavorites.map((t) => (
+              <MusicCard key={t.id} track={t} list={replayFavorites} />
             ))}
           </div>
         </section>

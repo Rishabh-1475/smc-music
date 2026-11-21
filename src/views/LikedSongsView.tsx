@@ -12,7 +12,7 @@ export default function LikedSongsView() {
 
   const handlePlayAll = () => {
     if (likedSongs.length > 0) {
-      playTrack(likedSongs[0], likedSongs);
+      playTrack(likedSongs[0], { source: 'liked', queue: likedSongs, sourceLabel: 'Liked Songs' });
     }
   };
 
@@ -71,6 +71,7 @@ export default function LikedSongsView() {
                 key={`${song.id}-${idx}`}
                 track={song}
                 list={likedSongs}
+                source="liked"
                 index={idx}
               />
             ))}

@@ -84,9 +84,9 @@ export default function SearchView() {
               {/* Top Result Split Card */}
               {topSong && (
                 <section>
-                  <SectionHead title="Top Result" note="320 KBPS LOSSLESS" />
+                  <SectionHead title="Top Result" note="320 KBPS LOSSLESS • AUTO RADIO QUEUE" />
                   <div
-                    onClick={() => playTrack(topSong, results)}
+                    onClick={() => playTrack(topSong, { source: 'search' })}
                     className="group relative p-6 rounded-2xl bg-[#111114] border border-white/10 hover:border-[var(--ruby)]/40 shadow-xl cursor-pointer transition-all duration-300 flex flex-col md:flex-row items-center md:items-start gap-6 overflow-hidden"
                   >
                     <div className="relative w-40 h-40 rounded-xl overflow-hidden shadow-2xl flex-shrink-0">
@@ -118,7 +118,7 @@ export default function SearchView() {
                           className="btn btn--glow"
                           onClick={(e) => {
                             e.stopPropagation();
-                            playTrack(topSong, results);
+                            playTrack(topSong, { source: 'search' });
                           }}
                         >
                           <Icon name="play" size={16} /> STREAM MASTER
@@ -135,7 +135,12 @@ export default function SearchView() {
                   <SectionHead title="Matching Songs" note={`${results.length} TRACKS FOUND`} />
                   <ul className="rows">
                     {listSongs.map((t, idx) => (
-                      <TrackRow key={`${t.id}-${idx}`} track={t} list={results} index={idx} />
+                      <TrackRow
+                        key={`${t.id}-${idx}`}
+                        track={t}
+                        source="search"
+                        index={idx}
+                      />
                     ))}
                   </ul>
                 </section>

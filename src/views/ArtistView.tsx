@@ -36,7 +36,7 @@ export default function ArtistView() {
 
   const handlePlayAll = () => {
     if (tracks.length > 0) {
-      playTrack(tracks[0], tracks);
+      playTrack(tracks[0], { source: 'artist', queue: tracks, sourceLabel: `${artistName} Radio` });
     }
   };
 
@@ -100,6 +100,7 @@ export default function ArtistView() {
                 key={`${song.id}-${idx}`}
                 track={song}
                 list={tracks}
+                source="artist"
                 index={idx}
               />
             ))}

@@ -135,7 +135,7 @@ export default function AstraView() {
             const songs = await fetchSongsByQuery(result.query);
             if (songs && songs.length > 0) {
               const song = songs[0];
-              playTrack(song, songs);
+              playTrack(song, { source: 'astra' });
               addMessage(
                 'astra',
                 `Streaming "${song.name || song.title}" in 320kbps Master Lossless...`,
@@ -299,7 +299,7 @@ export default function AstraView() {
               {/* Attached Song Preview Card */}
               {m.trackPreview && (
                 <div
-                  onClick={() => playTrack(m.trackPreview)}
+                  onClick={() => playTrack(m.trackPreview, { source: 'astra' })}
                   className="mt-2 flex items-center gap-2.5 p-2 rounded-xl bg-black/40 border border-white/10 hover:border-[var(--ruby)]/40 cursor-pointer transition-colors max-w-[80%]"
                 >
                   <Cover track={m.trackPreview} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
