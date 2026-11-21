@@ -31,7 +31,7 @@ class GlobalAudioEngine {
 
     this.audio = new Audio();
     this.audio.preload = 'auto';
-    this.audio.crossOrigin = 'anonymous';
+    // NOTE: DO NOT set crossOrigin = 'anonymous' as it triggers CORS blocks on Saavn CDN audio streams!
     window.__rhythmx_audio = this.audio;
 
     this.audio.addEventListener('timeupdate', () => {
@@ -47,8 +47,14 @@ class GlobalAudioEngine {
     });
 
     this.audio.addEventListener('error', (e) => {
-      console.error('Audio playback error on stream URL:', this.audio?.src, e);
+      console.warn('Audio stream error on current source:', this.audio?.src, e);
       this.notifyState();
+      // Auto-skip to next playable track on error
+      if (this.onEndCb) {
+        setTimeout(() => {
+          if (this.onEndCb) this.onEndCb();
+        }, 800);
+      }
     });
 
     this.bindMediaSession();
@@ -75,7 +81,7 @@ class GlobalAudioEngine {
           }
         });
       } catch (err) {
-        console.warn('MediaSession action handler error:', err);
+        console.warn('MediaSession handler registration:', err);
       }
     }
   }
@@ -105,7 +111,6 @@ class GlobalAudioEngine {
       return;
     }
 
-    // Force secure HTTPS protocol to prevent mixed-content blocks
     const secureUrl = url.replace('http://', 'https://');
 
     if (this.audio.src !== secureUrl) {
@@ -116,7 +121,7 @@ class GlobalAudioEngine {
     const playPromise = this.audio.play();
     if (playPromise !== undefined) {
       playPromise.catch((err) => {
-        console.warn('Playback deferred or blocked by browser policy:', err);
+        console.warn('Autoplay prevented or network interruption:', err);
       });
     }
 
@@ -128,7 +133,7 @@ class GlobalAudioEngine {
           artwork: art ? [{ src: art, sizes: '512x512', type: 'image/jpeg' }] : []
         });
       } catch (err) {
-        console.warn('MediaMetadata sync error:', err);
+        console.warn('MediaMetadata sync:', err);
       }
     }
   }

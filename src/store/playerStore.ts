@@ -1,10 +1,11 @@
 import { create } from 'zustand';
-import { Song, FALLBACK_CATALOG, fetchRadioRecommendations } from '@/services/api';
+import { Song, fetchRadioRecommendations } from '@/services/api';
 import { audioEngine } from '@/services/audioService';
 
 interface PlayerState {
   currentTrack: Song | null;
   isPlaying: boolean;
+  isLoading: boolean;
   queue: Song[];
   playedHistoryIds: string[];
   recents: Song[];
@@ -13,6 +14,8 @@ interface PlayerState {
   currentTime: number;
   duration: number;
   isExpandingQueue: boolean;
+  isShuffle: boolean;
+  isRepeat: boolean;
   playTrack: (song: Song, customQueue?: Song[]) => void;
   togglePlay: () => void;
   playNext: () => void;
@@ -21,6 +24,8 @@ interface PlayerState {
   setVolume: (vol: number) => void;
   toggleLike: (song: Song) => void;
   setQueue: (songs: Song[]) => void;
+  toggleShuffle: () => void;
+  toggleRepeat: () => void;
   checkAndExpandQueue: () => Promise<void>;
 }
 
@@ -43,22 +48,26 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     });
   }
 
-  const initialLiked: Song[] = typeof window !== 'undefined'
-    ? JSON.parse(localStorage.getItem('rhythmx_liked_songs') || '[]')
-    : [];
+  const initialLiked: Song[] =
+    typeof window !== 'undefined'
+      ? JSON.parse(localStorage.getItem('rhythmx_liked_songs') || '[]')
+      : [];
 
-  const initialRecents: Song[] = typeof window !== 'undefined'
-    ? JSON.parse(localStorage.getItem('rhythmx_recents') || '[]')
-    : [];
+  const initialRecents: Song[] =
+    typeof window !== 'undefined'
+      ? JSON.parse(localStorage.getItem('rhythmx_recents') || '[]')
+      : [];
 
-  const initialPlayedIds: string[] = typeof window !== 'undefined'
-    ? JSON.parse(localStorage.getItem('rhythmx_played_ids') || '[]')
-    : [];
+  const initialPlayedIds: string[] =
+    typeof window !== 'undefined'
+      ? JSON.parse(localStorage.getItem('rhythmx_played_ids') || '[]')
+      : [];
 
   return {
     currentTrack: null,
     isPlaying: false,
-    queue: FALLBACK_CATALOG,
+    isLoading: false,
+    queue: [],
     playedHistoryIds: initialPlayedIds,
     recents: initialRecents,
     likedSongs: initialLiked,
@@ -66,17 +75,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     currentTime: 0,
     duration: 0,
     isExpandingQueue: false,
+    isShuffle: false,
+    isRepeat: false,
 
     playTrack: (song: Song, customQueue?: Song[]) => {
       const { recents, queue, playedHistoryIds } = get();
 
-      // LRU Deduplicated Recents
-      const updatedRecents = [song, ...recents.filter((s) => s.id !== song.id)].slice(0, 30);
-
-      // Played History Tracking
-      const updatedPlayedIds = Array.from(new Set([song.id, ...playedHistoryIds])).slice(0, 200);
-
-      const activeQueue = customQueue && customQueue.length > 0 ? customQueue : queue;
+      const updatedRecents = [song, ...recents.filter((s) => s.id !== song.id)].slice(0, 40);
+      const updatedPlayedIds = Array.from(new Set([song.id, ...playedHistoryIds])).slice(0, 300);
+      const activeQueue = customQueue && customQueue.length > 0 ? customQueue : (queue.length > 0 ? queue : [song]);
 
       set({
         currentTrack: song,
@@ -106,11 +113,24 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     },
 
     playNext: () => {
-      const { queue, currentTrack } = get();
+      const { queue, currentTrack, isRepeat, isShuffle } = get();
       if (queue.length === 0) return;
 
+      if (isRepeat && currentTrack) {
+        audioEngine.seek(0);
+        audioEngine.playTrack(currentTrack.streamUrl, currentTrack.name, currentTrack.primaryArtists, currentTrack.imageUrl);
+        return;
+      }
+
+      if (isShuffle && queue.length > 1) {
+        const otherTracks = queue.filter((s) => s.id !== currentTrack?.id);
+        const randomSong = otherTracks[Math.floor(Math.random() * otherTracks.length)];
+        get().playTrack(randomSong);
+        return;
+      }
+
       const idx = queue.findIndex((s) => s.id === currentTrack?.id);
-      const nextIndex = (idx + 1) % queue.length;
+      const nextIndex = idx >= 0 ? (idx + 1) % queue.length : 0;
       const nextSong = queue[nextIndex];
 
       get().playTrack(nextSong);
@@ -118,9 +138,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     },
 
     playPrev: () => {
-      const { queue, currentTrack } = get();
-      if (queue.length === 0) return;
+      const { queue, currentTrack, currentTime } = get();
+      if (currentTime > 3) {
+        audioEngine.seek(0);
+        set({ currentTime: 0 });
+        return;
+      }
 
+      if (queue.length === 0) return;
       const idx = queue.findIndex((s) => s.id === currentTrack?.id);
       const prevIndex = (idx - 1 + queue.length) % queue.length;
       const prevSong = queue[prevIndex];
@@ -157,12 +182,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       }
     },
 
-    /**
-     * Continuous Autoplay Loop (No-Repeat Engine):
-     * Monitored during every playTrack and playNext call.
-     * When current index is within 2 tracks of the queue end, fetches 20 viral recommendations
-     * and appends deduplicated tracks. Audio NEVER stops.
-     */
+    toggleShuffle: () => {
+      set((state) => ({ isShuffle: !state.isShuffle }));
+    },
+
+    toggleRepeat: () => {
+      set((state) => ({ isRepeat: !state.isRepeat }));
+    },
+
     checkAndExpandQueue: async () => {
       const { currentTrack, queue, playedHistoryIds, isExpandingQueue } = get();
       if (!currentTrack || isExpandingQueue) return;
@@ -170,27 +197,17 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       const currentIndex = queue.findIndex((s) => s.id === currentTrack.id);
       const remainingTracks = queue.length - 1 - currentIndex;
 
-      // Expand when within 2 tracks of queue end
       if (remainingTracks <= 2) {
         set({ isExpandingQueue: true });
         try {
-          const recommendations = await fetchRadioRecommendations(currentTrack);
-
+          const recommendations = await fetchRadioRecommendations(currentTrack, playedHistoryIds);
           const existingQueueIds = new Set(queue.map((s) => s.id));
-          const playedIdsSet = new Set(playedHistoryIds);
 
-          const novelTracks = recommendations.filter(
-            (s) => !existingQueueIds.has(s.id) && !playedIdsSet.has(s.id)
-          );
+          const novelTracks = recommendations.filter((s) => !existingQueueIds.has(s.id));
 
-          // If all recommended were played, at least append novel tracks not in current queue
-          const finalTracksToAdd = novelTracks.length >= 3
-            ? novelTracks
-            : recommendations.filter((s) => !existingQueueIds.has(s.id));
-
-          if (finalTracksToAdd.length > 0) {
+          if (novelTracks.length > 0) {
             set((state) => ({
-              queue: [...state.queue, ...finalTracksToAdd],
+              queue: [...state.queue, ...novelTracks],
               isExpandingQueue: false
             }));
           } else {

@@ -13,10 +13,9 @@ export const CreatorModal: React.FC<Props> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-2xl p-4 select-none">
       <div className="relative w-full max-w-sm bg-gradient-to-br from-[#1C090E] via-[#101015] to-[#070709] border border-[#B50925]/50 rounded-3xl p-6 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_40px_rgba(255,35,72,0.35)]">
-        
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
@@ -26,19 +25,22 @@ export const CreatorModal: React.FC<Props> = ({ isOpen, onClose }) => {
             <img
               src="/creator.jpeg"
               alt="Rishabh Singh"
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover rounded-xl"
-              onError={(e) => { e.currentTarget.src = '/creator.jpg'; }}
+              onError={(e) => {
+                e.currentTarget.src = '/creator.jpg';
+              }}
             />
           </div>
 
-          <h3 className="text-xl font-black text-white flex items-center gap-1.5">
+          <h3 className="text-xl font-black text-white flex items-center gap-1.5 font-['Space_Grotesk']">
             Rishabh Singh <ShieldCheck className="w-4 h-4 text-[#FF2348]" />
           </h3>
           <p className="text-[10px] font-mono text-[#FF2348] tracking-widest mt-0.5 uppercase">
             Lead Systems Architect • B.Tech CSE
           </p>
           <p className="text-xs text-zinc-400 mt-2 max-w-xs leading-relaxed">
-            Software Developer and Systems Architect. Creator of RhythmX (Lossless Spatial Audio Engine) and the NOIR//SOUND ASTRA interactive visualizer.
+            Software Developer and Systems Architect. Creator of RhythmX (Lossless Spatial Audio Engine) and the NOIR//SOUND ASTRA 3D interactive visualizer.
           </p>
 
           <div className="grid grid-cols-2 gap-2 mt-4 w-full">
@@ -62,7 +64,7 @@ export const CreatorModal: React.FC<Props> = ({ isOpen, onClose }) => {
             href="https://www.instagram.com/rish4bhsiingh/"
             target="_blank"
             rel="noreferrer"
-            className="mt-5 w-full py-3 rounded-xl bg-gradient-to-r from-[#B50925] via-[#E11D48] to-[#FF2348] text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(255,35,72,0.6)] hover:scale-[1.02] active:scale-[0.98] transition"
+            className="mt-5 w-full py-3 rounded-xl bg-gradient-to-r from-[#B50925] via-[#E11D48] to-[#FF2348] text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(255,35,72,0.6)] hover:scale-[1.02] active:scale-[0.98] transition cursor-pointer"
           >
             <span>Follow on Instagram (@rish4bhsiingh)</span>
             <ExternalLink className="w-3.5 h-3.5" />

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -73,6 +73,7 @@ body {
 .glass {
   background: linear-gradient(145deg, rgba(28, 26, 29, 0.94), rgba(12, 11, 13, 0.92));
   backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--line);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.08);
 }
@@ -278,9 +279,9 @@ body {
   bottom: 16px;
   left: 282px;
   right: 16px;
-  height: 80px;
+  height: 84px;
   border-radius: 20px;
-  padding: 0 24px;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -289,13 +290,14 @@ body {
 
 @media (max-width: 768px) {
   .sidebar { display: none; }
-  .player-dock { left: 16px; bottom: 84px; }
+  .player-dock { left: 16px; bottom: 80px; height: 76px; padding: 0 14px; }
   .shell { padding: 8px 8px 100px; }
 }
 
 .noir-panel {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(21, 21, 24, 0.9) 50%, rgba(8, 8, 9, 0.98) 100%);
   backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.25);
 }
@@ -328,4 +330,33 @@ body {
 }
 .ruby-glow {
   box-shadow: 0 0 35px rgba(255, 35, 72, 0.65);
+}
+
+/* Custom Seek and Volume Slider */
+input[type="range"] {
+  accent-color: #ff2447;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff2447;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(255, 36, 71, 0.8);
+  border: 2px solid #ffffff;
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 20s linear infinite;
 }

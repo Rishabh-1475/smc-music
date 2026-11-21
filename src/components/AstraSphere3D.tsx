@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
-import { Mic, MicOff, Sparkles } from 'lucide-react';
+import { Mic, MicOff, Sparkles, Send } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { fetchSongsByQuery } from '@/services/api';
 
@@ -18,6 +18,7 @@ export const AstraSphere3D: React.FC = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [statusText, setStatusText] = useState('TAP SPHERE OR MIC TO ACTIVATE');
   const [userName, setUserName] = useState('Rishabh');
+  const [textInput, setTextInput] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -40,10 +41,11 @@ export const AstraSphere3D: React.FC = () => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       const voices = window.speechSynthesis.getVoices();
-      const assistantVoice = voices.find(v => 
+      const assistantVoice = voices.find(v =>
         (v.name.includes('Google') && v.name.includes('US English')) ||
         v.name.includes('Samantha') ||
         v.name.includes('Jenny') ||
+        v.name.includes('Karen') ||
         v.lang.startsWith('en')
       ) || null;
 
@@ -76,28 +78,28 @@ export const AstraSphere3D: React.FC = () => {
 
     if (text.includes('pause') || text.includes('stop')) {
       if (isPlaying) togglePlay();
-      speakAI('Paused playback');
+      speakAI('Playback paused.');
       setStatusText('PAUSED');
       return;
     }
 
     if (text.includes('resume') || text.includes('continue')) {
       if (!isPlaying) togglePlay();
-      speakAI('Resuming playback');
+      speakAI('Resuming playback.');
       setStatusText('PLAYING');
       return;
     }
 
     if (text.includes('next') || text.includes('skip')) {
       playNext();
-      speakAI('Skipping to next track');
+      speakAI('Skipping track.');
       setStatusText('SKIPPED');
       return;
     }
 
     if (text.includes('previous') || text.includes('back')) {
       playPrev();
-      speakAI('Playing previous track');
+      speakAI('Playing previous track.');
       setStatusText('PREVIOUS TRACK');
       return;
     }
@@ -109,7 +111,7 @@ export const AstraSphere3D: React.FC = () => {
       .trim();
 
     if (!query) {
-      speakAI("I didn't catch the title. Please say it again.");
+      speakAI("I didn't catch the title. Say play followed by a song name.");
       setStatusText('TRY: "PLAY [SONG]"');
       return;
     }
@@ -150,7 +152,7 @@ export const AstraSphere3D: React.FC = () => {
 
     if (!SpeechRec) {
       setStatusText('SPEECH RECOGNITION NOT SUPPORTED');
-      speakAI('Speech recognition is not supported in this browser.');
+      speakAI('Speech recognition is not supported in this browser. Please use the text command input below.');
       return;
     }
 
@@ -191,7 +193,7 @@ export const AstraSphere3D: React.FC = () => {
         if (candidate) {
           setStatusText(`HEARD: "${candidate.toUpperCase()}"`);
           const lower = candidate.toLowerCase();
-          if (lower.startsWith('play ') || lower.startsWith('pause') || lower.startsWith('next')) {
+          if (lower.startsWith('play ') || lower.startsWith('pause') || lower.startsWith('next') || lower.startsWith('stop')) {
             if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
             debounceTimerRef.current = setTimeout(() => {
               stopListening();
@@ -202,7 +204,7 @@ export const AstraSphere3D: React.FC = () => {
             debounceTimerRef.current = setTimeout(() => {
               stopListening();
               executeVoiceIntent(candidate);
-            }, 1400);
+            }, 1300);
           }
         }
       };
@@ -228,6 +230,14 @@ export const AstraSphere3D: React.FC = () => {
     else startListening();
   };
 
+  const handleTextSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!textInput.trim()) return;
+    const cmd = textInput.trim();
+    setTextInput('');
+    executeVoiceIntent(cmd);
+  };
+
   useEffect(() => {
     if (!containerRef.current) return;
     const width = containerRef.current.clientWidth || 360;
@@ -245,20 +255,15 @@ export const AstraSphere3D: React.FC = () => {
     const astraGroup = new THREE.Group();
     scene.add(astraGroup);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    const redPoint = new THREE.PointLight(0xff2348, 8, 15);
-    redPoint.position.set(0, 0, 2);
+    const redPoint = new THREE.PointLight(0xff2348, 6, 15);
+    redPoint.position.set(0, 0, 3);
     scene.add(redPoint);
 
-    const vertexShader = `
-      uniform float uTime;
-      uniform float uAudio;
-      varying vec3 vNormal;
-      varying vec3 vPos;
-      varying float vNoise;
-
+    // Simplex Noise GLSL Functions
+    const simplexNoiseGLSL = `
       vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
       vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
       float snoise(vec3 v){
@@ -306,13 +311,24 @@ export const AstraSphere3D: React.FC = () => {
         m = m * m;
         return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
       }
+    `;
+
+    const vertexShader = `
+      uniform float uTime;
+      uniform float uAudio;
+      varying vec3 vNormal;
+      varying vec3 vPos;
+      varying float vNoise;
+
+      ${simplexNoiseGLSL}
 
       void main() {
         vNormal = normal;
         vPos = position;
-        float noise = snoise(position * 2.0 + vec3(uTime * 0.5));
+        float noise = snoise(position * 1.8 + vec3(uTime * 0.3));
         vNoise = noise;
-        vec3 displaced = position + normal * (noise * (0.16 + uAudio * 0.45));
+        // Very subtle displacement for silky smooth glossy plasma orb
+        vec3 displaced = position + normal * (noise * (0.025 + uAudio * 0.055));
         gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
       }
     `;
@@ -324,42 +340,80 @@ export const AstraSphere3D: React.FC = () => {
       varying vec3 vPos;
       varying float vNoise;
 
+      ${simplexNoiseGLSL}
+
+      float fbm(vec3 p) {
+        float f = 0.0;
+        f += 0.500 * snoise(p);
+        f += 0.250 * snoise(p * 2.0);
+        f += 0.125 * snoise(p * 4.0);
+        return f;
+      }
+
       void main() {
         vec3 viewDir = normalize(cameraPosition - vPos);
         float fresnel = 1.0 - max(dot(viewDir, vNormal), 0.0);
-        fresnel = pow(fresnel, 2.2);
+        fresnel = pow(fresnel, 2.5);
 
-        vec3 deepCrimson = vec3(0.71, 0.04, 0.15);
-        vec3 glowingRuby = vec3(1.0, 0.14, 0.28);
-        vec3 coreWhite = vec3(1.0, 0.85, 0.9);
+        // Deep obsidian/ruby palette
+        vec3 deepCore = vec3(0.086, 0.008, 0.031);   // #160208
+        vec3 midCrimson = vec3(0.408, 0.016, 0.094);  // #680418
+        vec3 hotRuby = vec3(1.0, 0.137, 0.282);       // #FF2348
 
-        vec3 color = mix(deepCrimson, glowingRuby, vNoise * 0.5 + 0.5);
-        color = mix(color, coreWhite, fresnel * 0.7 + (uAudio * 0.5));
+        // FBM magma veins
+        float veins = fbm(vPos * 2.5 + vec3(uTime * 0.2));
+        veins = smoothstep(0.1, 0.65, veins);
+
+        vec3 color = mix(deepCore, midCrimson, vNoise * 0.5 + 0.5);
+        color = mix(color, hotRuby, veins * 0.45 + (uAudio * 0.3));
+        
+        // Specular & Fresnel Rim Glow
+        color += hotRuby * fresnel * (0.55 + uAudio * 0.5);
+        color += vec3(1.0, 0.9, 0.95) * pow(fresnel, 4.5) * 0.4;
 
         gl_FragColor = vec4(color, 0.96);
       }
     `;
 
-    const uniforms = { uTime: { value: 0 }, uAudio: { value: 0.2 } };
+    const uniforms = { uTime: { value: 0 }, uAudio: { value: 0.1 } };
     uniformsRef.current = uniforms;
 
-    const coreGeo = new THREE.IcosahedronGeometry(1.3, 64);
+    // High-resolution smooth sphere
+    const coreGeo = new THREE.SphereGeometry(1.35, 96, 96);
     const coreMat = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms, transparent: true });
     const coreMesh = new THREE.Mesh(coreGeo, coreMat);
     astraGroup.add(coreMesh);
 
-    const ring1Geo = new THREE.TorusGeometry(1.9, 0.02, 16, 120);
-    const ring1Mat = new THREE.MeshBasicMaterial({ color: 0xFF2348 });
+    // Orbital Rings
+    const ring1Geo = new THREE.TorusGeometry(1.95, 0.012, 16, 120);
+    const ring1Mat = new THREE.MeshBasicMaterial({ color: 0xFF2348, transparent: true, opacity: 0.45 });
     const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
     ring1.rotation.x = Math.PI / 3;
     astraGroup.add(ring1);
 
-    const ring2Geo = new THREE.TorusGeometry(2.1, 0.02, 16, 120);
-    const ring2Mat = new THREE.MeshBasicMaterial({ color: 0xB50925 });
+    const ring2Geo = new THREE.TorusGeometry(2.15, 0.012, 16, 120);
+    const ring2Mat = new THREE.MeshBasicMaterial({ color: 0xB50925, transparent: true, opacity: 0.35 });
     const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
     ring2.rotation.x = -Math.PI / 4;
     ring2.rotation.y = Math.PI / 6;
     astraGroup.add(ring2);
+
+    // Star particles
+    const starCount = 120;
+    const starGeo = new THREE.BufferGeometry();
+    const starPositions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount * 3; i += 3) {
+      const radius = 3.5 + Math.random() * 4.5;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      starPositions[i] = radius * Math.sin(phi) * Math.cos(theta);
+      starPositions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      starPositions[i + 2] = radius * Math.cos(phi);
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0xFF2348, size: 0.035, transparent: true, opacity: 0.6 });
+    const starPoints = new THREE.Points(starGeo, starMat);
+    scene.add(starPoints);
 
     let animId: number;
     const clock = new THREE.Clock();
@@ -369,16 +423,17 @@ export const AstraSphere3D: React.FC = () => {
       const elapsed = clock.getElapsedTime();
       uniforms.uTime.value = elapsed;
 
-      let targetAudio = 0.15;
-      if (isSpeaking) targetAudio = 0.75 + Math.sin(elapsed * 15) * 0.35;
-      else if (isListening) targetAudio = 0.9 + Math.sin(elapsed * 9) * 0.3;
-      else if (isPlaying) targetAudio = 0.5 + Math.sin(elapsed * 6) * 0.25;
+      let targetAudio = 0.1;
+      if (isSpeaking) targetAudio = 0.55 + Math.sin(elapsed * 12) * 0.25;
+      else if (isListening) targetAudio = 0.7 + Math.sin(elapsed * 8) * 0.25;
+      else if (isPlaying) targetAudio = 0.4 + Math.sin(elapsed * 4) * 0.15;
 
-      uniforms.uAudio.value = THREE.MathUtils.lerp(uniforms.uAudio.value, targetAudio, 0.08);
+      uniforms.uAudio.value = THREE.MathUtils.lerp(uniforms.uAudio.value, targetAudio, 0.06);
 
-      coreMesh.rotation.y += 0.006;
-      ring1.rotation.z += 0.012;
-      ring2.rotation.z -= 0.01;
+      coreMesh.rotation.y += 0.004;
+      ring1.rotation.z += 0.008;
+      ring2.rotation.z -= 0.006;
+      starPoints.rotation.y += 0.0008;
 
       renderer.render(scene, camera);
     };
@@ -395,12 +450,12 @@ export const AstraSphere3D: React.FC = () => {
   }, [isPlaying, isListening, isSpeaking]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[75vh] px-4 select-none relative">
+    <div className="flex flex-col items-center justify-center min-h-[75vh] px-4 select-none relative max-w-2xl mx-auto">
       <div className="text-center z-10 mb-2">
         <span className="text-[10px] font-mono font-extrabold tracking-widest text-[#FF2348] bg-[#B50925]/20 border border-[#B50925]/50 px-3 py-1 rounded-full uppercase flex items-center gap-1.5 mx-auto w-fit shadow-[0_0_15px_rgba(255,35,72,0.3)]">
-          <Sparkles className="w-3 h-3 text-[#FF2348]" /> NOIR//SOUND ASTRA 3D AI
+          <Sparkles className="w-3 h-3 text-[#FF2348]" /> NOIR//SOUND ASTRA SPATIAL AI
         </span>
-        <h2 className="text-xl font-black text-white tracking-wide mt-2">
+        <h2 className="text-xl md:text-2xl font-black text-white tracking-wide mt-2 font-['Space_Grotesk']">
           {currentTrack ? currentTrack.name : `Hi, ${userName}`}
         </h2>
         <p className="text-[11px] font-mono text-[#FF2348] tracking-widest mt-1">
@@ -408,30 +463,52 @@ export const AstraSphere3D: React.FC = () => {
         </p>
       </div>
 
+      {/* WebGL Canvas Container */}
       <div
         onClick={toggleListening}
         ref={containerRef}
         className="w-[360px] h-[380px] relative z-10 flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95"
       />
 
-      <div className="z-10 flex items-center gap-4 bg-[#151518]/90 backdrop-blur-2xl border border-white/10 px-6 py-3 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.9)] mt-2">
+      {/* Mic Control Bar */}
+      <div className="z-10 flex items-center gap-4 bg-[#151518]/90 backdrop-blur-2xl border border-white/10 px-6 py-3 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.9)] mt-1">
         <button
           onClick={toggleListening}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg ${
-            isListening ? 'bg-[#FF2348] text-white animate-pulse shadow-[0_0_25px_rgba(255,35,72,0.8)]' : 'bg-white/10 text-white hover:bg-[#B50925]'
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg cursor-pointer ${
+            isListening
+              ? 'bg-[#FF2348] text-white animate-pulse shadow-[0_0_25px_rgba(255,35,72,0.8)]'
+              : 'bg-white/10 text-white hover:bg-[#B50925]'
           }`}
         >
           {isListening ? <Mic className="w-6 h-6" /> : <MicOff className="w-5 h-5 text-gray-400" />}
         </button>
         <div>
           <p className="text-xs font-bold text-white">
-            {isListening ? 'Listening in real-time...' : (isSpeaking ? 'Astra is speaking...' : 'Tap Sphere to Talk')}
+            {isListening ? 'Listening in real-time...' : isSpeaking ? 'Astra is speaking...' : 'Tap Sphere or Mic to Talk'}
           </p>
           <p className="text-[10px] text-gray-400 font-mono">
             Commands: &quot;Play [song]&quot;, &quot;Pause&quot;, &quot;Next&quot;
           </p>
         </div>
       </div>
+
+      {/* Text Command Input Fallback */}
+      <form onSubmit={handleTextSubmit} className="z-10 w-full max-w-md flex items-center gap-2 mt-4 px-2">
+        <input
+          type="text"
+          value={textInput}
+          onChange={(e) => setTextInput(e.target.value)}
+          placeholder='Type command: e.g. "Play Arijit Singh" or "Next"...'
+          className="flex-1 bg-[#151518]/90 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FF2348] transition font-sans"
+        />
+        <button
+          type="submit"
+          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#B50925] to-[#FF2348] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 hover:scale-105 active:scale-95 transition cursor-pointer"
+        >
+          <Send className="w-3.5 h-3.5" />
+          <span>Send</span>
+        </button>
+      </form>
     </div>
   );
 };
