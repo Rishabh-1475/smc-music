@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
-import { Mic, MicOff, Sparkles, Volume2 } from 'lucide-react';
+import { Mic, MicOff, Sparkles } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { fetchSongsByQuery, Song } from '@/services/api';
 
@@ -19,7 +19,6 @@ export const AstraSphere3D: React.FC = () => {
   const [statusText, setStatusText] = useState('TAP SPHERE OR MIC TO ACTIVATE');
   const [userName, setUserName] = useState('Rishabh');
 
-  // Load User Name
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('rhythmx_user_profile');
@@ -32,25 +31,21 @@ export const AstraSphere3D: React.FC = () => {
     }
   }, []);
 
-  // Natural AI Voice Synthesis (Alexa/GPT Cadence)
   const speakAI = useCallback((text: string, onDone?: () => void) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       if (onDone) onDone();
       return;
     }
-
     try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       const voices = window.speechSynthesis.getVoices();
-
       const naturalVoice = voices.find(v => 
         (v.name.includes('Google') && v.name.includes('US English')) ||
         v.name.includes('Samantha') ||
         v.name.includes('Jenny') ||
-        v.name.includes('Zira') ||
-        v.lang === 'en-US'
-      ) || voices.find(v => v.lang.startsWith('en')) || null;
+        v.lang.startsWith('en')
+      ) || null;
 
       if (naturalVoice) utterance.voice = naturalVoice;
       utterance.rate = 1.05;
@@ -73,14 +68,12 @@ export const AstraSphere3D: React.FC = () => {
     }
   }, []);
 
-  // Voice Command Execution Engine
   const executeCommand = useCallback(async (rawText: string) => {
     const text = rawText.toLowerCase().trim();
     if (!text) return;
 
     setStatusText(`PARSING: "${text.toUpperCase()}"`);
 
-    // 1. Playback controls
     if (text.includes('pause') || text.includes('stop')) {
       if (isPlaying) togglePlay();
       speakAI('Paused playback');
@@ -109,9 +102,8 @@ export const AstraSphere3D: React.FC = () => {
       return;
     }
 
-    // 2. Music Search & Playback
     let query = text
-      .replace(/^(astra|hey astra|ok astra|alexa|siri|computer)\s+/i, '')
+      .replace(/^(astra|hey astra|ok astra|alexa|siri|google)\s+/i, '')
       .replace(/^(play|stream|listen to|find|put on|start)\s+/i, '')
       .replace(/\s+(song|track|audio|music)$/i, '')
       .trim();
@@ -122,12 +114,11 @@ export const AstraSphere3D: React.FC = () => {
       return;
     }
 
-    setStatusText(`SEARCHING MASTER: "${query.toUpperCase()}"...`);
+    setStatusText(`SEARCHING: "${query.toUpperCase()}"...`);
 
     try {
       const results = await fetchSongsByQuery(query);
       if (results && results.length > 0) {
-        // Select official / top popular track
         const topSong = results[0];
         setStatusText(`PLAYING: ${topSong.name.toUpperCase()}`);
         speakAI(`Playing ${topSong.name}`, () => {
@@ -138,25 +129,21 @@ export const AstraSphere3D: React.FC = () => {
         setStatusText('NO TRACK FOUND');
       }
     } catch {
-      speakAI('Network connection issue. Please try again.');
+      speakAI('Network connection issue.');
       setStatusText('SEARCH FAILED');
     }
   }, [isPlaying, togglePlay, playNext, playPrev, playTrack, speakAI]);
 
-  // Stop Microphone
   const stopListening = useCallback(() => {
     isListeningRef.current = false;
     setIsListening(false);
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     if (recognitionRef.current) {
-      try {
-        recognitionRef.current.abort();
-      } catch {}
+      try { recognitionRef.current.abort(); } catch {}
     }
     setStatusText('TAP SPHERE OR MIC TO ACTIVATE');
   }, []);
 
-  // Start Microphone with Real-Time Interim Parser
   const startListening = useCallback(() => {
     if (typeof window === 'undefined') return;
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -167,7 +154,6 @@ export const AstraSphere3D: React.FC = () => {
       return;
     }
 
-    // Greet user on first interaction
     if (!hasGreetedRef.current) {
       hasGreetedRef.current = true;
       speakAI(`Hi ${userName}, I am Astra. Say play followed by any song name.`, () => {
@@ -197,27 +183,21 @@ export const AstraSphere3D: React.FC = () => {
 
         for (let i = e.resultIndex; i < e.results.length; ++i) {
           const trans = e.results[i][0].transcript;
-          if (e.results[i].isFinal) {
-            finalText += trans;
-          } else {
-            interimText += trans;
-          }
+          if (e.results[i].isFinal) finalText += trans;
+          else interimText += trans;
         }
 
         const candidate = (finalText || interimText).trim();
         if (candidate) {
           setStatusText(`HEARD: "${candidate.toUpperCase()}"`);
-
-          // Quick trigger if direct command word is heard
           const lower = candidate.toLowerCase();
-          if (lower.startsWith('play ') || lower.startsWith('stream ') || lower.startsWith('pause') || lower.startsWith('next')) {
+          if (lower.startsWith('play ') || lower.startsWith('pause') || lower.startsWith('next')) {
             if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
             debounceTimerRef.current = setTimeout(() => {
               stopListening();
               executeCommand(candidate);
             }, 600);
           } else {
-            // Debounce natural sentence
             if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
             debounceTimerRef.current = setTimeout(() => {
               stopListening();
@@ -227,17 +207,10 @@ export const AstraSphere3D: React.FC = () => {
         }
       };
 
-      rec.onerror = (err: any) => {
-        if (err.error !== 'no-speech') {
-          console.warn('Speech recognition status:', err.error);
-        }
-      };
-
+      rec.onerror = () => {};
       rec.onend = () => {
         if (isListeningRef.current) {
-          try {
-            rec.start();
-          } catch {}
+          try { rec.start(); } catch {}
         } else {
           setIsListening(false);
         }
@@ -251,14 +224,11 @@ export const AstraSphere3D: React.FC = () => {
   }, [userName, stopListening, executeCommand, speakAI]);
 
   const toggleListening = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
+    if (isListening) stopListening();
+    else startListening();
   };
 
-  // WebGL 3D Plasma Sphere
+  // Three.js Luminescent Plasma Shader
   useEffect(() => {
     if (!containerRef.current) return;
     const width = containerRef.current.clientWidth || 360;
@@ -275,6 +245,14 @@ export const AstraSphere3D: React.FC = () => {
 
     const astraGroup = new THREE.Group();
     scene.add(astraGroup);
+
+    // Dynamic Lights
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambient);
+
+    const redPoint = new THREE.PointLight(0xff2348, 8, 15);
+    redPoint.position.set(0, 0, 2);
+    scene.add(redPoint);
 
     const vertexShader = `
       uniform float uTime;
@@ -334,9 +312,9 @@ export const AstraSphere3D: React.FC = () => {
       void main() {
         vNormal = normal;
         vPos = position;
-        float noise = snoise(position * 1.8 + vec3(uTime * 0.45));
+        float noise = snoise(position * 2.0 + vec3(uTime * 0.5));
         vNoise = noise;
-        vec3 displaced = position + normal * (noise * (0.12 + uAudio * 0.4));
+        vec3 displaced = position + normal * (noise * (0.15 + uAudio * 0.45));
         gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
       }
     `;
@@ -351,48 +329,36 @@ export const AstraSphere3D: React.FC = () => {
       void main() {
         vec3 viewDir = normalize(cameraPosition - vPos);
         float fresnel = 1.0 - max(dot(viewDir, vNormal), 0.0);
-        fresnel = pow(fresnel, 2.8);
+        fresnel = pow(fresnel, 2.2);
 
-        vec3 deepVoid = vec3(0.04, 0.01, 0.02);
-        vec3 crimson = vec3(0.71, 0.04, 0.15); // #B50925
-        vec3 ruby = vec3(1.0, 0.14, 0.28);    // #FF2348
+        // Emissive Ruby & Crimson Glow Core
+        vec3 deepRed = vec3(0.71, 0.04, 0.15); // #B50925
+        vec3 brightRuby = vec3(1.0, 0.14, 0.28); // #FF2348
+        vec3 hotWhite = vec3(1.0, 0.8, 0.85);
 
-        vec3 col = mix(deepVoid, crimson, vNoise * 0.5 + 0.5);
-        col = mix(col, ruby, fresnel + uAudio * 0.45);
+        vec3 color = mix(deepRed, brightRuby, vNoise * 0.5 + 0.5);
+        color = mix(color, hotWhite, fresnel * 0.7 + (uAudio * 0.5));
 
-        gl_FragColor = vec4(col, 0.95);
+        gl_FragColor = vec4(color, 0.95);
       }
     `;
 
-    const uniforms = { uTime: { value: 0 }, uAudio: { value: 0.1 } };
+    const uniforms = { uTime: { value: 0 }, uAudio: { value: 0.2 } };
     uniformsRef.current = uniforms;
 
-    const coreGeo = new THREE.IcosahedronGeometry(1.25, 64);
+    const coreGeo = new THREE.IcosahedronGeometry(1.3, 64);
     const coreMat = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms, transparent: true });
     const coreMesh = new THREE.Mesh(coreGeo, coreMat);
     astraGroup.add(coreMesh);
 
-    // Smoked Glass Shell
-    const shellGeo = new THREE.IcosahedronGeometry(1.45, 32);
-    const shellMat = new THREE.MeshPhysicalMaterial({
-      color: 0x111116,
-      transparent: true,
-      opacity: 0.35,
-      roughness: 0.1,
-      metalness: 0.1,
-      clearcoat: 1.0
-    });
-    const shellMesh = new THREE.Mesh(shellGeo, shellMat);
-    astraGroup.add(shellMesh);
-
-    // Orbital Laser Rings
-    const ring1Geo = new THREE.TorusGeometry(1.9, 0.015, 16, 120);
+    // Glowing Orbital Rings
+    const ring1Geo = new THREE.TorusGeometry(1.9, 0.02, 16, 120);
     const ring1Mat = new THREE.MeshBasicMaterial({ color: 0xFF2348 });
     const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
     ring1.rotation.x = Math.PI / 3;
     astraGroup.add(ring1);
 
-    const ring2Geo = new THREE.TorusGeometry(2.1, 0.015, 16, 120);
+    const ring2Geo = new THREE.TorusGeometry(2.1, 0.02, 16, 120);
     const ring2Mat = new THREE.MeshBasicMaterial({ color: 0xB50925 });
     const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
     ring2.rotation.x = -Math.PI / 4;
@@ -407,16 +373,16 @@ export const AstraSphere3D: React.FC = () => {
       const elapsed = clock.getElapsedTime();
       uniforms.uTime.value = elapsed;
 
-      let targetAudio = 0.05;
-      if (isSpeaking) targetAudio = 0.65 + Math.sin(elapsed * 14) * 0.35;
-      else if (isListening) targetAudio = 0.85 + Math.sin(elapsed * 8) * 0.25;
-      else if (isPlaying) targetAudio = 0.4 + Math.sin(elapsed * 5) * 0.2;
+      let targetAudio = 0.15;
+      if (isSpeaking) targetAudio = 0.75 + Math.sin(elapsed * 15) * 0.35;
+      else if (isListening) targetAudio = 0.9 + Math.sin(elapsed * 9) * 0.3;
+      else if (isPlaying) targetAudio = 0.5 + Math.sin(elapsed * 6) * 0.25;
 
       uniforms.uAudio.value = THREE.MathUtils.lerp(uniforms.uAudio.value, targetAudio, 0.08);
 
-      coreMesh.rotation.y += 0.005;
-      ring1.rotation.z += 0.01;
-      ring2.rotation.z -= 0.008;
+      coreMesh.rotation.y += 0.006;
+      ring1.rotation.z += 0.012;
+      ring2.rotation.z -= 0.01;
 
       renderer.render(scene, camera);
     };
@@ -435,8 +401,8 @@ export const AstraSphere3D: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[75vh] px-4 select-none relative">
       <div className="text-center z-10 mb-2">
-        <span className="text-[10px] font-mono font-extrabold tracking-widest text-[#FF2348] bg-[#B50925]/15 border border-[#B50925]/40 px-3 py-1 rounded-full uppercase flex items-center gap-1.5 mx-auto w-fit">
-          <Sparkles className="w-3 h-3 text-[#FF2348]" /> ASTRA SPATIAL INTELLIGENCE
+        <span className="text-[10px] font-mono font-extrabold tracking-widest text-[#FF2348] bg-[#B50925]/20 border border-[#B50925]/50 px-3 py-1 rounded-full uppercase flex items-center gap-1.5 mx-auto w-fit shadow-[0_0_15px_rgba(255,35,72,0.3)]">
+          <Sparkles className="w-3 h-3 text-[#FF2348]" /> NOIR//SOUND ASTRA 3D AI
         </span>
         <h2 className="text-xl font-black text-white tracking-wide mt-2">
           {currentTrack ? currentTrack.name : `Hi, ${userName}`}
@@ -446,14 +412,12 @@ export const AstraSphere3D: React.FC = () => {
         </p>
       </div>
 
-      {/* 3D Sphere Interactive Canvas */}
       <div
         onClick={toggleListening}
         ref={containerRef}
         className="w-[360px] h-[380px] relative z-10 flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95"
       />
 
-      {/* Control HUD */}
       <div className="z-10 flex items-center gap-4 bg-[#151518]/90 backdrop-blur-2xl border border-white/10 px-6 py-3 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.9)] mt-2">
         <button
           onClick={toggleListening}
@@ -468,7 +432,7 @@ export const AstraSphere3D: React.FC = () => {
             {isListening ? 'Listening in real-time...' : (isSpeaking ? 'Astra is speaking...' : 'Tap Sphere to Talk')}
           </p>
           <p className="text-[10px] text-gray-400 font-mono">
-            Commands: &quot;Play 295&quot;, &quot;Pause&quot;, &quot;Next track&quot;
+            Commands: &quot;Play [song]&quot;, &quot;Pause&quot;, &quot;Next&quot;
           </p>
         </div>
       </div>

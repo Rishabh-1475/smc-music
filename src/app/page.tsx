@@ -7,6 +7,7 @@ import { AstraSphere3D } from '@/components/AstraSphere3D';
 import { LibraryView } from '@/components/LibraryView';
 import { MiniPlayer } from '@/components/MiniPlayer';
 import { Hero3DVisualizer } from '@/components/Hero3DVisualizer';
+import { CreatorModal } from '@/components/CreatorModal';
 import { fetchSongsByQuery, fetchDynamicRadio, Song, FALLBACK_CATALOG } from '@/services/api';
 import { usePlayerStore } from '@/store/playerStore';
 
@@ -18,6 +19,7 @@ export default function App() {
   const [songs, setSongs] = useState<Song[]>(FALLBACK_CATALOG);
   const [loading, setLoading] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  const [isCreatorOpen, setIsCreatorOpen] = useState(false);
 
   const { currentTrack, playTrack, setQueue, recents, isPlaying } = usePlayerStore();
 
@@ -101,14 +103,24 @@ export default function App() {
           </nav>
         </div>
 
-        {/* User Card */}
-        <div className="pt-4 border-t border-white/10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-[#B50925] to-[#FF2348]">
-            <img src="/creator.jpg" alt="Profile" className="w-full h-full rounded-full object-cover" />
+        {/* User Card - Open Creator Dossier Modal */}
+        <div
+          onClick={() => setIsCreatorOpen(true)}
+          className="pt-4 border-t border-white/10 flex items-center gap-3 cursor-pointer group hover:opacity-95 transition"
+        >
+          <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-[#B50925] to-[#FF2348] group-hover:scale-105 transition shadow-[0_0_15px_rgba(255,35,72,0.4)]">
+            <img
+              src="/creator.jpeg"
+              alt="Rishabh Singh"
+              className="w-full h-full rounded-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = '/creator.jpg';
+              }}
+            />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-white truncate">{userName}</p>
-            <p className="text-[10px] text-gray-400 font-mono">Master Audio Plan</p>
+            <p className="text-xs font-bold text-white truncate group-hover:text-[#FF2348] transition">Rishabh Singh</p>
+            <p className="text-[10px] text-gray-400 font-mono">View Dossier</p>
           </div>
         </div>
       </aside>
@@ -129,8 +141,23 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3 ml-4">
-            <button onClick={() => setActiveTab('galaxy')} className="px-3.5 py-1.5 rounded-full bg-[#B50925]/20 border border-[#B50925]/40 text-[#FF2348] text-xs font-bold flex items-center gap-1.5">
+            <button
+              onClick={() => setActiveTab('galaxy')}
+              className="px-3.5 py-1.5 rounded-full bg-[#B50925]/20 border border-[#B50925]/40 text-[#FF2348] text-xs font-bold flex items-center gap-1.5 hover:bg-[#B50925]/30 transition"
+            >
               <Compass className="w-3.5 h-3.5" /> ASTRA
+            </button>
+            <button
+              onClick={() => setIsCreatorOpen(true)}
+              className="w-8 h-8 rounded-full p-0.5 bg-gradient-to-tr from-[#B50925] to-[#FF2348] flex-shrink-0 cursor-pointer hover:scale-105 transition shadow-[0_0_12px_rgba(255,35,72,0.4)]"
+              title="Creator Dossier"
+            >
+              <img
+                src="/creator.jpeg"
+                alt="Rishabh Singh"
+                className="w-full h-full rounded-full object-cover"
+                onError={(e) => { e.currentTarget.src = '/creator.jpg'; }}
+              />
             </button>
           </div>
         </header>
@@ -184,10 +211,10 @@ export default function App() {
                   <div
                     key={`feed_${song.id}`}
                     onClick={() => playTrack(song)}
-                    className="flex items-center justify-between p-3 rounded-xl bg-[#151518] border border-white/5 hover:border-[#B50925]/50 cursor-pointer transition"
+                    className="flex items-center justify-between p-3 rounded-xl noir-row cursor-pointer"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <img src={song.imageUrl} alt={song.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                      <img src={song.imageUrl} alt={song.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0 shadow-md" />
                       <div className="min-w-0">
                         <p className={`text-xs font-bold truncate ${currentTrack?.id === song.id ? 'text-[#FF2348]' : 'text-white'}`}>
                           {song.name}
@@ -195,7 +222,7 @@ export default function App() {
                         <p className="text-[11px] text-gray-400 truncate mt-0.5">{song.primaryArtists}</p>
                       </div>
                     </div>
-                    <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-300 hover:text-white">
+                    <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#B50925] transition">
                       <Play className="w-3.5 h-3.5 fill-current translate-x-0.5" />
                     </button>
                   </div>
@@ -229,6 +256,7 @@ export default function App() {
       </nav>
 
       {isPlayerOpen && <NowPlayingView onClose={() => setIsPlayerOpen(false)} />}
+      <CreatorModal isOpen={isCreatorOpen} onClose={() => setIsCreatorOpen(false)} />
     </div>
   );
 }

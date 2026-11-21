@@ -35,16 +35,16 @@ export const LibraryView: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           {likedSongs.map((song) => {
             const isCurrent = currentTrack?.id === song.id;
             return (
               <div
                 key={song.id}
-                className={`flex items-center justify-between p-2.5 rounded-xl transition border ${
+                className={`flex items-center justify-between p-3 rounded-xl transition ${
                   isCurrent
-                    ? 'bg-[#181218] border-[#EF4444]/60 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
-                    : 'bg-[#121217]/70 border-white/5 hover:border-white/15'
+                    ? 'bg-[#181218] border border-[#FF2348] shadow-[0_0_20px_rgba(255,35,72,0.35),inset_0_1px_1px_rgba(255,255,255,0.25)]'
+                    : 'noir-row'
                 }`}
               >
                 <div
@@ -54,31 +54,33 @@ export const LibraryView: React.FC = () => {
                   <img
                     src={song.imageUrl}
                     alt={song.name}
-                    className="w-11 h-11 rounded-lg object-cover flex-shrink-0 bg-neutral-900 border border-white/5"
+                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0 bg-neutral-900 border border-white/10 shadow-md"
                     onError={(e) => {
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80';
                     }}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className={`text-xs font-semibold truncate ${isCurrent ? 'text-[#EF4444]' : 'text-white'}`}>
+                    <p className={`text-xs font-bold truncate ${isCurrent ? 'text-[#FF2348]' : 'text-white'}`}>
                       {song.name}
                     </p>
                     <p className="text-[11px] text-gray-400 truncate mt-0.5">{song.primaryArtists}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <button
                     onClick={() => toggleLike(song)}
-                    className="p-2 text-gray-400 hover:text-[#EF4444] transition active:scale-90 cursor-pointer"
+                    className="p-2 text-gray-400 hover:text-[#FF2348] transition active:scale-90 cursor-pointer"
                     title="Remove from Liked"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => playTrack(song, likedSongs)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer ${
-                      isCurrent && isPlaying ? 'text-[#EF4444]' : 'text-gray-400 hover:text-white'
+                    className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition ${
+                      isCurrent && isPlaying
+                        ? 'bg-[#FF2348] text-white shadow-[0_0_15px_rgba(255,35,72,0.5)]'
+                        : 'bg-white/5 text-gray-300 hover:text-white hover:bg-[#B50925]'
                     }`}
                   >
                     {isCurrent && isPlaying ? (
