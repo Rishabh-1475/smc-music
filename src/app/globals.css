@@ -2,84 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap');
-
 :root {
-  color-scheme: dark;
-  --bg: #030305;
-  --panel: #0d0c10;
-  --panel2: #141318;
-  --red: #b20c2b;
-  --hot: #ef4444;
-  --ruby: #e11d48;
-  --muted: #878387;
-  --text: #f4f0f2;
-  --line: rgba(255, 255, 255, 0.08);
+  --canvas: #080809;
+  --charcoal: #151518;
+  --crimson: #B50925;
+  --ruby: #FF2348;
 }
 
-/* Zero-lag Global Tap Highlights */
-* {
-  -webkit-tap-highlight-color: transparent;
-  box-sizing: border-box;
-}
-
-/* Selection Highlight in Laser Crimson */
-::selection {
-  background-color: #ef4444;
-  color: #ffffff;
-}
-
-::-moz-selection {
-  background-color: #ef4444;
-  color: #ffffff;
-}
-
-/* Base Body Styles - Deep Cosmic Void Base (#030305) with NOIR radial ambient aura */
-html,
 body {
-  background-color: var(--bg);
-  background-image: 
-    radial-gradient(ellipse at 80% 0%, rgba(52, 8, 19, 0.45) 0%, transparent 45%),
-    radial-gradient(ellipse at 20% 100%, rgba(27, 9, 14, 0.4) 0%, transparent 50%);
-  color: var(--text);
-  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #080809;
+  color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   overflow-x: hidden;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
 }
 
-/* Smooth Scrolling & GPU Layers */
-.smooth-scroll {
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  transform: translateZ(0);
-}
-
-.gpu-layer {
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  perspective: 1200px;
-}
-
-/* Custom Obsidian & Crimson Scrollbar */
+/* Scrollbar customization */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #030305;
+  background: #080809;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #1f1f2a;
-  border-radius: 4px;
+  background: #222228;
+  border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #ef4444;
+  background: #B50925;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -90,66 +42,27 @@ body {
   scrollbar-width: none;
 }
 
-/* NOIR SOUND 3D Hardware Accelerated Utilities */
-@layer utilities {
-  .bg-obsidian { background-color: #080809; }
-  .bg-charcoal { background-color: #151518; }
-  .text-ruby { color: #FF2348; }
-  .border-smoked { border: 1px solid rgba(255, 255, 255, 0.1); }
-  .glass-noir {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(21, 21, 24, 0.85) 60%, rgba(8, 8, 9, 0.98) 100%);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.2);
-  }
-  .card-3d-tilt {
-    transform-style: preserve-3d;
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
-  }
-  .card-3d-tilt:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.95), 0 0 25px rgba(181, 9, 37, 0.3);
-  }
-
-  .perspective-stage {
-    perspective: 1200px;
-    transform-style: preserve-3d;
-  }
-  .preserve-3d {
-    transform-style: preserve-3d;
-  }
-  
-  /* Specular Glass Surface */
-  .glass {
-    background: linear-gradient(145deg, rgba(28, 26, 29, 0.88), rgba(12, 11, 13, 0.95));
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px rgba(255, 255, 255, 0.06);
-  }
-
-  /* NOIR 3D Card Shadow with Specular Rim */
-  .card-3d-shadow {
-    box-shadow: 
-      0 20px 45px rgba(0, 0, 0, 0.9),
-      0 0 25px rgba(239, 68, 68, 0.25),
-      inset 0 1px 1px rgba(255, 255, 255, 0.25),
-      inset 0 -1px 1px rgba(239, 68, 68, 0.35);
-  }
-
-  .neon-crimson-glow {
-    filter: drop-shadow(0 0 14px rgba(239, 68, 68, 0.7));
-  }
+.noir-panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(21, 21, 24, 0.9) 50%, rgba(8, 8, 9, 0.98) 100%);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.15);
 }
 
-/* Animated Floating Disc */
-@keyframes float3D {
-  0%, 100% {
-    transform: translateY(0px) rotateX(12deg) rotateY(-8deg) translateZ(20px);
-  }
-  50% {
-    transform: translateY(-8px) rotateX(16deg) rotateY(-5deg) translateZ(35px);
-  }
+.noir-card {
+  background: #151518;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.noir-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(181, 9, 37, 0.6);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.95), 0 0 20px rgba(181, 9, 37, 0.25);
 }
 
-.animate-floating-disc {
-  animation: float3D 6s ease-in-out infinite;
+.crimson-glow {
+  box-shadow: 0 0 25px rgba(181, 9, 37, 0.5);
+}
+.ruby-glow {
+  box-shadow: 0 0 35px rgba(255, 35, 72, 0.65);
 }
