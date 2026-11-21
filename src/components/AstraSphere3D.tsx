@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { Mic, MicOff, Sparkles } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
-import { fetchSongsByQuery, Song } from '@/services/api';
+import { fetchSongsByQuery } from '@/services/api';
 
 export const AstraSphere3D: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -329,8 +329,8 @@ export const AstraSphere3D: React.FC = () => {
         float fresnel = 1.0 - max(dot(viewDir, vNormal), 0.0);
         fresnel = pow(fresnel, 2.2);
 
-        vec3 deepCrimson = vec3(0.71, 0.04, 0.15); // #B50925
-        vec3 glowingRuby = vec3(1.0, 0.14, 0.28);  // #FF2348
+        vec3 deepCrimson = vec3(0.71, 0.04, 0.15);
+        vec3 glowingRuby = vec3(1.0, 0.14, 0.28);
         vec3 coreWhite = vec3(1.0, 0.85, 0.9);
 
         vec3 color = mix(deepCrimson, glowingRuby, vNoise * 0.5 + 0.5);

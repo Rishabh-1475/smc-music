@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Search, Compass, Music, Disc, Home as HomeIcon, Play, Pause, Sparkles, ExternalLink } from 'lucide-react';
+import { Search, Compass, Music, Home as HomeIcon, Play, Pause, Sparkles } from 'lucide-react';
 import { fetchSongsByQuery, Song, FALLBACK_CATALOG } from '@/services/api';
 import { usePlayerStore } from '@/store/playerStore';
 import { AstraSphere3D } from '@/components/AstraSphere3D';
@@ -40,7 +40,6 @@ export default function App() {
       <div className="ambient" />
 
       <div className="shell">
-        {/* DESKTOP SIDEBAR CONSOLE (BLUEPRINT PAGE 03) */}
         <aside className="sidebar glass">
           <div className="brand">
             <div className="brand-mark">R</div>
@@ -73,7 +72,6 @@ export default function App() {
             <span>Library & Liked</span>
           </button>
 
-          {/* RISHABH SINGH CREATOR DOSSIER TRIGGER */}
           <div onClick={() => setIsCreatorOpen(true)} className="side-bottom group">
             <div className="avatar">
               <img
@@ -91,9 +89,7 @@ export default function App() {
           </div>
         </aside>
 
-        {/* MAIN LUXURY DISPLAY SURFACE */}
         <main className="main">
-          {/* TOP BAR */}
           <header className="top">
             <div className="search">
               <Search className="w-4 h-4" />
@@ -112,7 +108,6 @@ export default function App() {
 
           {activeTab === 'home' && (
             <div className="p-2 md:p-4 max-w-6xl">
-              {/* FILTER CHIPS */}
               <div className="flex gap-2 overflow-x-auto no-scrollbar mb-6">
                 {chips.map((chip) => (
                   <button
@@ -129,10 +124,8 @@ export default function App() {
                 ))}
               </div>
 
-              {/* CINEMATIC HERO STAGE */}
               <Hero3DVisualizer song={featuredSong} />
 
-              {/* MADE FOR YOU ALBUM TILES */}
               <div className="mt-8">
                 <h3 className="text-sm font-extrabold tracking-widest text-[#878387] uppercase mb-4">
                   Made For You
@@ -161,7 +154,6 @@ export default function App() {
         </main>
       </div>
 
-      {/* NOIR GLASS PLAYER DOCK */}
       {currentTrack && (
         <div
           onClick={() => setIsPlayerOpen(true)}
@@ -186,7 +178,6 @@ export default function App() {
         </div>
       )}
 
-      {/* MOBILE BOTTOM NAVIGATION */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#070708]/95 backdrop-blur-2xl border-t border-white/10 flex items-center justify-around z-30">
         <button onClick={() => setActiveTab('home')} className={`text-xs flex flex-col items-center gap-1 ${activeTab === 'home' ? 'text-[#ff2447]' : 'text-gray-400'}`}>
           <HomeIcon className="w-4 h-4" /> Home
@@ -205,7 +196,6 @@ export default function App() {
         </button>
       </nav>
 
-      {/* RISHABH SINGH CREATOR PROFILE MODAL */}
       <CreatorModal isOpen={isCreatorOpen} onClose={() => setIsCreatorOpen(false)} />
       {isPlayerOpen && <NowPlayingView onClose={() => setIsPlayerOpen(false)} />}
     </div>

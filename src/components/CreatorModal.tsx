@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { X, ExternalLink, ShieldCheck, Code, Award, Music2 } from 'lucide-react';
+import { X, ExternalLink, ShieldCheck, Code, Music2 } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
