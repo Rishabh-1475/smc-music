@@ -72,7 +72,7 @@ export default function TopBar() {
           aria-label="RythemX Home"
         >
           <img
-            src="/icon-192.png"
+            src="/icon-192.png?v=icon2"
             alt="RythemX"
             className="w-9 h-9 rounded-xl object-cover shadow-[0_2px_12px_rgba(181,9,37,0.4)] border border-white/10"
           />

@@ -14,9 +14,12 @@ export const SIDEBAR_NAV: { id: AppView; label: string; short: string; icon: str
 
 export function BrandMark({ size = 40 }: { size?: number }) {
   return (
-    <span className="brand__mark" style={{ '--s': `${size}px` } as React.CSSProperties} aria-hidden="true">
-      <span>R</span>
-    </span>
+    <img
+      src="/icon-192.png?v=icon2"
+      alt="RythemX"
+      style={{ width: size, height: size }}
+      className="rounded-[12px] object-cover border border-white/10 shadow-[0_4px_18px_rgba(181,9,37,0.45)] shrink-0"
+    />
   );
 }
 
@@ -45,9 +48,9 @@ export default function Sidebar() {
         title="RythemX — ASTRA 3D Spatial Audio"
       >
         <img
-          src="/icon-192.png"
+          src="/icon-192.png?v=icon2"
           alt="RythemX"
-          className="w-10 h-10 rounded-[12px] object-cover shadow-[0_4px_18px_rgba(181,9,37,0.45)] border border-white/10 shrink-0"
+          className="w-11 h-11 rounded-[13px] object-cover border border-white/10 shadow-[0_6px_22px_rgba(181,9,37,0.45)] shrink-0"
         />
         <div className="brand__text">
           <strong>

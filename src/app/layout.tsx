@@ -7,9 +7,12 @@ export const metadata: Metadata = {
   description: 'Spatial 3D audiophile music streaming platform powered by ASTRA Voice AI.',
   manifest: '/manifest.json',
   icons: {
-    icon: '/favicon.png',
-    apple: '/apple-touch-icon.png',
-  },
+    icon: [
+      { url: '/favicon.png?v=icon2', type: 'image/png' },
+      { url: '/favicon-32x32.png?v=icon2', sizes: '32x32', type: 'image/png' }
+    ],
+    apple: '/apple-touch-icon.png?v=icon2'
+  }
 };
 
 export const viewport: Viewport = {
@@ -29,9 +32,9 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="referrer" content="no-referrer" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=icon2" />
+        <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=icon2" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=icon2" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

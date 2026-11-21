@@ -79,7 +79,7 @@ export default function FullPlayerModal() {
 
         <div className="flex items-center gap-2">
           <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--ruby)]/15 border border-[var(--ruby)]/30 text-[var(--ruby)]">
-            <Icon name="wave" size={14} /> 320 KBPS LOSSLESS
+            <img src="/icon-192.png?v=icon2" alt="RythemX" className="w-4 h-4 rounded-sm object-cover" /> 320 KBPS LOSSLESS
           </span>
           <button
             type="button"
