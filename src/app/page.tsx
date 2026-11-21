@@ -91,7 +91,7 @@ export default function App() {
   }, [recents, songs]);
 
   return (
-    <div className="min-h-screen bg-[#040406] text-white flex justify-center selection:bg-[#EF4444] selection:text-white select-none">
+    <div className="min-h-screen bg-[#030305] text-white flex justify-center selection:bg-[#EF4444] selection:text-white select-none">
       <OnboardingModal onComplete={(name) => setUserName(name)} />
 
       {/* Responsive Desktop & Mobile Shell Frame */}
@@ -197,8 +197,10 @@ export default function App() {
                         }}
                       />
                       {isCurrent && isPlaying && (
-                        <div className="absolute inset-0 bg-[#EF4444]/30 backdrop-blur-[1px] flex items-center justify-center">
-                          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                        <div className="absolute inset-0 bg-[#EF4444]/40 backdrop-blur-[1px] flex items-center justify-center gap-0.5">
+                          <span className="w-1 h-3.5 bg-white rounded-full animate-[bounce_0.6s_ease-in-out_infinite]" />
+                          <span className="w-1 h-5 bg-white rounded-full animate-[bounce_0.8s_ease-in-out_0.2s_infinite]" />
+                          <span className="w-1 h-2.5 bg-white rounded-full animate-[bounce_0.5s_ease-in-out_0.4s_infinite]" />
                         </div>
                       )}
                     </div>

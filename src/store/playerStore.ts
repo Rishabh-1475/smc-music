@@ -1,16 +1,18 @@
 import { create } from 'zustand';
-import { Song, FALLBACK_CATALOG, fetchSongsByQuery } from '@/services/api';
+import { Song, FALLBACK_CATALOG, fetchRadioRecommendations } from '@/services/api';
 import { audioEngine } from '@/services/audioService';
 
 interface PlayerState {
   currentTrack: Song | null;
   isPlaying: boolean;
   queue: Song[];
+  playedHistoryIds: string[];
   recents: Song[];
   likedSongs: Song[];
   volume: number;
   currentTime: number;
   duration: number;
+  isExpandingQueue: boolean;
   playTrack: (song: Song, customQueue?: Song[]) => void;
   togglePlay: () => void;
   playNext: () => void;
@@ -33,38 +35,62 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     audioEngine.setOnEnded(() => {
       get().playNext();
     });
+    audioEngine.setOnNext(() => {
+      get().playNext();
+    });
+    audioEngine.setOnPrev(() => {
+      get().playPrev();
+    });
   }
 
-  const initialLiked = typeof window !== 'undefined'
+  const initialLiked: Song[] = typeof window !== 'undefined'
     ? JSON.parse(localStorage.getItem('rhythmx_liked_songs') || '[]')
     : [];
 
-  const initialRecents = typeof window !== 'undefined'
+  const initialRecents: Song[] = typeof window !== 'undefined'
     ? JSON.parse(localStorage.getItem('rhythmx_recents') || '[]')
+    : [];
+
+  const initialPlayedIds: string[] = typeof window !== 'undefined'
+    ? JSON.parse(localStorage.getItem('rhythmx_played_ids') || '[]')
     : [];
 
   return {
     currentTrack: null,
     isPlaying: false,
     queue: FALLBACK_CATALOG,
+    playedHistoryIds: initialPlayedIds,
     recents: initialRecents,
     likedSongs: initialLiked,
     volume: 1,
     currentTime: 0,
     duration: 0,
+    isExpandingQueue: false,
 
     playTrack: (song: Song, customQueue?: Song[]) => {
-      const { recents, queue } = get();
+      const { recents, queue, playedHistoryIds } = get();
+
+      // LRU Deduplicated Recents
       const updatedRecents = [song, ...recents.filter((s) => s.id !== song.id)].slice(0, 30);
+
+      // Played History Tracking
+      const updatedPlayedIds = Array.from(new Set([song.id, ...playedHistoryIds])).slice(0, 200);
+
+      const activeQueue = customQueue && customQueue.length > 0 ? customQueue : queue;
+
       set({
         currentTrack: song,
         isPlaying: true,
         recents: updatedRecents,
-        queue: customQueue || queue
+        playedHistoryIds: updatedPlayedIds,
+        queue: activeQueue
       });
+
       if (typeof window !== 'undefined') {
         localStorage.setItem('rhythmx_recents', JSON.stringify(updatedRecents));
+        localStorage.setItem('rhythmx_played_ids', JSON.stringify(updatedPlayedIds));
       }
+
       audioEngine.playTrack(song.streamUrl, song.name, song.primaryArtists, song.imageUrl);
       get().checkAndExpandQueue();
     },
@@ -82,16 +108,23 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     playNext: () => {
       const { queue, currentTrack } = get();
       if (queue.length === 0) return;
+
       const idx = queue.findIndex((s) => s.id === currentTrack?.id);
-      const nextSong = queue[(idx + 1) % queue.length];
+      const nextIndex = (idx + 1) % queue.length;
+      const nextSong = queue[nextIndex];
+
       get().playTrack(nextSong);
+      get().checkAndExpandQueue();
     },
 
     playPrev: () => {
       const { queue, currentTrack } = get();
       if (queue.length === 0) return;
+
       const idx = queue.findIndex((s) => s.id === currentTrack?.id);
-      const prevSong = queue[(idx - 1 + queue.length) % queue.length];
+      const prevIndex = (idx - 1 + queue.length) % queue.length;
+      const prevSong = queue[prevIndex];
+
       get().playTrack(prevSong);
     },
 
@@ -108,26 +141,64 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     toggleLike: (song: Song) => {
       const { likedSongs } = get();
       const exists = likedSongs.some((s) => s.id === song.id);
-      const updated = exists ? likedSongs.filter((s) => s.id !== song.id) : [...likedSongs, song];
+      const updated = exists
+        ? likedSongs.filter((s) => s.id !== song.id)
+        : [song, ...likedSongs];
+
       set({ likedSongs: updated });
       if (typeof window !== 'undefined') {
         localStorage.setItem('rhythmx_liked_songs', JSON.stringify(updated));
       }
     },
 
-    setQueue: (songs: Song[]) => set({ queue: songs }),
+    setQueue: (songs: Song[]) => {
+      if (songs && songs.length > 0) {
+        set({ queue: songs });
+      }
+    },
 
+    /**
+     * Continuous Autoplay Loop (No-Repeat Engine):
+     * Monitored during every playTrack and playNext call.
+     * When current index is within 2 tracks of the queue end, fetches 20 viral recommendations
+     * and appends deduplicated tracks. Audio NEVER stops.
+     */
     checkAndExpandQueue: async () => {
-      const { queue, currentTrack, recents } = get();
-      if (!currentTrack) return;
-      const currentIndex = queue.findIndex((s) => s.id === currentTrack.id);
+      const { currentTrack, queue, playedHistoryIds, isExpandingQueue } = get();
+      if (!currentTrack || isExpandingQueue) return;
 
-      if (currentIndex >= queue.length - 2) {
-        const query = currentTrack.primaryArtists.split(',')[0] || currentTrack.language || 'Trending India';
-        const fresh = await fetchSongsByQuery(query);
-        const deduplicated = fresh.filter((s) => !recents.some((r) => r.id === s.id) && !queue.some((q) => q.id === s.id));
-        if (deduplicated.length > 0) {
-          set({ queue: [...queue, ...deduplicated] });
+      const currentIndex = queue.findIndex((s) => s.id === currentTrack.id);
+      const remainingTracks = queue.length - 1 - currentIndex;
+
+      // Expand when within 2 tracks of queue end
+      if (remainingTracks <= 2) {
+        set({ isExpandingQueue: true });
+        try {
+          const recommendations = await fetchRadioRecommendations(currentTrack);
+
+          const existingQueueIds = new Set(queue.map((s) => s.id));
+          const playedIdsSet = new Set(playedHistoryIds);
+
+          const novelTracks = recommendations.filter(
+            (s) => !existingQueueIds.has(s.id) && !playedIdsSet.has(s.id)
+          );
+
+          // If all recommended were played, at least append novel tracks not in current queue
+          const finalTracksToAdd = novelTracks.length >= 3
+            ? novelTracks
+            : recommendations.filter((s) => !existingQueueIds.has(s.id));
+
+          if (finalTracksToAdd.length > 0) {
+            set((state) => ({
+              queue: [...state.queue, ...finalTracksToAdd],
+              isExpandingQueue: false
+            }));
+          } else {
+            set({ isExpandingQueue: false });
+          }
+        } catch (err) {
+          console.warn('Queue expansion failed:', err);
+          set({ isExpandingQueue: false });
         }
       }
     }

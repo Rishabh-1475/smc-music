@@ -1,11 +1,19 @@
 export type AudioCallback = () => void;
 export type TimeCallback = (current: number, duration: number) => void;
 
+declare global {
+  interface Window {
+    __rhythmx_audio?: HTMLAudioElement;
+  }
+}
+
 class GlobalAudioEngine {
   private audio: HTMLAudioElement | null = null;
   private timeCbs: Set<TimeCallback> = new Set();
   private stateCbs: Set<AudioCallback> = new Set();
   private onEndCb: (() => void) | null = null;
+  private onNextCb: (() => void) | null = null;
+  private onPrevCb: (() => void) | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -14,10 +22,17 @@ class GlobalAudioEngine {
   }
 
   private initAudio() {
-    if (this.audio) return;
+    if (typeof window === 'undefined') return;
+
+    if (window.__rhythmx_audio) {
+      this.audio = window.__rhythmx_audio;
+      return;
+    }
+
     this.audio = new Audio();
     this.audio.preload = 'auto';
     this.audio.crossOrigin = 'anonymous';
+    window.__rhythmx_audio = this.audio;
 
     this.audio.addEventListener('timeupdate', () => {
       if (!this.audio) return;
@@ -35,6 +50,34 @@ class GlobalAudioEngine {
       console.error('Audio playback error on stream URL:', this.audio?.src, e);
       this.notifyState();
     });
+
+    this.bindMediaSession();
+  }
+
+  private bindMediaSession() {
+    if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.setActionHandler('play', () => {
+          this.toggle();
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+          this.toggle();
+        });
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+          if (this.onNextCb) this.onNextCb();
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+          if (this.onPrevCb) this.onPrevCb();
+        });
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+          if (details.seekTime !== undefined && Number.isFinite(details.seekTime)) {
+            this.seek(details.seekTime);
+          }
+        });
+      } catch (err) {
+        console.warn('MediaSession action handler error:', err);
+      }
+    }
   }
 
   private notifyState() {
@@ -43,6 +86,14 @@ class GlobalAudioEngine {
 
   public setOnEnded(cb: () => void) {
     this.onEndCb = cb;
+  }
+
+  public setOnNext(cb: () => void) {
+    this.onNextCb = cb;
+  }
+
+  public setOnPrev(cb: () => void) {
+    this.onPrevCb = cb;
   }
 
   public playTrack(url: string, title?: string, artist?: string, art?: string) {
@@ -54,7 +105,7 @@ class GlobalAudioEngine {
       return;
     }
 
-    // Force secure HTTPS protocol to prevent mixed-content blocks on Vercel
+    // Force secure HTTPS protocol to prevent mixed-content blocks
     const secureUrl = url.replace('http://', 'https://');
 
     if (this.audio.src !== secureUrl) {
@@ -69,12 +120,16 @@ class GlobalAudioEngine {
       });
     }
 
-    if ('mediaSession' in navigator && title) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title,
-        artist: artist || 'RhythmX Lossless',
-        artwork: art ? [{ src: art, sizes: '512x512', type: 'image/jpeg' }] : []
-      });
+    if (typeof navigator !== 'undefined' && 'mediaSession' in navigator && title) {
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title,
+          artist: artist || 'RhythmX Lossless',
+          artwork: art ? [{ src: art, sizes: '512x512', type: 'image/jpeg' }] : []
+        });
+      } catch (err) {
+        console.warn('MediaMetadata sync error:', err);
+      }
     }
   }
 
