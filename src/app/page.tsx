@@ -78,15 +78,16 @@ export default function App() {
     fetchSongsByQuery(q).then((res) => {
       if (active && res.length > 0) {
         setSongs(res);
-        if (!currentTrack) {
-          setQueue(res);
+        const state = usePlayerStore.getState();
+        if (!state.currentTrack) {
+          state.setQueue(res);
         }
       }
     });
     return () => {
       active = false;
     };
-  }, [category, currentTrack, setQueue]);
+  }, [category]);
 
   // Debounced search for Explore tab
   useEffect(() => {

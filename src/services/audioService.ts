@@ -1,5 +1,6 @@
 export type AudioCallback = () => void;
 export type TimeCallback = (current: number, duration: number) => void;
+export type ErrorCallback = (code: number, message: string) => void;
 
 declare global {
   interface Window {
@@ -11,9 +12,18 @@ class GlobalAudioEngine {
   private audio: HTMLAudioElement | null = null;
   private timeCbs: Set<TimeCallback> = new Set();
   private stateCbs: Set<AudioCallback> = new Set();
+  private errorCbs: Set<ErrorCallback> = new Set();
   private onEndCb: (() => void) | null = null;
   private onNextCb: (() => void) | null = null;
   private onPrevCb: (() => void) | null = null;
+
+  // Monotonic token to ignore stale abort/error events from previously playing songs
+  private loadToken = 0;
+  private currentStreamUrls: string[] = [];
+  private currentBitrateIndex = 0;
+  private currentTitle = '';
+  private currentArtist = '';
+  private currentArt = '';
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -31,7 +41,7 @@ class GlobalAudioEngine {
 
     this.audio = new Audio();
     this.audio.preload = 'auto';
-    // NOTE: DO NOT set crossOrigin = 'anonymous' as it triggers CORS blocks on Saavn CDN audio streams!
+    // CRITICAL: DO NOT set crossOrigin = 'anonymous' as Saavn CDN streams do not send CORS headers!
     window.__rhythmx_audio = this.audio;
 
     this.audio.addEventListener('timeupdate', () => {
@@ -39,22 +49,60 @@ class GlobalAudioEngine {
       this.timeCbs.forEach((cb) => cb(this.audio!.currentTime, this.audio!.duration || 0));
     });
 
+    this.audio.addEventListener('loadedmetadata', () => {
+      if (!this.audio) return;
+      this.timeCbs.forEach((cb) => cb(this.audio!.currentTime, this.audio!.duration || 0));
+    });
+
     this.audio.addEventListener('play', () => this.notifyState());
+    this.audio.addEventListener('playing', () => this.notifyState());
     this.audio.addEventListener('pause', () => this.notifyState());
+    this.audio.addEventListener('waiting', () => this.notifyState());
+
     this.audio.addEventListener('ended', () => {
-      this.notifyState();
-      if (this.onEndCb) this.onEndCb();
+      if (!this.audio) return;
+      const dur = this.audio.duration;
+      const cur = this.audio.currentTime;
+      // Guard: ONLY trigger ended if track actually played to the end (> 5s total, and currentTime >= duration - 1.5s)
+      if (dur > 5 && cur >= dur - 1.5) {
+        this.notifyState();
+        if (this.onEndCb) this.onEndCb();
+      } else {
+        console.warn('Premature ended event ignored (cur:', cur, 'dur:', dur, ')');
+      }
     });
 
     this.audio.addEventListener('error', (e) => {
-      console.warn('Audio stream error on current source:', this.audio?.src, e);
-      this.notifyState();
-      // Auto-skip to next playable track on error
-      if (this.onEndCb) {
-        setTimeout(() => {
-          if (this.onEndCb) this.onEndCb();
-        }, 800);
+      if (!this.audio || !this.audio.src) return;
+      const tokenAtError = this.loadToken;
+      const errCode = this.audio.error?.code || 0;
+      console.warn(`Audio error code=${errCode} on src: ${this.audio.src}`);
+
+      // Try fallback bitrate on the SAME song (320kbps -> 160kbps -> 96kbps)
+      if (
+        this.currentStreamUrls.length > 0 &&
+        this.currentBitrateIndex < this.currentStreamUrls.length - 1
+      ) {
+        this.currentBitrateIndex++;
+        const fallbackUrl = this.currentStreamUrls[this.currentBitrateIndex];
+        console.log(`Switching to fallback bitrate [${this.currentBitrateIndex}]: ${fallbackUrl}`);
+
+        if (this.loadToken === tokenAtError) {
+          this.audio.src = fallbackUrl;
+          this.audio.load();
+          this.audio.play().catch((err) => {
+            if (err.name !== 'AbortError') {
+              console.warn('Fallback play error:', err);
+            }
+          });
+          return;
+        }
       }
+
+      // If all bitrates fail or token changed, stop playback — NEVER loop-skip!
+      console.error(`Playback failed for track "${this.currentTitle}". Error code: ${errCode}`);
+      this.notifyState();
+      this.errorCbs.forEach((cb) => cb(errCode, `Playback failed for "${this.currentTitle}"`));
     });
 
     this.bindMediaSession();
@@ -102,7 +150,18 @@ class GlobalAudioEngine {
     this.onPrevCb = cb;
   }
 
-  public playTrack(url: string, title?: string, artist?: string, art?: string) {
+  public subscribeError(cb: ErrorCallback) {
+    this.errorCbs.add(cb);
+    return () => this.errorCbs.delete(cb);
+  }
+
+  public playTrack(
+    url: string,
+    streamUrls: string[] = [],
+    title?: string,
+    artist?: string,
+    art?: string
+  ) {
     if (!this.audio) this.initAudio();
     if (!this.audio) return;
 
@@ -111,17 +170,32 @@ class GlobalAudioEngine {
       return;
     }
 
+    // Increment monotonic load token to invalidate pending errors from previous tracks
+    this.loadToken++;
+    const currentToken = this.loadToken;
+
+    this.currentStreamUrls = streamUrls.length > 0 ? streamUrls : [url];
+    this.currentBitrateIndex = 0;
+    this.currentTitle = title || '';
+    this.currentArtist = artist || '';
+    this.currentArt = art || '';
+
     const secureUrl = url.replace('http://', 'https://');
 
-    if (this.audio.src !== secureUrl) {
-      this.audio.src = secureUrl;
-      this.audio.load();
-    }
+    try {
+      this.audio.pause();
+    } catch {}
+
+    this.audio.src = secureUrl;
+    this.audio.currentTime = 0;
+    this.audio.load();
 
     const playPromise = this.audio.play();
     if (playPromise !== undefined) {
       playPromise.catch((err) => {
-        console.warn('Autoplay prevented or network interruption:', err);
+        if (err.name !== 'AbortError' && this.loadToken === currentToken) {
+          console.warn('Playback deferred or blocked by browser policy:', err);
+        }
       });
     }
 
@@ -143,7 +217,9 @@ class GlobalAudioEngine {
     if (!this.audio) return;
 
     if (this.audio.paused) {
-      this.audio.play().catch(console.warn);
+      this.audio.play().catch((err) => {
+        if (err.name !== 'AbortError') console.warn(err);
+      });
     } else {
       this.audio.pause();
     }

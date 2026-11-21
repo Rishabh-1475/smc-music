@@ -10,6 +10,7 @@ export interface Song {
   primaryArtists: string;
   imageUrl: string;
   streamUrl: string;
+  streamUrls: string[];
   language: string;
 }
 
@@ -62,7 +63,9 @@ export const decryptMediaUrl = (encryptedBase64: string, is320?: boolean | strin
   }
 };
 
-export const extract320Stream = (down: any, fallback?: string): string => {
+export const extractBitrateStreams = (down: any, fallback?: string): { primary: string; all: string[] } => {
+  const result: string[] = [];
+
   if (Array.isArray(down) && down.length > 0) {
     // 1st Priority: 320kbps
     const q320 = down.find(
@@ -72,7 +75,8 @@ export const extract320Stream = (down: any, fallback?: string): string => {
         d.bitrate === '320kbps' ||
         d.bitrate === '320'
     );
-    if (q320?.url || q320?.link) return (q320.url || q320.link).replace('http://', 'https://');
+    const u320 = (q320?.url || q320?.link || '').replace('http://', 'https://');
+    if (u320) result.push(u320);
 
     // 2nd Priority: 160kbps
     const q160 = down.find(
@@ -82,9 +86,10 @@ export const extract320Stream = (down: any, fallback?: string): string => {
         d.bitrate === '160kbps' ||
         d.bitrate === '160'
     );
-    if (q160?.url || q160?.link) return (q160.url || q160.link).replace('http://', 'https://');
+    const u160 = (q160?.url || q160?.link || '').replace('http://', 'https://');
+    if (u160 && !result.includes(u160)) result.push(u160);
 
-    // 3rd Priority: 96kbps / last available
+    // 3rd Priority: 96kbps / last entry
     const q96 = down.find(
       (d: any) =>
         d.quality === '96kbps' ||
@@ -92,12 +97,26 @@ export const extract320Stream = (down: any, fallback?: string): string => {
         d.bitrate === '96kbps' ||
         d.bitrate === '96'
     );
-    if (q96?.url || q96?.link) return (q96.url || q96.link).replace('http://', 'https://');
+    const u96 = (q96?.url || q96?.link || '').replace('http://', 'https://');
+    if (u96 && !result.includes(u96)) result.push(u96);
 
     const last = down[down.length - 1];
-    if (last?.url || last?.link) return (last.url || last.link).replace('http://', 'https://');
+    const uLast = (last?.url || last?.link || '').replace('http://', 'https://');
+    if (uLast && !result.includes(uLast)) result.push(uLast);
   }
-  return (fallback || '').replace('http://', 'https://');
+
+  if (result.length === 0 && fallback) {
+    result.push(fallback.replace('http://', 'https://'));
+  }
+
+  return {
+    primary: result[0] || '',
+    all: result
+  };
+};
+
+export const extract320Stream = (down: any, fallback?: string): string => {
+  return extractBitrateStreams(down, fallback).primary;
 };
 
 export const extract500Image = (img: any): string => {
@@ -145,7 +164,7 @@ const fetchMirrorWithTimeout = async (url: string, timeoutMs = 8000): Promise<So
 
     const parsed: Song[] = rawList
       .map((item: any) => {
-        const streamUrl = extract320Stream(
+        const streamData = extractBitrateStreams(
           item.downloadUrl || item.downloadUrls,
           item.media_url
         );
@@ -158,7 +177,8 @@ const fetchMirrorWithTimeout = async (url: string, timeoutMs = 8000): Promise<So
           label: item.label || 'Singh Music Co.',
           primaryArtists: decodeHtml(extractArtists(item)),
           imageUrl: extract500Image(item.image || item.images),
-          streamUrl,
+          streamUrl: streamData.primary,
+          streamUrls: streamData.all,
           language: item.language || 'hindi'
         };
       })
@@ -197,9 +217,17 @@ const fetchDirectJioSaavn = async (query: string, timeoutMs = 8000): Promise<Son
         .map((item: any) => {
           const encUrl = item.more_info?.encrypted_media_url || item.encrypted_media_url;
           const is320 = item.more_info?.['320kbps'] ?? item['320kbps'];
-          let streamUrl = decryptMediaUrl(encUrl, is320);
-          if (!streamUrl && item.media_url) {
-            streamUrl = item.media_url.replace('http://', 'https://');
+          let decryptedUrl = decryptMediaUrl(encUrl, is320);
+          if (!decryptedUrl && item.media_url) {
+            decryptedUrl = item.media_url.replace('http://', 'https://');
+          }
+
+          const streamUrls: string[] = [];
+          if (decryptedUrl) {
+            const u320 = decryptedUrl.replace('_96.', '_320.').replace('_160.', '_320.');
+            const u160 = decryptedUrl.replace('_96.', '_160.').replace('_320.', '_160.');
+            const u96 = decryptedUrl.replace('_320.', '_96.').replace('_160.', '_96.');
+            streamUrls.push(u320, u160, u96);
           }
 
           const rawDuration = item.more_info?.duration || item.duration;
@@ -214,7 +242,8 @@ const fetchDirectJioSaavn = async (query: string, timeoutMs = 8000): Promise<Son
             label: item.more_info?.copyright_text || item.label || 'JioSaavn',
             primaryArtists: decodeHtml(extractArtists(item)),
             imageUrl: extract500Image(item.image || item.images),
-            streamUrl,
+            streamUrl: streamUrls[0] || '',
+            streamUrls,
             language: item.language || 'hindi'
           };
         })
@@ -235,13 +264,11 @@ export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
 
   const clean = encodeURIComponent(effectiveQuery);
 
-  // Live verified JioSaavn mirror endpoints (tested HTTP 200 with CORS: *)
+  // Verified working JioSaavn mirror (HTTP 200, CORS: *, full-length 320kbps streams verified)
   const mirrorEndpoints = [
-    `https://saavnapi-beta.vercel.app/search/songs?query=${clean}&page=1&limit=40`,
     `https://saavn-api-one.vercel.app/search/songs?query=${clean}&page=1&limit=40`
   ];
 
-  // Race working mirrors in parallel with Promise.any
   try {
     const results = await Promise.any(
       mirrorEndpoints.map((url) => fetchMirrorWithTimeout(url, 8000))
@@ -250,10 +277,10 @@ export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
       return results;
     }
   } catch {
-    // Both mirrors failed or timed out, attempt direct JioSaavn fallback
+    // Mirror failed or timed out, attempt direct JioSaavn fallback
   }
 
-  // Direct JioSaavn api.php + pure-JS DES-ECB decryption fallback
+  // Fallback: Direct JioSaavn api.php + pure-JS DES decryption
   try {
     const directResults = await fetchDirectJioSaavn(effectiveQuery, 8000);
     if (directResults && directResults.length > 0) {

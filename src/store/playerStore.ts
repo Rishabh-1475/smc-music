@@ -35,7 +35,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       set({ isPlaying: audioEngine.isPlaying() });
     });
     audioEngine.subscribeTime((current, dur) => {
-      set({ currentTime: current, duration: dur });
+      set((state) => ({
+        currentTime: current,
+        duration: dur > 0 ? dur : (state.duration || state.currentTrack?.duration || 0)
+      }));
+    });
+    audioEngine.subscribeError((code, msg) => {
+      console.warn(`[PlayerStore] Audio playback failed (${code}): ${msg}`);
+      set({ isPlaying: false, isLoading: false });
     });
     audioEngine.setOnEnded(() => {
       get().playNext();
@@ -88,6 +95,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       set({
         currentTrack: song,
         isPlaying: true,
+        isLoading: false,
+        currentTime: 0,
+        duration: song.duration || 0,
         recents: updatedRecents,
         playedHistoryIds: updatedPlayedIds,
         queue: activeQueue
@@ -98,7 +108,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         localStorage.setItem('rhythmx_played_ids', JSON.stringify(updatedPlayedIds));
       }
 
-      audioEngine.playTrack(song.streamUrl, song.name, song.primaryArtists, song.imageUrl);
+      const streamUrls = song.streamUrls && song.streamUrls.length > 0 ? song.streamUrls : [song.streamUrl];
+      audioEngine.playTrack(song.streamUrl, streamUrls, song.name, song.primaryArtists, song.imageUrl);
       get().checkAndExpandQueue();
     },
 
@@ -118,7 +129,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
 
       if (isRepeat && currentTrack) {
         audioEngine.seek(0);
-        audioEngine.playTrack(currentTrack.streamUrl, currentTrack.name, currentTrack.primaryArtists, currentTrack.imageUrl);
+        const streamUrls = currentTrack.streamUrls && currentTrack.streamUrls.length > 0 ? currentTrack.streamUrls : [currentTrack.streamUrl];
+        audioEngine.playTrack(currentTrack.streamUrl, streamUrls, currentTrack.name, currentTrack.primaryArtists, currentTrack.imageUrl);
         return;
       }
 
