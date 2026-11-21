@@ -215,7 +215,7 @@ export default function AstraView() {
 
         {/* Real Three.js WebGL Planet Scene */}
         <div className="w-full h-[320px] md:h-[400px] flex items-center justify-center relative">
-          <AstraPlanet3D state={mode} />
+          <AstraPlanet3D state={mode} onTap={handleMicClick} />
         </div>
 
         {/* Live Speech Feedback */}

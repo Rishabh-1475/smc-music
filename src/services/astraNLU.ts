@@ -59,7 +59,18 @@ const PHONETIC_MAP: Record<string, string> = {
   'shilpi raj': 'shilpi raj',
   'kaali gadi': 'kaali gaadi',
   'kali gadi': 'kaali gaadi',
-  'kalyani': 'kalyani remix'
+  'kalyani': 'kalyani remix',
+  // Native script mappings (Devanagari / Gurmukhi)
+  'काली गाड़ी': 'kaali gaadi',
+  'काली गाडी': 'kaali gaadi',
+  'कल्याणी': 'kalyani remix',
+  'अरिजित सिंह': 'arijit singh',
+  'अरिजीत सिंह': 'arijit singh',
+  'सिद्धू मूसे वाला': 'sidhu moose wala',
+  'हनी सिंह': 'yo yo honey singh',
+  'दिलजीत': 'diljit dosanjh',
+  'पवन सिंह': 'pawan singh',
+  'खेसारी लाल': 'khesari lal yadav'
 };
 
 export const normalizeIndianQuery = (text: string): string => {
@@ -77,7 +88,7 @@ export const parseAstraIntent = (rawTranscript: string, langCode = 'hi-IN'): NLU
 
   // Control: Pause
   if (
-    /\b(pause|stop|halt|roko|ruk|ruk jao|band karo|tham)\b/i.test(text)
+    /\b(pause|stop|halt|roko|ruk|ruk jao|band karo|tham|rok do|थमो|रोको|बंद करो)\b/i.test(text)
   ) {
     return {
       intent: 'PAUSE',
@@ -88,7 +99,7 @@ export const parseAstraIntent = (rawTranscript: string, langCode = 'hi-IN'): NLU
 
   // Control: Resume
   if (
-    /\b(resume|continue|unpause|chalu karo|bajao wapas|phir se bajao)\b/i.test(text)
+    /\b(resume|continue|unpause|chalu karo|chalu kar do|bajao wapas|phir se bajao|chalao|चलाओ|शुरू करो)\b/i.test(text)
   ) {
     return {
       intent: 'RESUME',
@@ -99,7 +110,7 @@ export const parseAstraIntent = (rawTranscript: string, langCode = 'hi-IN'): NLU
 
   // Control: Next
   if (
-    /\b(next|skip|forward|agla|agle|aage badhao|change)\b/i.test(text)
+    /\b(next|skip|forward|agla|agle|aage badhao|change|agla gana|अगला)\b/i.test(text)
   ) {
     return {
       intent: 'NEXT',
@@ -110,7 +121,7 @@ export const parseAstraIntent = (rawTranscript: string, langCode = 'hi-IN'): NLU
 
   // Control: Previous
   if (
-    /\b(prev|previous|back|pichhla|piche karo|pehle wala)\b/i.test(text)
+    /\b(prev|previous|back|pichhla|piche karo|pehle wala|pichla gana|पिछला)\b/i.test(text)
   ) {
     return {
       intent: 'PREV',
@@ -121,7 +132,7 @@ export const parseAstraIntent = (rawTranscript: string, langCode = 'hi-IN'): NLU
 
   // Control: Volume Up
   if (
-    /\b(volume up|louder|increase volume|awaaz badhao|tez karo|sound badhao)\b/i.test(text)
+    /\b(volume up|louder|increase volume|awaaz badhao|tez karo|sound badhao|आवाज़ बढ़ाओ)\b/i.test(text)
   ) {
     return {
       intent: 'VOLUME_UP',
@@ -132,7 +143,7 @@ export const parseAstraIntent = (rawTranscript: string, langCode = 'hi-IN'): NLU
 
   // Control: Volume Down
   if (
-    /\b(volume down|quieter|decrease volume|awaaz kam karo|dheemi karo|sound kam)\b/i.test(text)
+    /\b(volume down|quieter|decrease volume|awaaz kam karo|dheemi karo|sound kam|आवाज़ कम)\b/i.test(text)
   ) {
     return {
       intent: 'VOLUME_DOWN',
@@ -143,7 +154,7 @@ export const parseAstraIntent = (rawTranscript: string, langCode = 'hi-IN'): NLU
 
   // Control: Like
   if (
-    /\b(like|favorite|favourite|save|pasand hai|dil de do|accha hai)\b/i.test(text)
+    /\b(like|favorite|favourite|save|pasand hai|dil de do|accha hai|पसंद)\b/i.test(text)
   ) {
     return {
       intent: 'LIKE',
@@ -154,7 +165,7 @@ export const parseAstraIntent = (rawTranscript: string, langCode = 'hi-IN'): NLU
 
   // Control: Shuffle
   if (
-    /\b(shuffle|mix karo|randomly bajao)\b/i.test(text)
+    /\b(shuffle|mix karo|randomly bajao|शफ़ल)\b/i.test(text)
   ) {
     return {
       intent: 'SHUFFLE',
@@ -164,11 +175,11 @@ export const parseAstraIntent = (rawTranscript: string, langCode = 'hi-IN'): NLU
   }
 
   // Extract song / artist query for Play or Search
-  // Remove command trigger words: "play", "stream", "bajaao", "bajao", "chalao", "sunao", "search for", "find"
+  // Remove wake prefixes and multilingual verbs
   let cleanQuery = text
-    .replace(/^(astra|hey astra|ok astra|please|kripya)\s+/i, '')
-    .replace(/^(play|stream|listen to|bajaao|bajao|chalao|sunao|lagaao|lagao|dhundo|search for|find)\s+/i, '')
-    .replace(/\s+(bajaao|bajao|chalao|sunao|lagaao|lagao|song|track|gaana)$/i, '')
+    .replace(/^(astra|hey astra|ok astra|please|kripya|sun astra|sunna astra|एस्ट्रा|हे एस्ट्रा)\s+/i, '')
+    .replace(/^(play|stream|listen to|bajaao|bajao|chalao|chala do|chala de|baja do|laga do|sunao|laa de|podu|pettandi|dhundo|search for|find|चलाओ|बजाओ|सुनाओ)\s+/i, '')
+    .replace(/\s+(bajaao|bajao|chalao|chala do|chala de|baja do|laga do|sunao|laa de|podu|pettandi|song|track|gaana|gana|paatu|paattu|गाना|ਗਾਣਾ)$/i, '')
     .trim();
 
   // If after stripping it's empty, fallback to original

@@ -5,11 +5,11 @@ import { Mic, MicOff, Sparkles, Send } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { fetchSongsByQuery } from '@/services/api';
 
+import { astraVoiceEngine } from '@/services/astraVoiceEngine';
+
 export const AstraSphere3D: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const uniformsRef = useRef<any>(null);
-  const recognitionRef = useRef<any>(null);
-  const isListeningRef = useRef(false);
   const debounceTimerRef = useRef<any>(null);
   const hasGreetedRef = useRef(false);
 
@@ -19,6 +19,15 @@ export const AstraSphere3D: React.FC = () => {
   const [statusText, setStatusText] = useState('TAP SPHERE OR MIC TO ACTIVATE');
   const [userName, setUserName] = useState('Rishabh');
   const [textInput, setTextInput] = useState('');
+
+  useEffect(() => {
+    const unsub = astraVoiceEngine.subscribe((st) => {
+      setIsListening(st.mode === 'listening');
+      setIsSpeaking(st.mode === 'speaking');
+      if (st.statusText) setStatusText(st.statusText.toUpperCase());
+    });
+    return unsub;
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -137,93 +146,12 @@ export const AstraSphere3D: React.FC = () => {
   }, [isPlaying, togglePlay, playNext, playPrev, playTrack, speakAI]);
 
   const stopListening = useCallback(() => {
-    isListeningRef.current = false;
-    setIsListening(false);
-    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch {}
-    }
-    setStatusText('TAP SPHERE OR MIC TO ACTIVATE');
+    astraVoiceEngine.stopActiveListening();
   }, []);
 
   const startListening = useCallback(() => {
-    if (typeof window === 'undefined') return;
-    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRec) {
-      setStatusText('SPEECH RECOGNITION NOT SUPPORTED');
-      speakAI('Speech recognition is not supported in this browser. Please use the text command input below.');
-      return;
-    }
-
-    if (!hasGreetedRef.current) {
-      hasGreetedRef.current = true;
-      speakAI(`Hi ${userName}, I am Astra. Say play followed by any song name.`, () => {
-        startListening();
-      });
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-    stopListening();
-
-    try {
-      const rec = new SpeechRec();
-      rec.continuous = true;
-      rec.interimResults = true;
-      rec.lang = 'en-IN';
-
-      rec.onstart = () => {
-        isListeningRef.current = true;
-        setIsListening(true);
-        setStatusText('LISTENING... SAY "PLAY [SONG]"');
-      };
-
-      rec.onresult = (e: any) => {
-        let interimText = '';
-        let finalText = '';
-
-        for (let i = e.resultIndex; i < e.results.length; ++i) {
-          const trans = e.results[i][0].transcript;
-          if (e.results[i].isFinal) finalText += trans;
-          else interimText += trans;
-        }
-
-        const candidate = (finalText || interimText).trim();
-        if (candidate) {
-          setStatusText(`HEARD: "${candidate.toUpperCase()}"`);
-          const lower = candidate.toLowerCase();
-          if (lower.startsWith('play ') || lower.startsWith('pause') || lower.startsWith('next') || lower.startsWith('stop')) {
-            if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-            debounceTimerRef.current = setTimeout(() => {
-              stopListening();
-              executeVoiceIntent(candidate);
-            }, 600);
-          } else {
-            if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-            debounceTimerRef.current = setTimeout(() => {
-              stopListening();
-              executeVoiceIntent(candidate);
-            }, 1300);
-          }
-        }
-      };
-
-      rec.onerror = () => {};
-      rec.onend = () => {
-        if (isListeningRef.current) {
-          try { rec.start(); } catch {}
-        } else {
-          setIsListening(false);
-        }
-      };
-
-      recognitionRef.current = rec;
-      rec.start();
-    } catch {
-      setIsListening(false);
-    }
-  }, [userName, stopListening, executeVoiceIntent, speakAI]);
+    astraVoiceEngine.startActiveListening();
+  }, []);
 
   const toggleListening = () => {
     if (isListening) stopListening();

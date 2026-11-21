@@ -3,7 +3,7 @@ import Icon from '../ui/Icon';
 import MiniOrb from '../ui/MiniOrb';
 import { BrandMark } from './Sidebar';
 import { usePlayerStore } from '@/store/playerStore';
-import { astraVoice, AstraMode } from '@/services/astraVoice';
+import { astraVoiceEngine, AstraVoiceMode } from '@/services/astraVoiceEngine';
 
 export const CATEGORIES = [
   { id: 'all', label: 'All Hits' },
@@ -26,13 +26,20 @@ export default function TopBar() {
     setCreatorOpen
   } = usePlayerStore();
 
-  const [astraMode, setAstraMode] = useState<AstraMode>('idle');
+  const [astraMode, setAstraMode] = useState<AstraVoiceMode>('idle');
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const debounceTimer = useRef<any>(null);
 
   useEffect(() => {
     setLocalQuery(searchQuery);
   }, [searchQuery]);
+
+  useEffect(() => {
+    const unsub = astraVoiceEngine.subscribe((st) => {
+      setAstraMode(st.mode);
+    });
+    return unsub;
+  }, []);
 
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -46,18 +53,9 @@ export default function TopBar() {
 
   const handleVoiceMic = () => {
     if (astraMode === 'listening') {
-      astraVoice.stopListening();
+      astraVoiceEngine.stopActiveListening();
     } else {
-      navigate('astra');
-      astraVoice.setCallbacks({
-        onModeChange: (m) => setAstraMode(m),
-        onTranscript: (t) => {},
-        onCommand: (res) => {
-          if (res.query) setSearchQuery(res.query);
-        },
-        onError: (err) => addToast(err, 'error')
-      });
-      astraVoice.startListening();
+      astraVoiceEngine.startActiveListening();
     }
   };
 
