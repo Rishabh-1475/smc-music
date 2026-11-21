@@ -1,7 +1,7 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Play, Pause, Heart, Sparkles, Disc3 } from 'lucide-react';
+import { Play, Pause, Heart, Sparkles, Radio } from 'lucide-react';
 import { Song } from '@/services/api';
 import { usePlayerStore } from '@/store/playerStore';
 
@@ -10,68 +10,69 @@ interface Props {
 }
 
 export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-  const { playTrack, togglePlay, currentTrack, isPlaying, toggleLike, likedSongs } = usePlayerStore();
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isInteracting, setIsInteracting] = useState(false);
 
+  const { playTrack, togglePlay, currentTrack, isPlaying, toggleLike, likedSongs } = usePlayerStore();
   const isCurrent = currentTrack?.id === song.id;
   const isLiked = likedSongs.some((s) => s.id === song.id);
 
-  // --- Real-time Three.js 3D Holographic Disc & Crimson Laser Engine ---
+  // --- Real-time WebGL 3D Holographic Turntable & Astra Wave Ring ---
   useEffect(() => {
-    const container = canvasContainerRef.current;
+    const container = canvasRef.current;
     if (!container) return;
 
-    const width = 130;
-    const height = 130;
+    const width = 160;
+    const height = 160;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    camera.position.set(0, 0, 4.2);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    camera.position.set(0, 0, 4.0);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    // --- Lighting Setup for Shiny Obsidian Black ---
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    // --- Dynamic Studio Lights for Shiny Obsidian Finish ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambientLight);
 
-    const redRimLight = new THREE.PointLight(0xef4444, 4, 10);
-    redRimLight.position.set(2, 2, 2);
-    scene.add(redRimLight);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    keyLight.position.set(3, 4, 3);
+    scene.add(keyLight);
 
-    const redBackLight = new THREE.PointLight(0x991b1b, 3, 10);
-    redBackLight.position.set(-2, -2, -1);
-    scene.add(redBackLight);
+    const crimsonNeonLight = new THREE.PointLight(0xef4444, 5, 8);
+    crimsonNeonLight.position.set(-1, -1, 2);
+    scene.add(crimsonNeonLight);
 
-    // --- Shiny 3D Vinyl Disc Geometry ---
-    const discGroup = new THREE.Group();
-    discGroup.rotation.x = 0.35; // Isometric tilt
-    discGroup.rotation.y = -0.25;
-    scene.add(discGroup);
+    // Group for 3D Turntable Disc
+    const turntableGroup = new THREE.Group();
+    turntableGroup.rotation.x = 0.45; // 3D Isometric projection
+    turntableGroup.rotation.y = -0.3;
+    scene.add(turntableGroup);
 
-    // Texture Loader for Track Cover
+    // High-Gloss Obsidian Vinyl Disc
+    const discGeo = new THREE.CylinderGeometry(1.35, 1.35, 0.06, 64);
+    const discMat = new THREE.MeshPhysicalMaterial({
+      color: 0x050508,
+      metalness: 0.95,
+      roughness: 0.08,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
+      reflectivity: 1.0
+    });
+    const discMesh = new THREE.Mesh(discGeo, discMat);
+    discMesh.rotation.x = Math.PI / 2;
+    turntableGroup.add(discMesh);
+
+    // Track Album Artwork Center Label
+    const labelGeo = new THREE.CircleGeometry(0.8, 64);
+    const labelMat = new THREE.MeshBasicMaterial({ color: 0x1f1f2e });
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setCrossOrigin('anonymous');
-    
-    // Main Vinyl Disc Material: Ultra-Shiny Obsidian (#030305)
-    const vinylGeo = new THREE.CylinderGeometry(1.4, 1.4, 0.05, 64);
-    const vinylMat = new THREE.MeshPhysicalMaterial({
-      color: 0x050508,
-      metalness: 0.9,
-      roughness: 0.15,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.1,
-      reflectivity: 0.9
-    });
-    const vinylMesh = new THREE.Mesh(vinylGeo, vinylMat);
-    vinylMesh.rotation.x = Math.PI / 2;
-    discGroup.add(vinylMesh);
-
-    // Center Album Art Sticker (Texture or fallback)
-    const labelGeo = new THREE.CircleGeometry(0.85, 48);
-    const labelMat = new THREE.MeshBasicMaterial({ color: 0x1f1f2e });
 
     textureLoader.load(
       song.imageUrl,
@@ -82,55 +83,54 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
       },
       undefined,
       () => {
-        // Fallback color if blocked
         labelMat.color.setHex(0xef4444);
       }
     );
 
     const labelMesh = new THREE.Mesh(labelGeo, labelMat);
-    labelMesh.position.z = 0.03;
-    discGroup.add(labelMesh);
+    labelMesh.position.z = 0.035;
+    turntableGroup.add(labelMesh);
 
-    // Center Spindle Hole
-    const spindleGeo = new THREE.CircleGeometry(0.18, 32);
-    const spindleMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    // Metallic Center Spindle
+    const spindleGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.1, 32);
+    const spindleMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.9, roughness: 0.2 });
     const spindleMesh = new THREE.Mesh(spindleGeo, spindleMat);
-    spindleMesh.position.z = 0.035;
-    discGroup.add(spindleMesh);
+    spindleMesh.rotation.x = Math.PI / 2;
+    spindleMesh.position.z = 0.05;
+    turntableGroup.add(spindleMesh);
 
-    // Crimson Laser Orbit Ring
-    const ringGeo = new THREE.RingGeometry(1.55, 1.58, 64);
+    // Astra Harmonic Laser Orbit Ring
+    const ringGeo = new THREE.TorusGeometry(1.58, 0.025, 16, 100);
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0xef4444,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.7
-    });
-    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-    discGroup.add(ringMesh);
-
-    // Orbiting Particles
-    const particleCount = 45;
-    const particleGeo = new THREE.BufferGeometry();
-    const posArray = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount * 3; i += 3) {
-      const angle = (i / 3 / particleCount) * Math.PI * 2;
-      const r = 1.7 + Math.random() * 0.3;
-      posArray[i] = Math.cos(angle) * r;
-      posArray[i + 1] = Math.sin(angle) * r;
-      posArray[i + 2] = (Math.random() - 0.5) * 0.4;
-    }
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    const particleMat = new THREE.PointsMaterial({
-      color: 0xef4444,
-      size: 0.05,
       transparent: true,
       opacity: 0.85
     });
-    const particleSystem = new THREE.Points(particleGeo, particleMat);
-    discGroup.add(particleSystem);
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    turntableGroup.add(ringMesh);
 
-    // --- Render Loop ---
+    // Orbiting 3D Particle Cloud
+    const particleCount = 60;
+    const particleGeo = new THREE.BufferGeometry();
+    const posArr = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      const angle = (i / 3 / particleCount) * Math.PI * 2;
+      const radius = 1.75 + Math.random() * 0.35;
+      posArr[i] = Math.cos(angle) * radius;
+      posArr[i + 1] = Math.sin(angle) * radius;
+      posArr[i + 2] = (Math.random() - 0.5) * 0.5;
+    }
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+    const particleMat = new THREE.PointsMaterial({
+      color: 0xff3b5c,
+      size: 0.045,
+      transparent: true,
+      opacity: 0.9
+    });
+    const particleSystem = new THREE.Points(particleGeo, particleMat);
+    turntableGroup.add(particleSystem);
+
+    // --- Animation Render Loop ---
     let animId: number;
     const clock = new THREE.Clock();
 
@@ -139,11 +139,13 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
       const delta = clock.getDelta();
 
       if (isCurrent && isPlaying) {
-        discGroup.rotation.z -= delta * 2.5; // Smooth rotation when playing
+        turntableGroup.rotation.z -= delta * 2.8;
         ringMesh.rotation.z += delta * 1.5;
-        particleSystem.rotation.z -= delta * 0.8;
+        particleSystem.rotation.z -= delta * 0.9;
+        crimsonNeonLight.intensity = 4.5 + Math.sin(clock.getElapsedTime() * 8) * 1.5;
       } else {
-        discGroup.rotation.z -= delta * 0.4; // Idle float
+        turntableGroup.rotation.z -= delta * 0.5; // Idle breathing rotation
+        crimsonNeonLight.intensity = 2.5;
       }
 
       renderer.render(scene, camera);
@@ -160,6 +162,20 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
     };
   }, [song.imageUrl, isCurrent, isPlaying]);
 
+  // Parallax Pointer Handler
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+    setTilt({ x: -y * 14, y: x * 14 });
+  };
+
+  const handlePointerLeave = () => {
+    setIsInteracting(false);
+    setTilt({ x: 0, y: 0 });
+  };
+
   const handleAction = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isCurrent) {
@@ -170,33 +186,51 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
   };
 
   return (
-    <div className="py-4 px-4 select-none">
-      {/* Top Section Tag */}
-      <div className="flex items-center justify-between mb-2 px-1">
-        <p className="text-[10px] font-mono font-extrabold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+    <div className="py-4 px-4 select-none perspective-[1200px]">
+      {/* HUD Header */}
+      <div className="flex items-center justify-between mb-2.5 px-1">
+        <p className="text-[10px] font-mono font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#EF4444] animate-ping" />
           ASTRA SPATIAL SHOWCASE
         </p>
-        <span className="text-[10px] font-mono text-[#EF4444] bg-[#EF4444]/15 px-2.5 py-0.5 rounded-full border border-[#EF4444]/30 flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-[#EF4444]" /> 3D WEBGL ENGINE
+        <span className="text-[10px] font-mono text-[#EF4444] bg-[#EF4444]/15 px-2.5 py-0.5 rounded-full border border-[#EF4444]/40 flex items-center gap-1 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
+          <Sparkles className="w-3 h-3 text-[#EF4444]" /> 3D WEBGL CORE
         </span>
       </div>
 
-      {/* Glossy Obsidian & Crimson 3D Stage Card */}
+      {/* Glossy Obsidian 3D Master Card */}
       <div
+        ref={cardRef}
+        onPointerEnter={() => setIsInteracting(true)}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
         onClick={handleAction}
-        className="relative rounded-3xl overflow-hidden cursor-pointer border border-[#EF4444]/40 bg-gradient-to-br from-[#120306] via-[#08080C] to-[#020204] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.95),0_0_30px_rgba(239,68,68,0.25)] transition-all duration-300 hover:border-[#EF4444]/70 active:scale-[0.99]"
+        style={{
+          transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(${isInteracting ? 1.02 : 1}, ${isInteracting ? 1.02 : 1}, 1)`,
+          transformStyle: 'preserve-3d',
+          transition: isInteracting ? 'transform 0.08s ease-out' : 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)'
+        }}
+        className="relative rounded-[28px] overflow-hidden cursor-pointer border border-[#EF4444]/40 bg-gradient-to-br from-[#1C060B] via-[#09080E] to-[#020204] p-5 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(239,68,68,0.35),inset_0_1px_1px_rgba(255,255,255,0.2)]"
       >
-        {/* Specular Radial Sheen */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-[#EF4444]/25 via-transparent to-transparent pointer-events-none blur-2xl" />
-        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-red-950/40 pointer-events-none blur-2xl" />
+        {/* Specular Liquid Light Sheen */}
+        <div
+          style={{
+            transform: 'translateZ(30px)',
+            background: `radial-gradient(circle at ${(tilt.y / 14 + 1) * 50}% ${(-tilt.x / 14 + 1) * 50}%, rgba(255, 255, 255, 0.3), transparent 60%)`
+          }}
+          className="absolute inset-0 rounded-[28px] pointer-events-none z-30 opacity-70"
+        />
 
-        <div className="relative z-10 flex items-center justify-between gap-3">
-          {/* Left Metadata & Controls */}
-          <div className="flex-1 min-w-0 pr-2">
+        {/* Ambient Volumetric Flare */}
+        <div className="absolute top-0 right-0 w-44 h-44 bg-[#EF4444]/25 blur-3xl rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-rose-950/40 blur-3xl rounded-full pointer-events-none" />
+
+        <div className="relative z-20 flex items-center justify-between gap-2">
+          {/* Left Metadata & Controls on Z-Elevation */}
+          <div style={{ transform: 'translateZ(35px)' }} className="flex-1 min-w-0 pr-1">
             <div className="flex items-center gap-2">
-              <span className="text-[9px] font-mono font-black text-[#EF4444] bg-[#EF4444]/20 border border-[#EF4444]/40 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                FEATURED MASTER
+              <span className="text-[9px] font-mono font-black text-[#EF4444] bg-[#EF4444]/20 border border-[#EF4444]/50 px-2.5 py-0.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1">
+                <Radio className="w-2.5 h-2.5" /> FEATURED MASTER
               </span>
               {isCurrent && isPlaying && (
                 <div className="flex items-center gap-0.5 h-3">
@@ -207,15 +241,15 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
               )}
             </div>
 
-            <h3 className="text-lg font-black text-white mt-2 truncate tracking-tight drop-shadow-lg">
+            <h3 className="text-lg font-black text-white mt-2 truncate tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
               {song.name}
             </h3>
-            <p className="text-xs text-zinc-400 truncate mt-0.5">{song.primaryArtists}</p>
+            <p className="text-xs text-zinc-300 truncate mt-0.5 drop-shadow">{song.primaryArtists}</p>
 
             <div className="mt-4 flex items-center gap-2.5">
               <button
                 onClick={handleAction}
-                className="px-4 py-2 rounded-full bg-gradient-to-r from-[#EF4444] via-rose-600 to-amber-500 text-white font-extrabold text-xs flex items-center gap-2 shadow-[0_0_20px_rgba(239,68,68,0.6)] hover:scale-105 active:scale-95 transition cursor-pointer"
+                className="px-4 py-2 rounded-full bg-gradient-to-r from-[#EF4444] via-rose-600 to-amber-500 text-white font-black text-xs flex items-center gap-2 shadow-[0_0_25px_rgba(239,68,68,0.7)] hover:scale-105 active:scale-95 transition cursor-pointer"
               >
                 {isCurrent && isPlaying ? (
                   <>
@@ -235,18 +269,21 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
                   e.stopPropagation();
                   toggleLike(song);
                 }}
-                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-[#EF4444]/50 transition cursor-pointer"
+                className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:border-[#EF4444] transition shadow-lg cursor-pointer"
               >
-                <Heart className={`w-4 h-4 ${isLiked ? 'fill-[#EF4444] text-[#EF4444]' : 'text-zinc-400'}`} />
+                <Heart className={`w-4 h-4 ${isLiked ? 'fill-[#EF4444] text-[#EF4444]' : 'text-zinc-300'}`} />
               </button>
             </div>
           </div>
 
-          {/* Right Interactive 3D WebGL Canvas Disc */}
-          <div className="relative flex-shrink-0 flex items-center justify-center">
+          {/* Right WebGL 3D Holographic Viewport */}
+          <div
+            style={{ transform: 'translateZ(50px)' }}
+            className="relative flex-shrink-0 flex items-center justify-center"
+          >
             <div
-              ref={canvasContainerRef}
-              className="w-[130px] h-[130px] flex items-center justify-center drop-shadow-[0_15px_30px_rgba(0,0,0,0.9)]"
+              ref={canvasRef}
+              className="w-[160px] h-[160px] flex items-center justify-center drop-shadow-[0_20px_35px_rgba(0,0,0,0.95)]"
             />
           </div>
         </div>

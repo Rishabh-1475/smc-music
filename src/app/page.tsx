@@ -169,28 +169,47 @@ export default function App() {
               ))}
             </div>
 
-            {/* 3D Quick-Access Grid (Spotify 6-Tile Feature with 3D Depth) */}
-            <div className="grid grid-cols-2 gap-2.5 mt-3 perspective-stage">
+            {/* 3D GLOSSY OBSIDIAN QUICK-ACCESS TILES */}
+            <div className="grid grid-cols-2 gap-2.5 mt-3 px-1 perspective-[1000px]">
               {quickAccessSongs.map((song) => {
                 const isCurrent = currentTrack?.id === song.id;
                 return (
-                  <TiltCard3D
+                  <div
                     key={`tile_${song.id}`}
-                    depth={10}
                     onClick={() => playTrack(song)}
-                    className={`rounded-xl overflow-hidden transition-all duration-300 border ${
+                    className={`group relative flex items-center rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 transform active:scale-95 ${
                       isCurrent
-                        ? 'bg-[#180A0E] border-[#EF4444] shadow-[0_0_20px_rgba(239,68,68,0.35)]'
-                        : 'bg-[#0E0E14] border-white/5 hover:border-[#EF4444]/30'
+                        ? 'bg-gradient-to-r from-[#2A0812] to-[#14060A] border border-[#EF4444] shadow-[0_10px_25px_rgba(239,68,68,0.4),inset_0_1px_1px_rgba(255,255,255,0.3)]'
+                        : 'bg-gradient-to-br from-[#181822]/90 via-[#0E0E16]/95 to-[#040407] border border-white/10 hover:border-[#EF4444]/60 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.18)] hover:-translate-y-0.5'
                     }`}
                   >
-                    <div className="flex items-center p-1.5">
-                      <img src={song.imageUrl} alt={song.name} className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
-                      <p className={`text-xs font-bold px-2.5 truncate flex-1 ${isCurrent ? 'text-[#EF4444]' : 'text-white'}`}>
-                        {song.name}
-                      </p>
+                    {/* Specular Edge Top-Light */}
+                    <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+
+                    {/* 3D Elevated Artwork Thumbnail */}
+                    <div className="relative w-12 h-12 flex-shrink-0 m-1.5 rounded-xl overflow-hidden shadow-[0_5px_15px_rgba(0,0,0,0.8)] border border-white/10 bg-black">
+                      <img
+                        src={song.imageUrl}
+                        alt={song.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80';
+                        }}
+                      />
+                      {isCurrent && isPlaying && (
+                        <div className="absolute inset-0 bg-[#EF4444]/30 backdrop-blur-[1px] flex items-center justify-center">
+                          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                        </div>
+                      )}
                     </div>
-                  </TiltCard3D>
+
+                    {/* Title with Glow */}
+                    <p className={`text-xs font-black px-2 truncate flex-1 tracking-tight drop-shadow ${
+                      isCurrent ? 'text-[#EF4444]' : 'text-white group-hover:text-[#EF4444] transition-colors'
+                    }`}>
+                      {song.name}
+                    </p>
+                  </div>
                 );
               })}
             </div>
