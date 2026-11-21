@@ -1,6 +1,7 @@
 'use client';
-import React, { useRef, useState } from 'react';
-import { Play, Pause, Heart, Sparkles, Volume2 } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import * as THREE from 'three';
+import { Play, Pause, Heart, Sparkles, Disc3 } from 'lucide-react';
 import { Song } from '@/services/api';
 import { usePlayerStore } from '@/store/playerStore';
 
@@ -9,29 +10,157 @@ interface Props {
 }
 
 export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const { playTrack, togglePlay, currentTrack, isPlaying, toggleLike, likedSongs } = usePlayerStore();
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const [isInteracting, setIsInteracting] = useState(false);
 
   const isCurrent = currentTrack?.id === song.id;
   const isLiked = likedSongs.some((s) => s.id === song.id);
 
-  // Smooth GPU-accelerated touch/cursor parallax tilt
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-    setTilt({ x: -y * 12, y: x * 12 });
-  };
+  // --- Real-time Three.js 3D Holographic Disc & Crimson Laser Engine ---
+  useEffect(() => {
+    const container = canvasContainerRef.current;
+    if (!container) return;
 
-  const handlePointerLeave = () => {
-    setIsInteracting(false);
-    setTilt({ x: 0, y: 0 });
-  };
+    const width = 130;
+    const height = 130;
 
-  const handleMainAction = (e: React.MouseEvent) => {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    camera.position.set(0, 0, 4.2);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    // --- Lighting Setup for Shiny Obsidian Black ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const redRimLight = new THREE.PointLight(0xef4444, 4, 10);
+    redRimLight.position.set(2, 2, 2);
+    scene.add(redRimLight);
+
+    const redBackLight = new THREE.PointLight(0x991b1b, 3, 10);
+    redBackLight.position.set(-2, -2, -1);
+    scene.add(redBackLight);
+
+    // --- Shiny 3D Vinyl Disc Geometry ---
+    const discGroup = new THREE.Group();
+    discGroup.rotation.x = 0.35; // Isometric tilt
+    discGroup.rotation.y = -0.25;
+    scene.add(discGroup);
+
+    // Texture Loader for Track Cover
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.setCrossOrigin('anonymous');
+    
+    // Main Vinyl Disc Material: Ultra-Shiny Obsidian (#030305)
+    const vinylGeo = new THREE.CylinderGeometry(1.4, 1.4, 0.05, 64);
+    const vinylMat = new THREE.MeshPhysicalMaterial({
+      color: 0x050508,
+      metalness: 0.9,
+      roughness: 0.15,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.1,
+      reflectivity: 0.9
+    });
+    const vinylMesh = new THREE.Mesh(vinylGeo, vinylMat);
+    vinylMesh.rotation.x = Math.PI / 2;
+    discGroup.add(vinylMesh);
+
+    // Center Album Art Sticker (Texture or fallback)
+    const labelGeo = new THREE.CircleGeometry(0.85, 48);
+    const labelMat = new THREE.MeshBasicMaterial({ color: 0x1f1f2e });
+
+    textureLoader.load(
+      song.imageUrl,
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        labelMat.map = tex;
+        labelMat.needsUpdate = true;
+      },
+      undefined,
+      () => {
+        // Fallback color if blocked
+        labelMat.color.setHex(0xef4444);
+      }
+    );
+
+    const labelMesh = new THREE.Mesh(labelGeo, labelMat);
+    labelMesh.position.z = 0.03;
+    discGroup.add(labelMesh);
+
+    // Center Spindle Hole
+    const spindleGeo = new THREE.CircleGeometry(0.18, 32);
+    const spindleMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const spindleMesh = new THREE.Mesh(spindleGeo, spindleMat);
+    spindleMesh.position.z = 0.035;
+    discGroup.add(spindleMesh);
+
+    // Crimson Laser Orbit Ring
+    const ringGeo = new THREE.RingGeometry(1.55, 1.58, 64);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xef4444,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.7
+    });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    discGroup.add(ringMesh);
+
+    // Orbiting Particles
+    const particleCount = 45;
+    const particleGeo = new THREE.BufferGeometry();
+    const posArray = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      const angle = (i / 3 / particleCount) * Math.PI * 2;
+      const r = 1.7 + Math.random() * 0.3;
+      posArray[i] = Math.cos(angle) * r;
+      posArray[i + 1] = Math.sin(angle) * r;
+      posArray[i + 2] = (Math.random() - 0.5) * 0.4;
+    }
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    const particleMat = new THREE.PointsMaterial({
+      color: 0xef4444,
+      size: 0.05,
+      transparent: true,
+      opacity: 0.85
+    });
+    const particleSystem = new THREE.Points(particleGeo, particleMat);
+    discGroup.add(particleSystem);
+
+    // --- Render Loop ---
+    let animId: number;
+    const clock = new THREE.Clock();
+
+    const animate = () => {
+      animId = requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+
+      if (isCurrent && isPlaying) {
+        discGroup.rotation.z -= delta * 2.5; // Smooth rotation when playing
+        ringMesh.rotation.z += delta * 1.5;
+        particleSystem.rotation.z -= delta * 0.8;
+      } else {
+        discGroup.rotation.z -= delta * 0.4; // Idle float
+      }
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      renderer.dispose();
+      if (container && container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
+    };
+  }, [song.imageUrl, isCurrent, isPlaying]);
+
+  const handleAction = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isCurrent) {
       togglePlay();
@@ -41,49 +170,32 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
   };
 
   return (
-    <div className="py-4 px-4 perspective-[1200px] select-none">
-      {/* Micro-HUD Header */}
+    <div className="py-4 px-4 select-none">
+      {/* Top Section Tag */}
       <div className="flex items-center justify-between mb-2 px-1">
-        <p className="text-[10px] font-mono font-extrabold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+        <p className="text-[10px] font-mono font-extrabold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-[#EF4444] animate-ping" />
           ASTRA SPATIAL SHOWCASE
         </p>
-        <span className="text-[10px] font-mono text-[#EF4444] bg-[#EF4444]/15 px-2 py-0.5 rounded-full border border-[#EF4444]/30 flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-[#EF4444]" /> 3D HOLOGRAM
+        <span className="text-[10px] font-mono text-[#EF4444] bg-[#EF4444]/15 px-2.5 py-0.5 rounded-full border border-[#EF4444]/30 flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-[#EF4444]" /> 3D WEBGL ENGINE
         </span>
       </div>
 
-      {/* 3D Kinetic Hologram Stage */}
+      {/* Glossy Obsidian & Crimson 3D Stage Card */}
       <div
-        ref={cardRef}
-        onPointerEnter={() => setIsInteracting(true)}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
-        style={{
-          transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(${isInteracting ? 1.02 : 1}, ${isInteracting ? 1.02 : 1}, 1)`,
-          transformStyle: 'preserve-3d',
-          transition: isInteracting ? 'transform 0.08s ease-out' : 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)'
-        }}
-        className="relative rounded-3xl overflow-hidden cursor-pointer shadow-[0_25px_50px_rgba(0,0,0,0.9),0_0_35px_rgba(239,68,68,0.25)] border border-[#EF4444]/30 bg-gradient-to-br from-[#1A060C] via-[#0D0508] to-[#040406] p-5"
+        onClick={handleAction}
+        className="relative rounded-3xl overflow-hidden cursor-pointer border border-[#EF4444]/40 bg-gradient-to-br from-[#120306] via-[#08080C] to-[#020204] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.95),0_0_30px_rgba(239,68,68,0.25)] transition-all duration-300 hover:border-[#EF4444]/70 active:scale-[0.99]"
       >
-        {/* Volumetric Red Particle Fog (Astra Matching) */}
-        <div className="absolute -top-14 -left-14 w-44 h-44 bg-[#EF4444]/25 rounded-full blur-3xl pointer-events-none animate-pulse" />
-        <div className="absolute -bottom-14 -right-14 w-44 h-44 bg-rose-600/20 rounded-full blur-3xl pointer-events-none" />
+        {/* Specular Radial Sheen */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-[#EF4444]/25 via-transparent to-transparent pointer-events-none blur-2xl" />
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-red-950/40 pointer-events-none blur-2xl" />
 
-        {/* Dynamic Specular Sheen */}
-        <div
-          style={{
-            transform: 'translateZ(20px)',
-            background: `radial-gradient(circle at ${(tilt.y / 12 + 1) * 50}% ${(-tilt.x / 12 + 1) * 50}%, rgba(255, 255, 255, 0.25), transparent 60%)`
-          }}
-          className="absolute inset-0 rounded-3xl pointer-events-none z-30 opacity-70"
-        />
-
-        <div className="relative z-20 flex items-center justify-between gap-4">
-          {/* Left Metadata & Controls (Z-Elevation 30px) */}
-          <div style={{ transform: 'translateZ(30px)' }} className="flex-1 min-w-0">
+        <div className="relative z-10 flex items-center justify-between gap-3">
+          {/* Left Metadata & Controls */}
+          <div className="flex-1 min-w-0 pr-2">
             <div className="flex items-center gap-2">
-              <span className="text-[9px] font-mono font-extrabold text-[#EF4444] bg-[#EF4444]/20 border border-[#EF4444]/40 px-2 py-0.5 rounded-full uppercase tracking-wider">
+              <span className="text-[9px] font-mono font-black text-[#EF4444] bg-[#EF4444]/20 border border-[#EF4444]/40 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                 FEATURED MASTER
               </span>
               {isCurrent && isPlaying && (
@@ -95,16 +207,15 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
               )}
             </div>
 
-            <h3 className="text-lg font-black text-white mt-2 truncate tracking-tight drop-shadow-md">
+            <h3 className="text-lg font-black text-white mt-2 truncate tracking-tight drop-shadow-lg">
               {song.name}
             </h3>
             <p className="text-xs text-zinc-400 truncate mt-0.5">{song.primaryArtists}</p>
 
-            {/* Action Bar */}
             <div className="mt-4 flex items-center gap-2.5">
               <button
-                onClick={handleMainAction}
-                className="px-4 py-2 rounded-full bg-gradient-to-r from-[#EF4444] via-rose-600 to-amber-500 text-white font-extrabold text-xs flex items-center gap-2 shadow-[0_0_20px_rgba(239,68,68,0.55)] hover:scale-105 active:scale-95 transition cursor-pointer"
+                onClick={handleAction}
+                className="px-4 py-2 rounded-full bg-gradient-to-r from-[#EF4444] via-rose-600 to-amber-500 text-white font-extrabold text-xs flex items-center gap-2 shadow-[0_0_20px_rgba(239,68,68,0.6)] hover:scale-105 active:scale-95 transition cursor-pointer"
               >
                 {isCurrent && isPlaying ? (
                   <>
@@ -131,34 +242,12 @@ export const Hero3DVisualizer: React.FC<Props> = ({ song }) => {
             </div>
           </div>
 
-          {/* Right Floating 3D Holographic Disc Stage (Z-Elevation 50px) */}
-          <div
-            style={{
-              transform: 'translateZ(50px) rotateY(-12deg) rotateX(8deg)',
-              transformStyle: 'preserve-3d'
-            }}
-            className="relative flex-shrink-0"
-          >
-            {/* Astra Matching Particle Laser Ring */}
-            <div className="absolute -inset-3 rounded-full border border-[#EF4444]/50 shadow-[0_0_20px_rgba(239,68,68,0.4)] pointer-events-none animate-spin [animation-duration:16s]" />
-            <div className="absolute -inset-1.5 rounded-full border border-dashed border-[#EF4444]/30 pointer-events-none animate-spin [animation-duration:8s] [animation-direction:reverse]" />
-
-            {/* Suspended 3D Vinyl Showcase */}
-            <div className="relative w-28 h-28 rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.95),0_0_25px_rgba(239,68,68,0.35)] bg-black">
-              <img
-                src={song.imageUrl}
-                alt={song.name}
-                className={`w-full h-full object-cover transition-transform duration-700 ${
-                  isCurrent && isPlaying ? 'animate-[spin_18s_linear_infinite]' : ''
-                }`}
-                onError={(e) => {
-                  e.currentTarget.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80';
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-              {/* Center Hologram Spindle */}
-              <div className="absolute w-5 h-5 rounded-full bg-black/90 border border-[#EF4444] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-inner pointer-events-none" />
-            </div>
+          {/* Right Interactive 3D WebGL Canvas Disc */}
+          <div className="relative flex-shrink-0 flex items-center justify-center">
+            <div
+              ref={canvasContainerRef}
+              className="w-[130px] h-[130px] flex items-center justify-center drop-shadow-[0_15px_30px_rgba(0,0,0,0.9)]"
+            />
           </div>
         </div>
       </div>
