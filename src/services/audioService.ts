@@ -9,25 +9,32 @@ class GlobalAudioEngine {
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.audio = new Audio();
-      this.audio.preload = 'auto';
-      this.audio.crossOrigin = 'anonymous';
-
-      this.audio.addEventListener('timeupdate', () => {
-        if (!this.audio) return;
-        this.timeCbs.forEach((cb) => cb(this.audio!.currentTime, this.audio!.duration || 0));
-      });
-
-      this.audio.addEventListener('play', () => this.notifyState());
-      this.audio.addEventListener('pause', () => this.notifyState());
-      this.audio.addEventListener('ended', () => {
-        this.notifyState();
-        if (this.onEndCb) this.onEndCb();
-      });
-      this.audio.addEventListener('error', (e) => {
-        console.warn('Playback stream interrupted:', e);
-      });
+      this.initAudio();
     }
+  }
+
+  private initAudio() {
+    if (this.audio) return;
+    this.audio = new Audio();
+    this.audio.preload = 'auto';
+    this.audio.crossOrigin = 'anonymous';
+
+    this.audio.addEventListener('timeupdate', () => {
+      if (!this.audio) return;
+      this.timeCbs.forEach((cb) => cb(this.audio!.currentTime, this.audio!.duration || 0));
+    });
+
+    this.audio.addEventListener('play', () => this.notifyState());
+    this.audio.addEventListener('pause', () => this.notifyState());
+    this.audio.addEventListener('ended', () => {
+      this.notifyState();
+      if (this.onEndCb) this.onEndCb();
+    });
+
+    this.audio.addEventListener('error', (e) => {
+      console.error('Audio playback error on stream URL:', this.audio?.src, e);
+      this.notifyState();
+    });
   }
 
   private notifyState() {
@@ -39,25 +46,42 @@ class GlobalAudioEngine {
   }
 
   public playTrack(url: string, title?: string, artist?: string, art?: string) {
+    if (!this.audio) this.initAudio();
     if (!this.audio) return;
+
+    if (!url) {
+      console.warn('Empty stream URL provided to audioEngine');
+      return;
+    }
+
+    // Force secure HTTPS protocol to prevent mixed-content blocks on Vercel
     const secureUrl = url.replace('http://', 'https://');
+
     if (this.audio.src !== secureUrl) {
       this.audio.src = secureUrl;
       this.audio.load();
     }
-    this.audio.play().catch(console.warn);
+
+    const playPromise = this.audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((err) => {
+        console.warn('Playback deferred or blocked by browser policy:', err);
+      });
+    }
 
     if ('mediaSession' in navigator && title) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title,
-        artist: artist || 'RhythmX 3D Lossless',
+        artist: artist || 'RhythmX Lossless',
         artwork: art ? [{ src: art, sizes: '512x512', type: 'image/jpeg' }] : []
       });
     }
   }
 
   public toggle() {
+    if (!this.audio) this.initAudio();
     if (!this.audio) return;
+
     if (this.audio.paused) {
       this.audio.play().catch(console.warn);
     } else {

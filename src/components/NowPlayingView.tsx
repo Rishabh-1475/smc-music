@@ -33,7 +33,7 @@ export const NowPlayingView: React.FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#040406] flex flex-col justify-between max-w-[430px] md:max-w-md mx-auto select-none overflow-hidden text-white perspective-[1200px]">
+    <div className="fixed inset-0 z-50 bg-[#040406] flex flex-col justify-between max-w-md md:max-w-lg mx-auto select-none overflow-hidden text-white perspective-[1200px] shadow-2xl md:border-x md:border-white/10">
       {/* 3D Volumetric Red Fog Backdrop */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-30 blur-3xl scale-125 pointer-events-none transition-all duration-700"

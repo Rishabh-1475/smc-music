@@ -18,7 +18,7 @@ export const MiniPlayer: React.FC<Props> = ({ onOpenNowPlaying }) => {
   return (
     <div
       onClick={onOpenNowPlaying}
-      className="fixed bottom-[68px] left-3 right-3 max-w-[420px] md:max-w-xl mx-auto z-40 bg-[#121217]/90 backdrop-blur-2xl border border-[#EF4444]/25 rounded-2xl p-2.5 shadow-[0_15px_35px_rgba(0,0,0,0.8),0_0_20px_rgba(239,68,68,0.15)] flex flex-col justify-between cursor-pointer select-none overflow-hidden transition hover:border-[#EF4444]/50"
+      className="fixed bottom-[68px] left-3 right-3 max-w-md md:max-w-3xl mx-auto z-40 bg-[#121217]/90 backdrop-blur-2xl border border-[#EF4444]/25 rounded-2xl p-2.5 shadow-[0_15px_35px_rgba(0,0,0,0.8),0_0_20px_rgba(239,68,68,0.15)] flex flex-col justify-between cursor-pointer select-none overflow-hidden transition hover:border-[#EF4444]/50"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0 flex-1">

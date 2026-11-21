@@ -11,7 +11,7 @@ interface Props {
 
 export const BottomNav: React.FC<Props> = ({ activeTab, onTabChange }) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 max-w-[430px] md:max-w-md mx-auto h-16 bg-[#070709]/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around z-30 px-2 select-none">
+    <nav className="fixed bottom-0 left-0 right-0 max-w-md md:max-w-5xl mx-auto h-16 bg-[#070709]/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around z-30 px-2 select-none">
       <button
         onClick={() => onTabChange('home')}
         className={`flex flex-col items-center gap-1 transition cursor-pointer ${

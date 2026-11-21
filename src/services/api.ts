@@ -21,32 +21,32 @@ export const FALLBACK_CATALOG: Song[] = [
     label: "Singh Music",
     primaryArtists: "Sachin-Jigar, Ed Sheeran, Arijit Singh",
     imageUrl: "https://c.saavncdn.com/978/KING-Hindi-2024-20241018141004-500x500.jpg",
-    streamUrl: "https://aac.saavncdn.com/978/f7c1348a47eb9e2b109b8d2eb45a76fa_320.mp4",
+    streamUrl: "https://aac.saavncdn.com/320/4d91932291471256b3c9313360ebb834_320.mp4",
     language: "hindi"
   },
   {
     id: "rx_3d_2",
-    name: "295",
-    album: "Moosetape",
-    year: "2021",
-    duration: 270,
-    label: "Sidhu Moose Wala",
-    primaryArtists: "Sidhu Moose Wala",
-    imageUrl: "https://c.saavncdn.com/026/Moosetape-Punjabi-2021-20210514130005-500x500.jpg",
-    streamUrl: "https://aac.saavncdn.com/026/295-Moosetape-320.mp4",
-    language: "punjabi"
+    name: "Dilruba Dilnasheen",
+    album: "Dilruba Dilnasheen",
+    year: "2026",
+    duration: 177,
+    label: "T-Series",
+    primaryArtists: "Arijit Singh",
+    imageUrl: "https://c.saavncdn.com/346/Dilruba-Dilnasheen-Hindi-2024-20240902143004-500x500.jpg",
+    streamUrl: "https://aac.saavncdn.com/346/3c821442fc39a08988caeb827ede49f4_320.mp4",
+    language: "hindi"
   },
   {
     id: "rx_3d_3",
-    name: "Lollipop Lagelu",
-    album: "Superhit Bhojpuri",
-    year: "2015",
-    duration: 240,
-    label: "Wave Music",
-    primaryArtists: "Pawan Singh",
-    imageUrl: "https://c.saavncdn.com/495/Lollipop-Lagelu-Bhojpuri-2015-500x500.jpg",
-    streamUrl: "https://aac.saavncdn.com/495/Lollipop-Lagelu-320.mp4",
-    language: "bhojpuri"
+    name: "Kesariya",
+    album: "Brahmastra",
+    year: "2022",
+    duration: 268,
+    label: "Sony Music",
+    primaryArtists: "Arijit Singh, Pritam",
+    imageUrl: "https://c.saavncdn.com/423/Arijit-Singh-All-Time-Best-Hindi-Hit-Love-Songs-Collection-Hindi-2026-20261008160834-500x500.jpg",
+    streamUrl: "https://aac.saavncdn.com/423/852ad6cc81d7733c5e9bfc46d7b063e2_320.mp4",
+    language: "hindi"
   },
   {
     id: "rx_3d_4",
@@ -56,8 +56,8 @@ export const FALLBACK_CATALOG: Song[] = [
     duration: 261,
     label: "Zee Music",
     primaryArtists: "Arijit Singh, Sachin-Jigar",
-    imageUrl: "https://c.saavncdn.com/815/Bhediya-Hindi-2022-20221124110842-500x500.jpg",
-    streamUrl: "https://aac.saavncdn.com/815/Apna-Bana-Le-320.mp4",
+    imageUrl: "https://c.saavncdn.com/228/Sachin-Jigar-Bollywood-Hits-Hindi-2026-20260630213800-500x500.jpg",
+    streamUrl: "https://aac.saavncdn.com/228/bed7fe5f8fe04ae6432bcb0717e2b74e_320.mp4",
     language: "hindi"
   },
   {
@@ -69,7 +69,7 @@ export const FALLBACK_CATALOG: Song[] = [
     label: "T-Series",
     primaryArtists: "Shashwat Sachdev, Arijit Singh",
     imageUrl: "https://c.saavncdn.com/264/Dhurandhar-Hindi-2025-20250108151234-500x500.jpg",
-    streamUrl: "https://aac.saavncdn.com/264/Gehra-Hua-320.mp4",
+    streamUrl: "https://aac.saavncdn.com/450/f467e05e2825cec2203546333e0d0550_320.mp4",
     language: "hindi"
   }
 ];
@@ -96,14 +96,19 @@ const extract500Image = (item: any): string => {
 
 const extractStream = (down: any, fallback?: string): string => {
   if (Array.isArray(down) && down.length > 0) {
+    // Prioritize 320kbps -> 160kbps -> 96kbps
     const q320 = down.find((d: any) => d.quality === '320kbps' || d.bitrate === '320kbps');
     if (q320?.url || q320?.link) return (q320.url || q320.link).replace('http://', 'https://');
     const q160 = down.find((d: any) => d.quality === '160kbps' || d.bitrate === '160kbps');
     if (q160?.url || q160?.link) return (q160.url || q160.link).replace('http://', 'https://');
     const last = down[down.length - 1];
-    return (last?.url || last?.link || '').replace('http://', 'https://');
+    const u = last?.url || last?.link || '';
+    if (u) return u.replace('http://', 'https://');
   }
-  return (fallback || '').replace('http://', 'https://');
+  if (fallback && typeof fallback === 'string') {
+    return fallback.replace('http://', 'https://');
+  }
+  return '';
 };
 
 export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
@@ -111,8 +116,8 @@ export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
 
   const clean = encodeURIComponent(query.trim());
   const endpoints = [
+    `https://jiosaavn-api-nine.vercel.app/api/search/songs?query=${clean}&page=1&limit=40`,
     `https://saavnapi-beta.vercel.app/search/songs?query=${clean}&page=1&limit=40`,
-    `https://saavn.dev/api/search/songs?query=${clean}&page=1&limit=40`,
     `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${clean}&page=1&limit=40`
   ];
 
@@ -137,7 +142,7 @@ export const fetchSongsByQuery = async (query: string): Promise<Song[]> => {
           label: item.label || '',
           primaryArtists: decodeHtml(item.primaryArtists || item.singers || item.artist || 'Various Artists'),
           imageUrl: extract500Image(item),
-          streamUrl: extractStream(item.downloadUrl || item.downloadUrls, item.media_url),
+          streamUrl: extractStream(item.downloadUrl || item.downloadUrls, item.media_url || item.url || item.preview_url),
           language: item.language || 'hindi'
         })).filter((s: Song) => s.streamUrl && s.imageUrl);
 

@@ -94,8 +94,8 @@ export default function App() {
     <div className="min-h-screen bg-[#040406] text-white flex justify-center selection:bg-[#EF4444] selection:text-white select-none">
       <OnboardingModal onComplete={(name) => setUserName(name)} />
 
-      {/* 3D Mobile Shell Frame */}
-      <div className="w-full max-w-[430px] md:max-w-md min-h-screen bg-[#070709] border-x border-[#1F1F2A] relative flex flex-col pb-36">
+      {/* Responsive Desktop & Mobile Shell Frame */}
+      <div className="w-full max-w-md md:max-w-5xl min-h-screen bg-[#070709] border-x border-[#1F1F2A] relative flex flex-col pb-36">
         
         {/* Top App Bar with Crimson Aura */}
         <header className="px-5 pt-8 pb-3 flex items-center justify-between border-b border-white/5 relative z-10">
@@ -133,7 +133,7 @@ export default function App() {
         </header>
 
         {/* 3D Holographic Search Box */}
-        <div className="px-5 py-3 relative z-10">
+        <div className="px-5 py-3 relative z-10 w-full max-w-2xl mx-auto">
           <div className="relative flex items-center">
             <Search className="absolute left-3.5 w-4 h-4 text-gray-400" />
             <input
@@ -170,7 +170,7 @@ export default function App() {
             </div>
 
             {/* 3D GLOSSY OBSIDIAN QUICK-ACCESS TILES */}
-            <div className="grid grid-cols-2 gap-2.5 mt-3 px-1 perspective-[1000px]">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 mt-3 px-1 perspective-[1000px]">
               {quickAccessSongs.map((song) => {
                 const isCurrent = currentTrack?.id === song.id;
                 return (
@@ -252,7 +252,7 @@ export default function App() {
                   RETRIEVING SPATIAL FEEDS...
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
                   {songs.map((song) => {
                     const isCurrent = currentTrack?.id === song.id;
                     return (
@@ -324,7 +324,7 @@ export default function App() {
         <MiniPlayer onOpenNowPlaying={() => setIsPlayerOpen(true)} />
 
         {/* Floating 3D Navigation Bar */}
-        <nav className="fixed bottom-0 left-0 right-0 max-w-[430px] md:max-w-md mx-auto h-16 bg-[#070709]/95 backdrop-blur-xl border-t border-[#1F1F2A] flex items-center justify-around z-30 px-4">
+        <nav className="fixed bottom-0 left-0 right-0 max-w-md md:max-w-5xl mx-auto h-16 bg-[#070709]/95 backdrop-blur-xl border-t border-[#1F1F2A] flex items-center justify-around z-30 px-4">
           <button
             onClick={() => setActiveTab('home')}
             className={`text-xs flex flex-col items-center gap-1 transition cursor-pointer ${activeTab === 'home' ? 'text-[#EF4444]' : 'text-gray-400'}`}
