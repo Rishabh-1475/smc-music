@@ -3,6 +3,7 @@ package co.singhsmusic.smc;
 import android.os.Bundle;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 
@@ -17,6 +18,11 @@ public class MainActivity extends BridgeActivity {
         super.onStart();
         if (bridge != null && bridge.getWebView() != null) {
             WebView webView = bridge.getWebView();
+            WebSettings settings = webView.getSettings();
+            settings.setDomStorageEnabled(true);
+            settings.setDatabaseEnabled(true);
+            settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+
             webView.setWebChromeClient(new WebChromeClient() {
                 @Override
                 public void onPermissionRequest(final PermissionRequest request) {

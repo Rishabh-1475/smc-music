@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import LiveUpdateWatcher from '@/components/LiveUpdateWatcher';
 
 export const metadata: Metadata = {
   title: 'RythemX — ASTRA 3D Audio Engine',
@@ -39,6 +40,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#080809] text-[#E2E8F0] antialiased overflow-x-hidden selection:bg-[#FF2348] selection:text-white">
+        <LiveUpdateWatcher />
         {children}
       </body>
     </html>

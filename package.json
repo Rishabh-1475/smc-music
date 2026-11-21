@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "prebuild": "node scripts/generate-version.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -12,6 +13,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^6.1.2",
+    "@capacitor/browser": "^6.0.6",
     "@capacitor/core": "^6.1.2",
     "@types/crypto-js": "^4.2.2",
     "@types/three": "^0.187.0",

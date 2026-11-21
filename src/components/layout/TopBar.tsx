@@ -142,16 +142,22 @@ export default function TopBar() {
         {/* Creator Avatar Button */}
         <button
           type="button"
-          className="w-9 h-9 rounded-full overflow-hidden border border-[var(--ruby)]/60 shrink-0 hover:scale-105 active:scale-95 transition-all shadow-[0_0_12px_rgba(255,35,72,0.3)] bg-neutral-900 ml-1"
+          className="w-11 h-11 rounded-full overflow-hidden border-2 border-[#FF2348] shrink-0 hover:scale-105 active:scale-95 transition-all shadow-[0_0_16px_rgba(255,35,72,0.45)] bg-neutral-900 ml-1.5 focus:outline-none focus:ring-2 focus:ring-[#FF2348]"
           onClick={() => setCreatorOpen(true)}
           aria-label="View Creator Dossier — Rishabh Singh"
           title="Creator Dossier — Rishabh Singh"
         >
           <img
-            src="/creator.jpg?v=3"
+            src="/creator.jpg?v=4"
             alt="Rishabh Singh"
             className="w-full h-full object-cover object-[50%_18%]"
             referrerPolicy="no-referrer"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (!target.src.includes('creator.jpeg')) {
+                target.src = '/creator.jpeg?v=4';
+              }
+            }}
           />
         </button>
       </div>

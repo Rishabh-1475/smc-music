@@ -2,6 +2,11 @@
   "appId": "co.singhsmusic.rhythmx",
   "appName": "RythemX",
   "webDir": "out",
+  "server": {
+    "url": "https://smc-music.vercel.app",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
   "android": {
     "allowMixedContent": true,
     "webContentsDebuggingEnabled": false,

@@ -186,13 +186,13 @@ export default function Sidebar() {
         <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden shrink-0 border-2 border-[#FF2348]/85 shadow-[0_0_18px_rgba(255,35,72,0.4)] bg-neutral-900">
           {!avatarBroken ? (
             <img
-              src="/creator.jpg?v=3"
+              src="/creator.jpg?v=4"
               alt="Rishabh Singh"
               className="w-full h-full object-cover object-[50%_18%] group-hover:scale-105 transition-transform duration-300"
               referrerPolicy="no-referrer"
               onError={() => {
                 const img = new Image();
-                img.src = '/creator.jpeg';
+                img.src = '/creator.jpeg?v=4';
                 img.onload = () => {};
                 img.onerror = () => setAvatarBroken(true);
               }}
